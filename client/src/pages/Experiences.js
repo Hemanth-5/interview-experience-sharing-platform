@@ -131,35 +131,35 @@ const Experiences = () => {
   const renderExperienceCard = (experience) => (
     <Link 
       key={experience._id} 
-      to={`/experience/${experience._id}`}
-      className="experience-card"
+      to={`/experiences/${experience._id}`}
+      className="exp-experience-card"
     >
-      <div className="experience-header">
-        <div className="company-info">
-          <div className="company-logo-container">
+      <div className="exp-experience-header">
+        <div className="exp-company-info">
+          <div className="exp-company-logo-container">
             <CompanyLogo 
               companyName={experience.companyInfo?.companyName || 'Unknown Company'} 
               size={40}
             />
           </div>
-          <div className="company-details">
-            <h3 className="company-name">{experience.companyInfo?.companyName || 'Unknown Company'}</h3>
-            <p className="role">{experience.companyInfo?.role || 'Unknown Role'}</p>
+          <div className="exp-company-details">
+            <h3 className="exp-company-name">{experience.companyInfo?.companyName || 'Unknown Company'}</h3>
+            <p className="exp-role">{experience.companyInfo?.role || 'Unknown Role'}</p>
           </div>
         </div>
-        <span className={`result-badge ${experience.finalResult?.toLowerCase() || 'pending'}`}>
+        <span className={`exp-result-badge ${experience.finalResult?.toLowerCase() || 'pending'}`}>
           {experience.finalResult || 'Pending'}
         </span>
       </div>
       
-      <div className="experience-meta">
-        <div className="experience-details">
-          <span className="department">{experience.companyInfo?.department || 'N/A'}</span>
-          <span className="location">{experience.companyInfo?.location || 'N/A'}</span>
+      <div className="exp-experience-meta">
+        <div className="exp-experience-details">
+          <span className="exp-department">{experience.companyInfo?.department || 'N/A'}</span>
+          <span className="exp-location">{experience.companyInfo?.location || 'N/A'}</span>
         </div>
-        <div className="experience-stats">
-          <span className="rating">⭐ {experience.overallRating || 0}/5</span>
-          <span className="rounds">{experience.rounds?.length || 0} rounds</span>
+        <div className="exp-experience-stats">
+          <span className="exp-rating">⭐ {experience.overallRating || 0}/5</span>
+          <span className="exp-rounds">{experience.rounds?.length || 0} rounds</span>
         </div>
       </div>
     </Link>
@@ -182,9 +182,9 @@ const Experiences = () => {
     }
 
     return (
-      <div className="pagination">
+      <div className="exp-pagination">
         <button
-          className="pagination-btn"
+          className="exp-pagination-btn"
           onClick={() => handlePageChange(pagination.page - 1)}
           disabled={pagination.page === 1}
         >
@@ -195,19 +195,19 @@ const Experiences = () => {
         {startPage > 1 && (
           <>
             <button
-              className="pagination-number"
+              className="exp-pagination-number"
               onClick={() => handlePageChange(1)}
             >
               1
             </button>
-            {startPage > 2 && <span className="pagination-ellipsis">...</span>}
+            {startPage > 2 && <span className="exp-pagination-ellipsis">...</span>}
           </>
         )}
 
         {pages.map(page => (
           <button
             key={page}
-            className={`pagination-number ${page === pagination.page ? 'active' : ''}`}
+            className={`exp-pagination-number ${page === pagination.page ? 'active' : ''}`}
             onClick={() => handlePageChange(page)}
           >
             {page}
@@ -216,9 +216,9 @@ const Experiences = () => {
 
         {endPage < pagination.totalPages && (
           <>
-            {endPage < pagination.totalPages - 1 && <span className="pagination-ellipsis">...</span>}
+            {endPage < pagination.totalPages - 1 && <span className="exp-pagination-ellipsis">...</span>}
             <button
-              className="pagination-number"
+              className="exp-pagination-number"
               onClick={() => handlePageChange(pagination.totalPages)}
             >
               {pagination.totalPages}
@@ -227,7 +227,7 @@ const Experiences = () => {
         )}
 
         <button
-          className="pagination-btn"
+          className="exp-pagination-btn"
           onClick={() => handlePageChange(pagination.page + 1)}
           disabled={pagination.page === pagination.totalPages}
         >
@@ -239,35 +239,35 @@ const Experiences = () => {
   };
 
   return (
-    <div className="experiences">
+    <div className="exp-experiences">
       {/* Header Section */}
-      <section className="experiences-header">
-        <div className="header-content">
-          <h1 className="header-title">Interview Experiences</h1>
-          <p className="header-subtitle">
-            Discover insights from {pagination.total.toLocaleString()} interview experiences shared by PSG students
+      <section className="exp-experiences-header">
+        <div className="exp-header-content">
+          <h1 className="exp-header-title">Interview Experiences</h1>
+          <p className="exp-header-subtitle">
+            Discover insights from interview experiences shared by PSG students
           </p>
         </div>
       </section>
 
-      <div className="container">
+      <div className="exp-container">
         {/* Filters */}
-        <div className="filters-section">
-          <div className="filters-container">
-            <h2 className="filters-title">
+        <div className="exp-filters-section">
+          <div className="exp-filters-container">
+            <h2 className="exp-filters-title">
               <i className="fas fa-filter"></i>
               Filters
             </h2>
-            <div className="filters-actions">
+            <div className="exp-filters-actions">
               <button 
-                className="filters-toggle" 
+                className="exp-filters-toggle" 
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <i className={`fas fa-chevron-${showFilters ? 'up' : 'down'}`}></i>
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
               {Object.values(filters).some(v => v) && (
-                <button className="clear-filters-btn" onClick={clearFilters}>
+                <button className="exp-clear-filters-btn" onClick={clearFilters}>
                   <i className="fas fa-times"></i>
                   Clear All
                 </button>
@@ -275,44 +275,44 @@ const Experiences = () => {
             </div>
           </div>
 
-          <div className={`filters-grid ${showFilters ? 'show' : ''}`}>
-            <div className="filter-group">
-              <label className="filter-label">Search</label>
+          <div className={`exp-filters-grid ${showFilters ? 'show' : ''}`}>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Search</label>
               <input
                 type="text"
-                className="filter-input"
+                className="exp-filter-input"
                 placeholder="Search companies, roles, or keywords..."
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
               />
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Company</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Company</label>
               <input
                 type="text"
-                className="filter-input"
+                className="exp-filter-input"
                 placeholder="Company name"
                 value={filters.company}
                 onChange={(e) => handleFilterChange('company', e.target.value)}
               />
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Role</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Role</label>
               <input
                 type="text"
-                className="filter-input"
+                className="exp-filter-input"
                 placeholder="Job title or role"
                 value={filters.role}
                 onChange={(e) => handleFilterChange('role', e.target.value)}
               />
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Internship Type</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Internship Type</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.internshipType}
                 onChange={(e) => handleFilterChange('internshipType', e.target.value)}
               >
@@ -323,10 +323,10 @@ const Experiences = () => {
               </select>
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Location</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Location</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.location}
                 onChange={(e) => handleFilterChange('location', e.target.value)}
               >
@@ -337,10 +337,10 @@ const Experiences = () => {
               </select>
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Final Result</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Final Result</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.finalResult}
                 onChange={(e) => handleFilterChange('finalResult', e.target.value)}
               >
@@ -351,10 +351,10 @@ const Experiences = () => {
               </select>
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Year of Study</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Year of Study</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.yearOfStudy}
                 onChange={(e) => handleFilterChange('yearOfStudy', e.target.value)}
               >
@@ -365,10 +365,10 @@ const Experiences = () => {
               </select>
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Minimum Rating</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Minimum Rating</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.rating}
                 onChange={(e) => handleFilterChange('rating', e.target.value)}
               >
@@ -381,10 +381,10 @@ const Experiences = () => {
               </select>
             </div>
 
-            <div className="filter-group">
-              <label className="filter-label">Sort By</label>
+            <div className="exp-filter-group">
+              <label className="exp-filter-label">Sort By</label>
               <select
-                className="filter-select"
+                className="exp-filter-select"
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
               >
@@ -397,47 +397,47 @@ const Experiences = () => {
         </div>
 
         {/* Results */}
-        <div className="results-section">
-          <div className="results-header">
-            <div className="results-info">
-              <span className="results-count">
+        <div className="exp-results-section">
+          <div className="exp-results-header">
+            <div className="exp-results-info">
+              <span className="exp-results-count">
                 {loading ? 'Loading...' : `${pagination.total.toLocaleString()} experiences found`}
               </span>
               {(Object.entries(filters).some(([key, value]) => value && key !== 'sortBy')) && (
-                <span className="active-filters">
+                <span className="exp-active-filters">
                   <i className="fas fa-filter"></i>
                   Filters applied
                 </span>
               )}
             </div>
-            <Link to="/create" className="btn btn-primary">
+            <Link to="/create" className="exp-btn exp-btn-primary">
               <i className="fas fa-plus"></i>
               Share Experience
             </Link>
           </div>
 
           {loading ? (
-            <div className="loading-layout">
-              <div className="loading-spinner"></div>
+            <div className="exp-loading-layout">
+              <div className="exp-loading-spinner"></div>
               <p>Loading experiences...</p>
             </div>
           ) : experiences.length > 0 ? (
             <>
-              <div className="experiences-grid">
+              <div className="exp-experiences-grid">
                 {experiences.map(renderExperienceCard)}
               </div>
               {renderPagination()}
             </>
           ) : (
-            <div className="empty-state">
-              <div className="empty-icon">
+            <div className="exp-empty-state">
+              <div className="exp-empty-icon">
                 <i className="fas fa-search"></i>
               </div>
-              <h3 className="empty-title">No experiences found</h3>
-              <p className="empty-description">
+              <h3 className="exp-empty-title">No experiences found</h3>
+              <p className="exp-empty-description">
                 Try adjusting your filters or search terms to find more experiences.
               </p>
-              <button className="btn btn-outline" onClick={clearFilters}>
+              <button className="exp-btn exp-btn-outline" onClick={clearFilters}>
                 Clear Filters
               </button>
             </div>

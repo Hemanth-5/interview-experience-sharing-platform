@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
 import axios from 'axios';
@@ -156,12 +156,22 @@ const ExperienceDetail = () => {
               👎 {experience.downvoteCount}
             </button>
           </div>
-          <button 
-            className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
-            onClick={handleBookmark}
-          >
-            {isBookmarked ? '🔖' : '📖'} Bookmark
-          </button>
+          <div className="action-buttons">
+            {user && experience.userId._id === user._id && (
+              <Link 
+                to={`/experiences/${id}/edit`}
+                className="edit-btn"
+              >
+                ✏️ Edit
+              </Link>
+            )}
+            <button 
+              className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+              onClick={handleBookmark}
+            >
+              {isBookmarked ? '🔖' : '📖'} Bookmark
+            </button>
+          </div>
         </div>
       </div>
 

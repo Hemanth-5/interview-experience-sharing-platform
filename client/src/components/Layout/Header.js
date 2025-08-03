@@ -72,10 +72,10 @@ const Header = () => {
             <div className="nav-actions">
               {isAuthenticated ? (
                 <>
-                  <Link to="/create" className="btn btn-primary btn-sm create-btn">
+                  {/* <Link to="/create" className="btn btn-primary btn-sm create-btn">
                     <i className="fas fa-plus"></i>
                     <span className="hidden md:inline">Share Experience</span>
-                  </Link>
+                  </Link> */}
                   
                   <div className="dropdown user-menu" ref={userMenuRef}>
                     <button
@@ -147,7 +147,7 @@ const Header = () => {
                 </Link>
               ))}
               
-              {isAuthenticated && (
+              {/* {isAuthenticated && (
                 <Link
                   to="/create"
                   className="mobile-nav-link create-link"
@@ -156,7 +156,7 @@ const Header = () => {
                   <i className="fas fa-plus"></i>
                   <span>Share Experience</span>
                 </Link>
-              )}
+              )} */}
             </div>
           </div>
         </div>

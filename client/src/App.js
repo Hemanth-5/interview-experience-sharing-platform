@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Experiences from './pages/Experiences';
 import ExperienceDetail from './pages/ExperienceDetail';
 import CreateExperience from './pages/CreateExperience';
+import EditExperience from './pages/EditExperience';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import About from './pages/About';
@@ -26,6 +27,14 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/experiences" element={<Experiences />} />
               <Route path="/experiences/:id" element={<ExperienceDetail />} />
+              <Route 
+                path="/experiences/:id/edit" 
+                element={
+                  <PrivateRoute>
+                    <EditExperience />
+                  </PrivateRoute>
+                } 
+              />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/about" element={<About />} />
               <Route 

@@ -3,6 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
+  height: 80px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
@@ -11,7 +12,14 @@
 }
 
 .nav {
-  height: 70px;
+  height: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  height: 100%;
 }
 
 .nav-content {
@@ -45,13 +53,15 @@
 }
 
 /* Desktop Navigation */
-.desktop-nav {
+.nav-links.desktop-nav {
   display: none;
   gap: var(--spacing-lg);
+  align-items: center;
+  height: 100%;
 }
 
 @media (min-width: 768px) {
-  .desktop-nav {
+  .nav-links.desktop-nav {
     display: flex;
   }
 }
@@ -63,16 +73,17 @@
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--text-secondary);
   text-decoration: none;
-  border-radius: var(--border-radius);
   transition: all var(--transition-fast);
   font-weight: var(--font-weight-medium);
   position: relative;
+  height: 40px;
+  min-height: 40px;
 }
 
-.nav-link:hover {
+/* .nav-link:hover {
   color: var(--primary-color);
   background-color: rgba(37, 99, 235, 0.1);
-}
+} */
 
 .nav-link.active {
   color: var(--primary-color);
@@ -87,8 +98,6 @@
   transform: translateX(-50%);
   width: 20px;
   height: 2px;
-  background-color: var(--primary-color);
-  border-radius: 1px;
 }
 
 /* Navigation Actions */
@@ -113,6 +122,8 @@
 /* User Menu */
 .user-menu {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .user-menu-toggle {
@@ -161,19 +172,18 @@
 /* Dropdown Menu */
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-xl);
-  min-width: 220px;
+  width: 300px;
   z-index: 40;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all var(--transition-fast);
-  margin-top: var(--spacing-xs);
 }
 
 .dropdown-menu.show {
@@ -324,8 +334,12 @@
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .nav {
-    height: 60px;
+  .header {
+    height: 70px;
+  }
+  
+  .container {
+    padding: 0 var(--spacing-md);
   }
   
   .nav-actions {
@@ -338,8 +352,27 @@
   }
   
   .dropdown-menu {
+    min-width: 220px;
+    right: 0;
+    /* Ensure it doesn't go off-screen on very small devices */
+    max-width: calc(100vw - 32px);
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-menu {
     min-width: 200px;
-    right: -10px;
+    right: 0;
+    max-width: calc(100vw - 16px);
+  }
+  
+  .user-info {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .dropdown-item {
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-xs);
   }
 }
 

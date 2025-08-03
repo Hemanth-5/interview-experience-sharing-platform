@@ -3,8 +3,13 @@ const mongoose = require('mongoose');
 const interviewRoundSchema = new mongoose.Schema({
   roundNumber: {
     type: Number,
-    required: true,
-    min: 1
+    required: false, // Made optional
+    min: 1,
+    default: function() {
+      // Auto-generate round number based on position in array
+      const rounds = this.parent().rounds;
+      return rounds ? rounds.length : 1;
+    }
   },
   roundType: {
     type: String,
@@ -117,7 +122,8 @@ const interviewRoundSchema = new mongoose.Schema({
   },
   tips: {
     type: String,
-    required: true
+    required: false, // Made optional
+    default: '' // Provide empty string default
   },
   overallExperience: {
     type: Number,
@@ -396,6 +402,37 @@ experienceSchema.virtual('netScore').get(function() {
 // Ensure virtuals are included in JSON
 experienceSchema.set('toJSON', { virtuals: true });
 experienceSchema.set('toObject', { virtuals: true });
+
+// Pre-save middleware to auto-assign round numbers
+experienceSchema.pre('save', function(next) {
+  if (this.rounds && this.rounds.length > 0) {
+    this.rounds.forEach((round, index) => {
+      if (!round.roundNumber) {
+        round.roundNumber = index + 1;
+      }
+      if (!round.tips) {
+        round.tips = '';
+      }
+    });
+  }
+  next();
+});
+
+// Pre-update middleware for findByIdAndUpdate
+experienceSchema.pre('findOneAndUpdate', function(next) {
+  const update = this.getUpdate();
+  if (update.rounds && update.rounds.length > 0) {
+    update.rounds.forEach((round, index) => {
+      if (!round.roundNumber) {
+        round.roundNumber = index + 1;
+      }
+      if (!round.tips) {
+        round.tips = '';
+      }
+    });
+  }
+  next();
+});
 
 // Methods
 experienceSchema.methods.incrementViews = function() {

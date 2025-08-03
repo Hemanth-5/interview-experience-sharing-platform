@@ -10,12 +10,12 @@
 }
 
 /* Loading States */
-/* .loading-container {
+.loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 400px;
-} */
+}
 
 .loading-text {
   margin-left: var(--spacing-md);
@@ -207,7 +207,6 @@
 }
 
 .dropdown-item {
-  display: block;
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;

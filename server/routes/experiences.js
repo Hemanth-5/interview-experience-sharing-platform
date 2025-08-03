@@ -7,7 +7,7 @@ const { isAuthenticated, isOwnerOrAdmin } = require('../middleware/auth');
 const handleValidationErrors = require('../middleware/validation');
 const router = express.Router();
 
-// Validation rules
+// Validation rules for creating experiences
 const experienceValidation = [
   body('companyInfo.companyName').trim().notEmpty().withMessage('Company name is required'),
   body('companyInfo.role').trim().notEmpty().withMessage('Role is required'),
@@ -28,6 +28,29 @@ const experienceValidation = [
   body('keyTips').trim().notEmpty().withMessage('Key tips are required'),
   body('mistakesToAvoid').trim().notEmpty().withMessage('Mistakes to avoid are required'),
   body('backgroundInfo.yearOfStudy').isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
+];
+
+// Validation rules for updating experiences (more flexible)
+const experienceUpdateValidation = [
+  body('companyInfo.companyName').optional().trim().notEmpty().withMessage('Company name cannot be empty'),
+  body('companyInfo.role').optional().trim().notEmpty().withMessage('Role cannot be empty'),
+  body('companyInfo.department').optional().trim().notEmpty().withMessage('Department cannot be empty'),
+  body('companyInfo.internshipType').optional().isIn(['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract']).withMessage('Invalid internship type'),
+  body('companyInfo.duration').optional().trim().notEmpty().withMessage('Duration cannot be empty'),
+  body('companyInfo.location').optional().isIn(['Remote', 'On-site', 'Hybrid']).withMessage('Invalid location type'),
+  body('companyInfo.applicationDate').optional().isISO8601().withMessage('Invalid application date'),
+  body('rounds').optional().isArray({ min: 1 }).withMessage('At least one round is required'),
+  body('rounds.*.roundType').optional().isIn(['Online Assessment', 'Technical', 'HR', 'Group Discussion', 'Presentation', 'Case Study', 'Coding Round', 'System Design']).withMessage('Invalid round type'),
+  body('rounds.*.duration').optional().isInt({ min: 1 }).withMessage('Round duration must be at least 1 minute'),
+  body('rounds.*.roundResult').optional().isIn(['Selected', 'Rejected', 'Pending', 'Waitlisted']).withMessage('Invalid round result'),
+  body('rounds.*.overallExperience').optional().isInt({ min: 1, max: 5 }).withMessage('Overall experience must be between 1 and 5'),
+  body('overallRating').optional().isInt({ min: 1, max: 5 }).withMessage('Overall rating must be between 1 and 5'),
+  body('finalResult').optional().isIn(['Selected', 'Rejected', 'Withdrawn', 'Pending']).withMessage('Invalid final result'),
+  body('wouldRecommend').optional().isBoolean().withMessage('Would recommend must be a boolean'),
+  body('preparationTime').optional().isInt({ min: 0 }).withMessage('Preparation time must be non-negative'),
+  body('keyTips').optional().trim().notEmpty().withMessage('Key tips cannot be empty'),
+  body('mistakesToAvoid').optional().trim().notEmpty().withMessage('Mistakes to avoid cannot be empty'),
+  body('backgroundInfo.yearOfStudy').optional().isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
 ];
 
 // @route   POST /api/experiences
@@ -302,7 +325,7 @@ router.put('/:id',
   isOwnerOrAdmin,
   [
     param('id').isMongoId().withMessage('Invalid experience ID'),
-    ...experienceValidation
+    ...experienceUpdateValidation
   ],
   handleValidationErrors,
   async (req, res) => {
@@ -316,15 +339,21 @@ router.put('/:id',
         });
       }
 
-      // Update tags
-      const tags = [
-        req.body.companyInfo.companyName.toLowerCase(),
-        req.body.companyInfo.role.toLowerCase(),
-        req.body.companyInfo.department.toLowerCase(),
-        req.body.companyInfo.internshipType.toLowerCase(),
-        ...req.body.backgroundInfo.skills.map(skill => skill.toLowerCase())
-      ];
-      req.body.tags = [...new Set(tags)];
+      // Update tags only if relevant fields are provided
+      if (req.body.companyInfo || req.body.backgroundInfo) {
+        const companyInfo = req.body.companyInfo || experience.companyInfo;
+        const backgroundInfo = req.body.backgroundInfo || experience.backgroundInfo;
+        
+        const tags = [
+          companyInfo.companyName?.toLowerCase(),
+          companyInfo.role?.toLowerCase(),
+          companyInfo.department?.toLowerCase(),
+          companyInfo.internshipType?.toLowerCase(),
+          ...(backgroundInfo.skills || []).map(skill => skill.toLowerCase())
+        ].filter(Boolean); // Remove undefined/null values
+        
+        req.body.tags = [...new Set(tags)];
+      }
 
       const updatedExperience = await Experience.findByIdAndUpdate(
         req.params.id,

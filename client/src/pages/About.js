@@ -6,84 +6,84 @@ const About = () => {
   const features = [
     {
       icon: '📝',
-      title: 'Share Experiences',
-      description: 'Share detailed interview experiences with round-by-round breakdowns, questions, and valuable tips.'
+      title: 'Share PSG Tech Experiences',
+      description: 'Share detailed PSG Tech interview experiences with round-by-round breakdowns, questions, and valuable tips.'
     },
     {
       icon: '🔍',
-      title: 'Smart Search',
-      description: 'Find experiences by company, role, or specific interview topics to prepare effectively.'
+      title: 'Search PSG Tech Interviews',
+      description: 'Find PSG Tech interview experiences by department, role, or specific topics to prepare effectively.'
     },
     {
       icon: '👥',
-      title: 'Community Driven',
-      description: 'Learn from a diverse community of candidates across different companies and roles.'
+      title: 'PSG Tech Community',
+      description: 'Learn from PSG Tech students and alumni across different departments and placement experiences.'
     },
     {
       icon: '⭐',
       title: 'Rating System',
-      description: 'Rate and review experiences to help others identify the most helpful content.'
+      description: 'Rate and review PSG Tech interview experiences to help fellow students identify the most helpful content.'
     },
     {
       icon: '🔖',
       title: 'Bookmark & Save',
-      description: 'Save interesting experiences and build your personal preparation library.'
+      description: 'Save interesting PSG Tech placement experiences and build your personal preparation library.'
     },
     {
       icon: '📊',
       title: 'Analytics',
-      description: 'Track your contributions and see how your shared experiences help others.'
+      description: 'Track your contributions and see how your shared PSG Tech experiences help other students.'
     }
   ];
 
   const stats = [
-    { number: '1000+', label: 'Experiences Shared' },
-    { number: '500+', label: 'Companies Covered' },
-    { number: '50+', label: 'Different Roles' },
-    { number: '95%', label: 'User Satisfaction' }
+    { number: '500+', label: 'PSG Tech Experiences' },
+    { number: '100+', label: 'Companies Visited' },
+    { number: '25+', label: 'Different Departments' },
+    { number: '95%', label: 'Student Satisfaction' }
   ];
 
   const teamMembers = [
     {
-      name: 'Alex Johnson',
-      role: 'Founder & CEO',
-      image: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=667eea&color=fff&size=200',
-      description: 'Former software engineer at Google with passion for helping students succeed.'
+      name: 'Dr. Rajesh Kumar',
+      role: 'Placement Officer',
+      image: 'https://ui-avatars.com/api/?name=Dr+Rajesh+Kumar&background=667eea&color=fff&size=200',
+      description: 'Experienced placement officer dedicated to helping PSG Tech students achieve their career goals.'
     },
     {
-      name: 'Sarah Chen',
-      role: 'Head of Community',
-      image: 'https://ui-avatars.com/api/?name=Sarah+Chen&background=764ba2&color=fff&size=200',
-      description: 'Community building expert who ensures our platform remains helpful and inclusive.'
+      name: 'Priya Sharma',
+      role: 'Student Coordinator',
+      image: 'https://ui-avatars.com/api/?name=Priya+Sharma&background=764ba2&color=fff&size=200',
+      description: 'PSG Tech alumna who coordinates student activities and maintains the experience sharing community.'
     },
     {
-      name: 'Mike Rodriguez',
-      role: 'Lead Developer',
-      image: 'https://ui-avatars.com/api/?name=Mike+Rodriguez&background=10b981&color=fff&size=200',
-      description: 'Full-stack developer focused on creating seamless user experiences.'
+      name: 'Arjun Patel',
+      role: 'Tech Lead',
+      image: 'https://ui-avatars.com/api/?name=Arjun+Patel&background=10b981&color=fff&size=200',
+      description: 'CSE graduate from PSG Tech focused on developing this platform for fellow students.'
     }
   ];
 
   const faqs = [
     {
-      question: 'Is the platform free to use?',
-      answer: 'Yes! Our platform is completely free for all users. We believe that career guidance and interview preparation resources should be accessible to everyone.'
+      question: 'Is this platform only for PSG Tech students?',
+      answer: 'Yes! This platform is specifically designed for PSG Tech students and alumni to share their placement and interview experiences within our college community.'
     },
     {
       question: 'Can I share experiences anonymously?',
-      answer: 'Absolutely! We offer anonymous sharing options to protect your privacy while still allowing you to help others with your valuable insights.'
+      answer: 'Absolutely! We offer anonymous sharing options to protect your privacy while still allowing you to help fellow PSG Tech students with your valuable insights.'
     },
     {
       question: 'How do you ensure the quality of shared experiences?',
-      answer: 'We have a community-driven moderation system where users can rate and report content. Our team also reviews flagged content to maintain quality standards.'
+      answer: 'We have a community-driven moderation system where PSG Tech students can rate and report content. Our placement office also reviews flagged content to maintain quality standards.'
     },
     {
       question: 'Can I edit my shared experiences?',
-      answer: 'Yes, you can edit your shared experiences at any time from your profile dashboard. This helps keep information current and accurate.'
+      answer: 'Yes, you can edit your shared PSG Tech placement experiences at any time from your profile dashboard. This helps keep information current and accurate for fellow students.'
     },
     {
-      question: 'How can I get the most out of the platform?',
-      answer: 'Start by browsing experiences for companies you\'re interested in, bookmark helpful content, and consider sharing your own experiences to give back to the community.'
+      question: 'How can PSG Tech students get the most out of this platform?',
+      answer: 'Start by browsing experiences from companies that visit PSG Tech, bookmark helpful content, and consider sharing your own placement experiences to give back to the PSG Tech community.'
     }
   ];
 
@@ -92,11 +92,11 @@ const About = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Empowering Your Interview Journey</h1>
+          <h1>Empowering PSG Tech Students' Placement Journey</h1>
           <p>
-            We're building the world's largest community-driven platform for sharing 
-            and discovering real interview experiences. From your first internship to 
-            your dream job, we're here to help you succeed.
+            We're building PSG Tech's largest community-driven platform for sharing 
+            and discovering real placement and interview experiences. From internships to 
+            dream companies, we're here to help PSG Tech students succeed.
           </p>
           <div className="hero-buttons">
             <Link to="/experiences" className="cta-btn primary">
@@ -124,46 +124,38 @@ const About = () => {
           <div className="mission-content">
             <div className="mission-text">
               <p>
-                Interview preparation shouldn't be a mystery. Every year, thousands of 
-                talented individuals miss opportunities simply because they lack access 
-                to reliable, detailed information about interview processes.
+                Placement preparation at PSG Tech shouldn't be a mystery. Every year, thousands of 
+                talented PSG Tech students miss opportunities simply because they lack access 
+                to reliable, detailed information about company interview processes.
               </p>
               <p>
-                We're changing that by creating a platform where candidates can share 
-                their real experiences, detailed insights, and valuable tips with the 
-                next generation of job seekers.
+                We're changing that by creating a platform where PSG Tech students and alumni can share 
+                their real placement experiences, detailed insights, and valuable tips with the 
+                next batch of PSG Tech students.
               </p>
-              <div className="mission-highlights">
+            </div>
+            <div className="mission-highlights">
                 <div className="highlight">
                   <span className="highlight-icon">🎯</span>
-                  <span>Democratize interview preparation</span>
+                  <span>Democratize PSG Tech placement preparation</span>
                 </div>
                 <div className="highlight">
                   <span className="highlight-icon">🤝</span>
-                  <span>Build a supportive community</span>
+                  <span>Build a supportive PSG Tech community</span>
                 </div>
                 <div className="highlight">
                   <span className="highlight-icon">📈</span>
-                  <span>Increase success rates</span>
+                  <span>Increase PSG Tech placement success rates</span>
                 </div>
               </div>
             </div>
-            <div className="mission-stats">
-              {stats.map((stat, index) => (
-                <div key={index} className="stat-item">
-                  <span className="stat-number">{stat.number}</span>
-                  <span className="stat-label">{stat.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Features Section */}
       <section className="features-section">
         <div className="container">
-          <h2>Why Choose Our Platform?</h2>
+          <h2>Why Choose Our PSG Tech Platform?</h2>
           <div className="features-grid">
             {features.map((feature, index) => (
               <div key={index} className="feature-card">
@@ -184,22 +176,22 @@ const About = () => {
             <div className="step">
               <div className="step-number">1</div>
               <div className="step-content">
-                <h3>Explore Experiences</h3>
-                <p>Browse through thousands of detailed interview experiences from various companies and roles.</p>
+                <h3>Explore PSG Tech Experiences</h3>
+                <p>Browse through hundreds of detailed placement experiences from PSG Tech students across various companies and departments.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">2</div>
               <div className="step-content">
                 <h3>Learn & Prepare</h3>
-                <p>Study the questions, tips, and strategies shared by successful candidates.</p>
+                <p>Study the questions, tips, and strategies shared by successful PSG Tech alumni and seniors.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">3</div>
               <div className="step-content">
-                <h3>Share Your Journey</h3>
-                <p>After your interviews, share your experience to help the next generation of candidates.</p>
+                <h3>Share Your PSG Tech Journey</h3>
+                <p>After your placements, share your experience to help the next batch of PSG Tech students.</p>
               </div>
             </div>
           </div>
@@ -209,10 +201,10 @@ const About = () => {
       {/* Team Section */}
       <section className="team-section">
         <div className="container">
-          <h2>Meet Our Team</h2>
+          <h2>Meet Our PSG Tech Team</h2>
           <p className="team-intro">
-            We're a passionate team of developers, designers, and career experts 
-            dedicated to making interview preparation accessible to everyone.
+            We're a passionate team of PSG Tech faculty, alumni, and students 
+            dedicated to making placement preparation accessible to all PSG Tech students.
           </p>
           <div className="team-grid">
             {teamMembers.map((member, index) => (
@@ -249,18 +241,15 @@ const About = () => {
       {/* CTA Section */}
       <section className="cta-section">
         <div className="container">
-          <h2>Ready to Start Your Journey?</h2>
+          <h2>Ready to Start Your PSG Tech Placement Journey?</h2>
           <p>
-            Join thousands of candidates who have successfully prepared for their 
-            interviews using our platform. Your dream job is just one great 
+            Join hundreds of PSG Tech students who have successfully prepared for their 
+            placements using our platform. Your dream company is just one great 
             interview away!
           </p>
           <div className="cta-buttons">
-            <Link to="/register" className="cta-btn primary large">
-              Join Our Community
-            </Link>
-            <Link to="/experiences" className="cta-btn secondary large">
-              Browse Experiences
+            <Link to="/experiences" className="cta-btn primary large">
+              Browse PSG Tech Experiences
             </Link>
           </div>
         </div>
@@ -274,20 +263,20 @@ const About = () => {
               <h3>Get in Touch</h3>
               <p>
                 Have questions, suggestions, or just want to say hello? 
-                We'd love to hear from you!
+                The PSG Tech placement team would love to hear from you!
               </p>
               <div className="contact-methods">
                 <div className="contact-method">
                   <span className="method-icon">📧</span>
-                  <span>hello@interviewexperience.com</span>
+                  <span>placement@psgtech.edu</span>
                 </div>
                 <div className="contact-method">
                   <span className="method-icon">💬</span>
-                  <span>Live chat support available</span>
+                  <span>Visit placement office for support</span>
                 </div>
                 <div className="contact-method">
-                  <span className="method-icon">🐦</span>
-                  <span>@InterviewExp on Twitter</span>
+                  <span className="method-icon">🏫</span>
+                  <span>PSG College of Technology</span>
                 </div>
               </div>
             </div>

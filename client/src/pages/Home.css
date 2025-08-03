@@ -418,7 +418,7 @@
 }
 
 .feature-card:hover {
-  background: var(--bg-secondary);
+  /* background: var(--bg-secondary); */
   transform: translateY(-5px);
 }
 
@@ -608,7 +608,6 @@
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-xl);
   text-decoration: none;
-  color: inherit;
   transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;

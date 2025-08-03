@@ -299,7 +299,7 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(3, minmax(350px, 1fr));
   gap: 30px;
 }
 
@@ -333,7 +333,6 @@
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
 }
 
 .feature-icon {

@@ -153,6 +153,9 @@ const Profile = () => {
         <Link to={`/experiences/${experience._id}`} className="view-btn">
           View Details
         </Link>
+        <Link to={`/experiences/${experience._id}/edit`} className="edit-btn">
+          Edit
+        </Link>
         <div className="experience-tags">
           <span className="tag">{experience.companyInfo.internshipType}</span>
           <span className="tag">{experience.companyInfo.location}</span>
@@ -166,42 +169,36 @@ const Profile = () => {
       <h3>Your Statistics</h3>
       <div className="stats-grid">
         <div className="stat-item">
-          <div className="stat-icon">📝</div>
           <div className="stat-info">
             <span className="stat-number">{stats.totalExperiences || 0}</span>
             <span className="stat-label">Experiences Shared</span>
           </div>
         </div>
         <div className="stat-item">
-          <div className="stat-icon">👍</div>
           <div className="stat-info">
             <span className="stat-number">{stats.totalUpvotes || 0}</span>
             <span className="stat-label">Total Upvotes</span>
           </div>
         </div>
         <div className="stat-item">
-          <div className="stat-icon">👀</div>
           <div className="stat-info">
             <span className="stat-number">{stats.totalViews || 0}</span>
             <span className="stat-label">Total Views</span>
           </div>
         </div>
         <div className="stat-item">
-          <div className="stat-icon">💬</div>
           <div className="stat-info">
             <span className="stat-number">{stats.totalComments || 0}</span>
             <span className="stat-label">Comments Received</span>
           </div>
         </div>
         <div className="stat-item">
-          <div className="stat-icon">🔖</div>
           <div className="stat-info">
             <span className="stat-number">{stats.totalBookmarks || 0}</span>
             <span className="stat-label">Bookmarks</span>
           </div>
         </div>
         <div className="stat-item">
-          <div className="stat-icon">🏆</div>
           <div className="stat-info">
             <span className="stat-number">{stats.helpfulnessScore || 0}</span>
             <span className="stat-label">Helpfulness Score</span>

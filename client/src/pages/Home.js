@@ -314,7 +314,7 @@ const Home = () => {
       )}
 
       {/* Call to Action */}
-      <section className="cta-section">
+      {/* <section className="cta-section">
         <div className="container">
           <div className="cta-content">
             <h2>Help Your Juniors Succeed</h2>
@@ -330,7 +330,7 @@ const Home = () => {
             )}
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };
