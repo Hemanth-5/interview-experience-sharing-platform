@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -11,11 +11,22 @@ const CreateExperience = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const errorRef = useRef(null);
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, []);
+
+  // Scroll to error when error state changes
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }, [error]);
 
   const [formData, setFormData] = useState({
     companyInfo: {
@@ -388,7 +399,7 @@ const CreateExperience = () => {
         <h2 className="psg-create-section-title">Interview Rounds</h2>
         <div className="psg-create-section-divider"></div>
         <button type="button" onClick={addRound} className="psg-create-btn psg-create-btn-primary psg-create-btn-sm">
-          ➕ Add Round
+          Add Round
         </button>
       </div>
       
@@ -396,7 +407,6 @@ const CreateExperience = () => {
         <div key={roundIndex} className="psg-create-round-card">
           <div className="psg-create-round-header">
             <h3 className="psg-create-round-title">
-              <span className="psg-create-round-icon">🎯</span>
               Round {round.roundNumber}
             </h3>
             {formData.rounds.length > 1 && (
@@ -466,13 +476,13 @@ const CreateExperience = () => {
           {/* Technical Questions */}
           <div className="psg-create-question-section">
             <div className="psg-create-question-header">
-              <h4 className="psg-create-question-title">💻 Technical Questions</h4>
+              <h4 className="psg-create-question-title">Technical Questions</h4>
               <button 
                 type="button" 
                 onClick={() => addQuestion(roundIndex, 'technical')}
                 className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
               >
-                ➕ Add Question
+                Add Question
               </button>
             </div>
             {round.technicalQuestions.map((question, qIndex) => (
@@ -538,13 +548,13 @@ const CreateExperience = () => {
           {/* Behavioral Questions */}
           <div className="psg-create-question-section">
             <div className="psg-create-question-header">
-              <h4 className="psg-create-question-title">🗣️ Behavioral Questions</h4>
+              <h4 className="psg-create-question-title">Behavioral Questions</h4>
               <button 
                 type="button" 
                 onClick={() => addQuestion(roundIndex, 'behavioral')}
                 className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
               >
-                ➕ Add Question
+                Add Question
               </button>
             </div>
             {round.behavioralQuestions.map((question, qIndex) => (
@@ -616,7 +626,7 @@ const CreateExperience = () => {
           </div>
 
           <div className="psg-create-field psg-create-grid-full">
-            <label className="psg-create-label">Tips for this round</label>
+            <label className="psg-create-label psg-create-label-required">Tips for this round</label>
             <textarea
               className="psg-create-textarea"
               value={round.tips}
@@ -673,7 +683,7 @@ const CreateExperience = () => {
           </select>
         </div>
         <div className="psg-create-field psg-create-grid-full">
-          <label className="psg-create-label">Overall Experience Summary</label>
+          <label className="psg-create-label psg-create-label-required">Overall Experience Summary</label>
           <textarea
             className="psg-create-textarea"
             value={formData.overallExperience}
@@ -894,7 +904,7 @@ const CreateExperience = () => {
         {renderStepIndicator()}
 
         {error && (
-          <div className="psg-create-error">
+          <div ref={errorRef} className="psg-create-error">
             <span className="psg-create-error-icon">⚠️</span>
             {error}
           </div>
