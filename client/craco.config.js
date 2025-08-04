@@ -27,9 +27,9 @@ module.exports = {
             deadCodeInjection: false,
             deadCodeInjectionThreshold: 0.2,
             
-            // Anti-debugging and domain protection (only in production)
+            // Remove anti-debugging features to allow dev tools access
             debugProtection: false,
-            debugProtectionInterval: 0,
+            debugProtectionInterval: false,
             disableConsoleOutput: false,
 
             
@@ -43,7 +43,7 @@ module.exports = {
               '**/public/**'
             ],
             
-            // Advanced options (reduced for stability)
+            // Remove self-defending to prevent dev tools blocking
             selfDefending: false,
             unicodeEscapeSequence: false,
             
@@ -77,8 +77,8 @@ module.exports = {
     configure: (webpackConfig) => {
       // Additional webpack configurations for production
       if (process.env.NODE_ENV === 'production') {
-        // Remove source maps in production for extra security
-        webpackConfig.devtool = false;
+        // Keep source maps hidden but available for debugging
+        webpackConfig.devtool = 'hidden-source-map';
         
         // Minimize bundle size
         webpackConfig.optimization = {
