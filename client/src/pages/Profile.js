@@ -66,33 +66,33 @@ const Profile = () => {
     }
   };
 
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const response = await axios.put(createApiUrl('/api/users/profile'), editData, {
-        withCredentials: true
-      });
+  // const handleUpdateProfile = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.put(createApiUrl('/api/users/profile'), editData, {
+  //       withCredentials: true
+  //     });
 
-      if (response.data.success) {
-        setProfile(response.data.data);
-        updateUser(response.data.data);
-        setEditMode(false);
-        setError(null);
-      }
-    } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.data.success) {
+  //       setProfile(response.data.data);
+  //       updateUser(response.data.data);
+  //       setEditMode(false);
+  //       setError(null);
+  //     }
+  //   } catch (error) {
+  //     setError(error.response?.data?.message || 'Failed to update profile');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleInputChange = (field, value) => {
-    setEditData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  // const handleInputChange = (field, value) => {
+  //   setEditData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
+  // };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {

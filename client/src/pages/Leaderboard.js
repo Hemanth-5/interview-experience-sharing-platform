@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { createApiUrl } from '../config/api';
+// import axios from 'axios';
+// import { createApiUrl } from '../config/api';
 import './Leaderboard.css';
 
 // const Leaderboard = () => {

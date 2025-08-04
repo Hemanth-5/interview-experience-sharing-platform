@@ -7,7 +7,7 @@ const About = () => {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -46,6 +46,7 @@ ${user.name}`;
 
     // Clear the form and show success message
     setMessage('');
+    setIsSubmitting(false);
   };
 
   const features = [

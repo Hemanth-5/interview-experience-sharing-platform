@@ -7,7 +7,7 @@ import CompanyLogo from '../components/CompanyLogo';
 import './Experiences.css';
 
 const Experiences = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);

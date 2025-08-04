@@ -65,21 +65,21 @@ const Home = () => {
   };
 
   // Helper function to get company logo based on name
-  const getCompanyLogo = (companyName) => {
-    const logoMap = {
-      'TCS': '💼',
-      'Infosys': '🏢',
-      'Wipro': '🔧',
-      'Cognizant': '⚡',
-      'Zoho': '🌐',
-      'Accenture': '🎯',
-      'Microsoft': '🔷',
-      'Google': '🌈',
-      'Amazon': '📦',
-      'Default': '🏢'
-    };
-    return logoMap[companyName] || logoMap['Default'];
-  };
+  // const getCompanyLogo = (companyName) => {
+  //   const logoMap = {
+  //     'TCS': '💼',
+  //     'Infosys': '🏢',
+  //     'Wipro': '🔧',
+  //     'Cognizant': '⚡',
+  //     'Zoho': '🌐',
+  //     'Accenture': '🎯',
+  //     'Microsoft': '🔷',
+  //     'Google': '🌈',
+  //     'Amazon': '📦',
+  //     'Default': '🏢'
+  //   };
+  //   return logoMap[companyName] || logoMap['Default'];
+  // };
 
   if (loading) {
     return (

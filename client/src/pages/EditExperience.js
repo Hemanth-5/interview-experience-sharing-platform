@@ -225,7 +225,7 @@ const EditExperience = () => {
         isAnonymous: formData.isAnonymous
       };
       
-      const response = await experienceAPI.update(id, submitData);
+      await experienceAPI.update(id, submitData);
       
       setSuccessMessage('Experience updated successfully! 🎉');
       setTimeout(() => {
