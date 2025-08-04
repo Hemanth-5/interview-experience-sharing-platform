@@ -21,11 +21,11 @@ module.exports = {
             renameProperties: false,
             renamePropertiesMode: 'safe',
             
-            // Control flow obfuscation
-            controlFlowFlattening: true,
-            controlFlowFlatteningThreshold: 0.75,
-            deadCodeInjection: true,
-            deadCodeInjectionThreshold: 0.4,
+            // Control flow obfuscation (reduced for stability)
+            controlFlowFlattening: false,
+            controlFlowFlatteningThreshold: 0.5,
+            deadCodeInjection: false,
+            deadCodeInjectionThreshold: 0.2,
             
             // Anti-debugging and domain protection
             debugProtection: true,
@@ -42,13 +42,18 @@ module.exports = {
               '**/public/**'
             ],
             
-            // Advanced options
-            selfDefending: true,
+            // Advanced options (reduced for stability)
+            selfDefending: false,
             unicodeEscapeSequence: false,
             
-            // Preserve some functionality
+            // Preserve important function names but not React (not needed in React 18+)
             reservedNames: [
-              '^React',
+              'useState',
+              'useEffect',
+              'useContext',
+              'createElement',
+              'Component',
+              'StrictMode',
               '^ReactDOM',
               '^_',
               '^$'
@@ -89,18 +94,6 @@ module.exports = {
       }
       
       return webpackConfig;
-    }
-  },
-  
-  // Additional CRACO configurations
-  style: {
-    css: {
-      loaderOptions: {
-        // Minimize CSS in production
-        ...(process.env.NODE_ENV === 'production' && {
-          minimize: true
-        })
-      }
     }
   }
 };

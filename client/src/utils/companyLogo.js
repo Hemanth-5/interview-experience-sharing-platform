@@ -1,4 +1,4 @@
-import { React } from 'react';
+import { useState, useEffect } from 'react';
 
 // Company logo utility using free logo services
 const LOGO_SERVICES = {
@@ -176,11 +176,11 @@ const adjustBrightness = (hex, percent) => {
  * @returns {Object} { logoUrl, isLoading, error }
  */
 export const useCompanyLogo = (companyName) => {
-  const [logoUrl, setLogoUrl] = React.useState(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  
-  React.useEffect(() => {
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
     if (!companyName) {
       setLogoUrl(null);
       setIsLoading(false);
