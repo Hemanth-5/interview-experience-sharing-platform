@@ -71,14 +71,6 @@ const EditExperience = () => {
     isAnonymous: false
   });
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    fetchExperience();
-  }, [id, user, navigate, fetchExperience]);
-
   const fetchExperience = useCallback(async () => {
     try {
       setLoading(true);
@@ -182,6 +174,14 @@ const EditExperience = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    fetchExperience();
+  }, [id, user, navigate, fetchExperience]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -227,7 +227,7 @@ const EditExperience = () => {
       
       await experienceAPI.update(id, submitData);
       
-      setSuccessMessage('Experience updated successfully! 🎉');
+      setSuccessMessage('Experience updated successfully!');
       setTimeout(() => {
         navigate(`/experiences/${id}`);
       }, 2000);
@@ -455,7 +455,6 @@ const EditExperience = () => {
     <div className="psg-edit-container">
       {successMessage && (
         <div className="psg-edit-notification psg-edit-fade-in">
-          <span>✅</span>
           {successMessage}
         </div>
       )}
@@ -488,7 +487,7 @@ const EditExperience = () => {
           <div className="psg-edit-section">
             <div className="psg-edit-section-header">
               <h2 className="psg-edit-section-title">
-                🏢 Company Information
+                Company Information
               </h2>
               <div className="psg-edit-section-divider"></div>
             </div>
@@ -666,7 +665,7 @@ const EditExperience = () => {
           <div className="psg-edit-section">
             <div className="psg-edit-section-header">
               <h2 className="psg-edit-section-title">
-                🎯 Interview Rounds
+                Interview Rounds
               </h2>
               <div className="psg-edit-section-divider"></div>
             </div>
@@ -675,7 +674,6 @@ const EditExperience = () => {
               <div key={roundIndex} className="psg-edit-round-card">
                 <div className="psg-edit-round-header">
                   <h3 className="psg-edit-round-title">
-                    <span className="psg-edit-round-icon">🎯</span>
                     Round {roundIndex + 1}
                   </h3>
                   {formData?.rounds?.length > 1 && (
@@ -797,7 +795,7 @@ const EditExperience = () => {
                 <div className="psg-edit-question-section">
                   <div className="psg-edit-question-header">
                     <h4 className="psg-edit-question-title">
-                      💻 Technical Questions
+                      Technical Questions
                     </h4>
                     <button
                       type="button"
@@ -886,7 +884,7 @@ const EditExperience = () => {
                 <div className="psg-edit-question-section">
                   <div className="psg-edit-question-header">
                     <h4 className="psg-edit-question-title">
-                      🗣️ Behavioral Questions
+                      Behavioral Questions
                     </h4>
                     <button
                       type="button"
@@ -980,7 +978,7 @@ const EditExperience = () => {
                 className="psg-edit-btn psg-edit-btn-ghost"
                 onClick={addRound}
               >
-                ➕ Add Another Round
+                Add Another Round
               </button>
             </div>
           </div>
@@ -989,7 +987,7 @@ const EditExperience = () => {
           <div className="psg-edit-section">
             <div className="psg-edit-section-header">
               <h2 className="psg-edit-section-title">
-                📊 Preparation & Tips
+                Preparation & Tips
               </h2>
               <div className="psg-edit-section-divider"></div>
             </div>
@@ -1117,7 +1115,7 @@ const EditExperience = () => {
           <div className="psg-edit-section">
             <div className="psg-edit-section-header">
               <h2 className="psg-edit-section-title">
-                🎓 Background Information
+                Background Information
               </h2>
               <div className="psg-edit-section-divider"></div>
             </div>
@@ -1237,7 +1235,7 @@ const EditExperience = () => {
                 </>
               ) : (
                 <>
-                  💾 Save Changes
+                  Save Changes
                 </>
               )}
             </button>
