@@ -87,7 +87,7 @@ ${user.name}`;
       name: 'Hemanthkumar V',
       role: 'Developer & Founder',
       image: 'https://ui-avatars.com/api/?name=Hemanthkumar+V&background=667eea&color=fff&size=200',
-      description: 'Placement Representative for CSE (2026). Passionate about building tools that empower PSG Tech students.'
+      description: 'Placement Representative for CSE (2026)'
     }
   ];
 
@@ -178,7 +178,7 @@ ${user.name}`;
       {/* Features Section */}
       <section className="features-section">
         <div className="container">
-          <h2>Why Choose Our PSG Tech Platform?</h2>
+          <h2>Why Choose Our Platform?</h2>
           <div className="features-grid">
             {features.map((feature, index) => (
               <div key={index} className="feature-card">
