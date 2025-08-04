@@ -8,8 +8,7 @@ const helmet = require('helmet');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
-dotenv.config({ path: envFile });
+dotenv.config();
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -53,8 +52,25 @@ app.use(helmet({
 }));
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:3000',
+  process.env.CLIENT_URL,
+  'https://psg-tech-interview-hub.vercel.app', // Add your Vercel domain
+  'https://your-actual-vercel-domain.vercel.app' // Update with your actual Vercel domain
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 }));
@@ -75,7 +91,8 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-domain cookies in production
   }
 }));
 
