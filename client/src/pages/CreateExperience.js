@@ -11,22 +11,11 @@ const CreateExperience = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const errorRef = useRef(null);
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, []);
-
-  // Scroll to error when error state changes
-  useEffect(() => {
-    if (error && errorRef.current) {
-      errorRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-      });
-    }
-  }, [error]);
 
   const [formData, setFormData] = useState({
     companyInfo: {
@@ -904,7 +893,7 @@ const CreateExperience = () => {
         {renderStepIndicator()}
 
         {error && (
-          <div ref={errorRef} className="psg-create-error">
+          <div className="psg-create-error">
             <span className="psg-create-error-icon">⚠️</span>
             {error}
           </div>
