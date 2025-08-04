@@ -27,7 +27,7 @@ module.exports = {
             deadCodeInjection: false,
             deadCodeInjectionThreshold: 0.2,
             
-            // Anti-debugging and domain protection
+            // Anti-debugging and domain protection (only in production)
             debugProtection: true,
             debugProtectionInterval: 2000,
             disableConsoleOutput: true,
@@ -91,6 +91,9 @@ module.exports = {
           ...webpackConfig.output,
           crossOriginLoading: 'anonymous'
         };
+      } else {
+        // Enable source maps for development
+        webpackConfig.devtool = 'eval-source-map';
       }
       
       return webpackConfig;
