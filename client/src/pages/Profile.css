@@ -588,17 +588,20 @@
 
 .experience-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(60px, 1fr));
+  gap: 8px;
   margin-bottom: 12px;
-  padding: 12px;
+  padding: 10px;
   background: #f8fafc;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
+  min-width: 100%;
+  overflow: visible;
 }
 
 .stat {
   text-align: center;
+  min-width: 60px;
 }
 
 .stat-value {
@@ -922,8 +925,22 @@
   }
 
   .experience-stats {
-    flex-wrap: wrap;
-    gap: 15px;
+    grid-template-columns: repeat(4, minmax(50px, 1fr));
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .stat {
+    min-width: 50px;
+  }
+  
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .stat-label {
+    font-size: 8px;
   }
 
   .experience-actions {
@@ -957,6 +974,28 @@
 
   .experience-card {
     padding: 20px;
+  }
+  
+  .experience-stats {
+    grid-template-columns: repeat(4, minmax(55px, 1fr));
+    gap: 6px;
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .stat {
+    min-width: 55px;
+  }
+  
+  .stat-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .stat-label {
+    font-size: 7px;
+    letter-spacing: 0.1px;
+    margin-top: 1px;
   }
 
   .achievements-grid .achievement {

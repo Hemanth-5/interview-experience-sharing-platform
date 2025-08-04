@@ -52,7 +52,7 @@ const Home = () => {
         setFeaturedExperience(featuredData.data?.[0] || null);
       }
     } catch (error) {
-      console.error('Error fetching home data:', error);
+      // console.error('Error fetching home data:', error);
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ const Home = () => {
       {/* Target Companies */}
       <section className="companies-section">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header target-companies-header">
             <h2 className="section-title">Popular Target Companies</h2>
             <p className="section-subtitle">
               {topCompanies.length > 0 ? 'Where PSG students commonly get placed' : 'Be the first to share your experience!'}

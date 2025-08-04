@@ -22,6 +22,7 @@ const experienceValidation = [
   body('rounds.*.roundResult').isIn(['Selected', 'Rejected', 'Pending', 'Waitlisted']).withMessage('Invalid round result'),
   body('rounds.*.overallExperience').isInt({ min: 1, max: 5 }).withMessage('Overall experience must be between 1 and 5'),
   body('overallRating').isInt({ min: 1, max: 5 }).withMessage('Overall rating must be between 1 and 5'),
+  body('overallExperience').optional().isString().withMessage('Overall experience summary must be a string'),
   body('finalResult').isIn(['Selected', 'Rejected', 'Withdrawn', 'Pending']).withMessage('Invalid final result'),
   body('wouldRecommend').isBoolean().withMessage('Would recommend must be a boolean'),
   body('preparationTime').isInt({ min: 0 }).withMessage('Preparation time must be non-negative'),
@@ -45,6 +46,7 @@ const experienceUpdateValidation = [
   body('rounds.*.roundResult').optional().isIn(['Selected', 'Rejected', 'Pending', 'Waitlisted']).withMessage('Invalid round result'),
   body('rounds.*.overallExperience').optional().isInt({ min: 1, max: 5 }).withMessage('Overall experience must be between 1 and 5'),
   body('overallRating').optional().isInt({ min: 1, max: 5 }).withMessage('Overall rating must be between 1 and 5'),
+  body('overallExperience').optional().isString().withMessage('Overall experience summary must be a string'),
   body('finalResult').optional().isIn(['Selected', 'Rejected', 'Withdrawn', 'Pending']).withMessage('Invalid final result'),
   body('wouldRecommend').optional().isBoolean().withMessage('Would recommend must be a boolean'),
   body('preparationTime').optional().isInt({ min: 0 }).withMessage('Preparation time must be non-negative'),
@@ -100,7 +102,7 @@ router.post('/',
         data: experience
       });
     } catch (error) {
-      console.error('Error creating experience:', error);
+      // console.error('Error creating experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error creating experience',
@@ -135,7 +137,7 @@ router.get('/featured',
         data: featuredExperiences
       });
     } catch (error) {
-      console.error('Error fetching featured experiences:', error);
+      // console.error('Error fetching featured experiences:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching featured experiences',
@@ -258,7 +260,7 @@ router.get('/',
         }
       });
     } catch (error) {
-      console.error('Error fetching experiences:', error);
+      // console.error('Error fetching experiences:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching experiences',
@@ -307,7 +309,7 @@ router.get('/:id',
         data: experience
       });
     } catch (error) {
-      console.error('Error fetching experience:', error);
+      // console.error('Error fetching experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching experience',
@@ -330,6 +332,8 @@ router.put('/:id',
   handleValidationErrors,
   async (req, res) => {
     try {
+      // console.log('PUT /api/experiences/:id - Update request body:', JSON.stringify(req.body, null, 2));
+      
       const experience = await Experience.findById(req.params.id);
 
       if (!experience) {
@@ -367,7 +371,7 @@ router.put('/:id',
         data: updatedExperience
       });
     } catch (error) {
-      console.error('Error updating experience:', error);
+      // console.error('Error updating experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error updating experience',
@@ -412,7 +416,7 @@ router.delete('/:id',
         message: 'Experience deleted successfully'
       });
     } catch (error) {
-      console.error('Error deleting experience:', error);
+      // console.error('Error deleting experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error deleting experience',
@@ -472,7 +476,7 @@ router.post('/:id/vote',
         }
       });
     } catch (error) {
-      console.error('Error voting on experience:', error);
+      // console.error('Error voting on experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error voting on experience',
@@ -524,7 +528,7 @@ router.post('/:id/bookmark',
         isBookmarked: bookmarkIndex === -1
       });
     } catch (error) {
-      console.error('Error bookmarking experience:', error);
+      // console.error('Error bookmarking experience:', error);
       res.status(500).json({
         success: false,
         message: 'Error bookmarking experience',
@@ -553,7 +557,7 @@ router.get('/:id/bookmark',
         isBookmarked
       });
     } catch (error) {
-      console.error('Error checking bookmark status:', error);
+      // console.error('Error checking bookmark status:', error);
       res.status(500).json({
         success: false,
         message: 'Error checking bookmark status',

@@ -42,7 +42,7 @@ const ExperienceDetail = () => {
       });
       setIsBookmarked(response.data.isBookmarked);
     } catch (error) {
-      console.error('Error checking bookmark status:', error);
+      // console.error('Error checking bookmark status:', error);
     }
   };
 
@@ -62,7 +62,7 @@ const ExperienceDetail = () => {
       setUserVote(userVote === voteType ? null : voteType);
       fetchExperience(); // Refresh to get updated vote counts
     } catch (error) {
-      console.error('Error voting:', error);
+      // console.error('Error voting:', error);
     }
   };
 
@@ -78,7 +78,7 @@ const ExperienceDetail = () => {
       });
       setIsBookmarked(!isBookmarked);
     } catch (error) {
-      console.error('Error bookmarking:', error);
+      // console.error('Error bookmarking:', error);
     }
   };
 

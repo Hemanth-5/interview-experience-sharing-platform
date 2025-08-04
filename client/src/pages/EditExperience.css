@@ -59,7 +59,7 @@
 }
 
 .psg-edit-container::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   top: 0;
   left: 0;
@@ -108,7 +108,7 @@
 }
 
 .psg-edit-header::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   top: -50%;
   left: -50%;
@@ -177,7 +177,7 @@
 }
 
 .psg-edit-section::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   left: 0;
   top: 0;
@@ -208,7 +208,7 @@
 }
 
 .psg-edit-section-title::before {
-  content: '';
+  /* content: ''; */
   width: 8px;
   height: 8px;
   background: linear-gradient(135deg, var(--psg-edit-primary) 0%, var(--psg-edit-accent) 100%);
@@ -236,7 +236,7 @@
 
 .psg-edit-section-divider {
   height: 4px;
-  background: linear-gradient(90deg, var(--psg-edit-primary) 0%, var(--psg-edit-accent) 100%);
+  /* background: linear-gradient(90deg, var(--psg-edit-primary) 0%, var(--psg-edit-accent) 100%); */
   border-radius: var(--psg-edit-radius-sm);
   width: 80px;
   margin-top: var(--psg-edit-spacing-sm);
@@ -273,7 +273,7 @@
 }
 
 .psg-edit-label::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   left: 0;
   top: 50%;
@@ -359,7 +359,7 @@
 }
 
 .psg-edit-btn::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   top: 0;
   left: -100%;
@@ -452,7 +452,7 @@
 }
 
 .psg-edit-round-card::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   top: 0;
   left: 0;

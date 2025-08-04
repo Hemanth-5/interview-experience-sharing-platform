@@ -74,15 +74,15 @@ const Experiences = () => {
         limit: pagination.limit.toString()
       });
 
-      console.log('Fetching experiences with params:', queryParams.toString());
+      // console.log('Fetching experiences with params:', queryParams.toString());
       const apiUrl = createApiUrl(`/api/experiences?${queryParams}`);
-      console.log('API URL:', apiUrl);
+      // console.log('API URL:', apiUrl);
 
       const response = await axios.get(apiUrl, {
         withCredentials: true
       });
       
-      console.log('Response:', response.data);
+      // console.log('Response:', response.data);
       
       if (response.data.success) {
         setExperiences(response.data.data || []);
@@ -96,7 +96,7 @@ const Experiences = () => {
         throw new Error(response.data.message || 'Failed to fetch experiences');
       }
     } catch (error) {
-      console.error('Error fetching experiences:', error);
+      // console.error('Error fetching experiences:', error);
       setError(error.response?.data?.message || error.message || 'Failed to fetch experiences');
     } finally {
       setLoading(false);

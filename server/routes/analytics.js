@@ -86,7 +86,7 @@ router.get('/trending', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching trending data:', error);
+    // console.error('Error fetching trending data:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching trending data',
@@ -177,7 +177,7 @@ router.get('/company/:companyName', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching company analytics:', error);
+    // console.error('Error fetching company analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching company analytics',
@@ -236,7 +236,7 @@ router.get('/user-stats', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching user stats:', error);
+    // console.error('Error fetching user stats:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching user statistics',
@@ -341,7 +341,7 @@ router.get('/dashboard', isAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching dashboard analytics:', error);
+    // console.error('Error fetching dashboard analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching dashboard analytics',
@@ -376,7 +376,7 @@ router.get('/platform-stats', async (req, res) => {
       totalUsers
     });
   } catch (error) {
-    console.error('Error fetching platform stats:', error);
+    // console.error('Error fetching platform stats:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching platform statistics',
@@ -410,7 +410,7 @@ router.get('/top-companies', async (req, res) => {
       data: topCompanies
     });
   } catch (error) {
-    console.error('Error fetching top companies:', error);
+    // console.error('Error fetching top companies:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching top companies',

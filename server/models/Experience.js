@@ -122,8 +122,8 @@ const interviewRoundSchema = new mongoose.Schema({
   },
   tips: {
     type: String,
-    required: false, // Made optional
-    default: '' // Provide empty string default
+    required: false,
+    default: ''
   },
   overallExperience: {
     type: Number,
@@ -241,6 +241,11 @@ const experienceSchema = new mongoose.Schema({
     min: 1,
     max: 5,
     required: true
+  },
+  overallExperience: {
+    type: String,
+    required: false,
+    default: ''
   },
   finalResult: {
     type: String,

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
-import './CreateExperience.css';
+import './CreateExperience_new.css';
 
 const CreateExperience = () => {
   const navigate = useNavigate();
@@ -48,6 +48,7 @@ const CreateExperience = () => {
       overallExperience: 5
     }],
     overallRating: 5,
+    overallExperience: '',
     finalResult: 'Selected',
     wouldRecommend: true,
     preparationTime: '',
@@ -154,6 +155,10 @@ const CreateExperience = () => {
     handleInputChange(section, field, array, index);
   };
 
+  const handleStringInput = (section, field, value) => {
+    handleInputChange(section, field, value);
+  };
+
   const validateStep = (step) => {
     switch (step) {
       case 1:
@@ -210,14 +215,14 @@ const CreateExperience = () => {
   };
 
   const renderStepIndicator = () => (
-    <div className="step-indicator">
+    <div className="psg-create-step-indicator">
       {[1, 2, 3, 4, 5].map(step => (
         <div 
           key={step} 
-          className={`step ${step === currentStep ? 'active' : step < currentStep ? 'completed' : ''}`}
+          className={`psg-create-step ${step === currentStep ? 'active' : step < currentStep ? 'completed' : ''}`}
         >
-          <div className="step-number">{step}</div>
-          <div className="step-label">
+          <div className="psg-create-step-number">{step}</div>
+          <div className="psg-create-step-label">
             {step === 1 && 'Company Info'}
             {step === 2 && 'Interview Rounds'}
             {step === 3 && 'Preparation & Tips'}
@@ -230,42 +235,49 @@ const CreateExperience = () => {
   );
 
   const renderCompanyInfo = () => (
-    <div className="form-section">
-      <h2>Company Information</h2>
-      <div className="form-grid">
-        <div className="form-group">
-          <label>Company Name *</label>
+    <div className="psg-create-section">
+      <div className="psg-create-section-header">
+        <h2 className="psg-create-section-title">Company Information</h2>
+        <div className="psg-create-section-divider"></div>
+      </div>
+      <div className="psg-create-grid">
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Company Name</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.companyName}
             onChange={(e) => handleInputChange('companyInfo', 'companyName', e.target.value)}
             placeholder="e.g., Google"
             required
           />
         </div>
-        <div className="form-group">
-          <label>Role *</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Role</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.role}
             onChange={(e) => handleInputChange('companyInfo', 'role', e.target.value)}
             placeholder="e.g., Software Engineer Intern"
             required
           />
         </div>
-        <div className="form-group">
-          <label>Department *</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Department</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.department}
             onChange={(e) => handleInputChange('companyInfo', 'department', e.target.value)}
             placeholder="e.g., Engineering"
             required
           />
         </div>
-        <div className="form-group">
-          <label>Internship Type</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Internship Type</label>
           <select
+            className="psg-create-select"
             value={formData.companyInfo.internshipType}
             onChange={(e) => handleInputChange('companyInfo', 'internshipType', e.target.value)}
           >
@@ -277,18 +289,21 @@ const CreateExperience = () => {
             <option value="Contract">Contract</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Duration</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Duration</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.duration}
             onChange={(e) => handleInputChange('companyInfo', 'duration', e.target.value)}
             placeholder="e.g., 3 months"
+            required
           />
         </div>
-        <div className="form-group">
-          <label>Work Location</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Work Location</label>
           <select
+            className="psg-create-select"
             value={formData.companyInfo.location}
             onChange={(e) => handleInputChange('companyInfo', 'location', e.target.value)}
           >
@@ -297,31 +312,34 @@ const CreateExperience = () => {
             <option value="Hybrid">Hybrid</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>City</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">City</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.city}
             onChange={(e) => handleInputChange('companyInfo', 'city', e.target.value)}
             placeholder="e.g., San Francisco"
           />
         </div>
-        <div className="form-group">
-          <label>Country</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Country</label>
           <input
             type="text"
+            className="psg-create-input"
             value={formData.companyInfo.country}
             onChange={(e) => handleInputChange('companyInfo', 'country', e.target.value)}
             placeholder="e.g., USA"
           />
         </div>
-        <div className="form-group">
-          <label>Stipend</label>
-          <div className="input-group">
+        <div className="psg-create-field">
+          <label className="psg-create-label">Stipend</label>
+          <div style={{display: 'flex', gap: 'var(--psg-create-spacing-sm)'}}>
             <select
               value={formData.companyInfo.currency}
               onChange={(e) => handleInputChange('companyInfo', 'currency', e.target.value)}
-              className="currency-select"
+              className="psg-create-select"
+              style={{maxWidth: '100px'}}
             >
               <option value="USD">USD</option>
               <option value="INR">INR</option>
@@ -330,24 +348,27 @@ const CreateExperience = () => {
             </select>
             <input
               type="number"
+              className="psg-create-input"
               value={formData.companyInfo.stipend}
               onChange={(e) => handleInputChange('companyInfo', 'stipend', e.target.value)}
               placeholder="Amount"
             />
           </div>
         </div>
-        <div className="form-group">
-          <label>Application Date</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Application Date</label>
           <input
             type="date"
+            className="psg-create-input"
             value={formData.companyInfo.applicationDate}
             onChange={(e) => handleInputChange('companyInfo', 'applicationDate', e.target.value)}
           />
         </div>
-        <div className="form-group">
-          <label>Result Date</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Result Date</label>
           <input
             type="date"
+            className="psg-create-input"
             value={formData.companyInfo.resultDate}
             onChange={(e) => handleInputChange('companyInfo', 'resultDate', e.target.value)}
           />
@@ -357,33 +378,38 @@ const CreateExperience = () => {
   );
 
   const renderRounds = () => (
-    <div className="form-section">
-      <div className="section-header">
-        <h2>Interview Rounds</h2>
-        <button type="button" onClick={addRound} className="add-btn">
-          + Add Round
+    <div className="psg-create-section">
+      <div className="psg-create-section-header">
+        <h2 className="psg-create-section-title">Interview Rounds</h2>
+        <div className="psg-create-section-divider"></div>
+        <button type="button" onClick={addRound} className="psg-create-btn psg-create-btn-primary psg-create-btn-sm">
+          ➕ Add Round
         </button>
       </div>
       
       {formData.rounds.map((round, roundIndex) => (
-        <div key={roundIndex} className="round-card">
-          <div className="round-header">
-            <h3>Round {round.roundNumber}</h3>
+        <div key={roundIndex} className="psg-create-round-card">
+          <div className="psg-create-round-header">
+            <h3 className="psg-create-round-title">
+              <span className="psg-create-round-icon">🎯</span>
+              Round {round.roundNumber}
+            </h3>
             {formData.rounds.length > 1 && (
               <button 
                 type="button" 
                 onClick={() => removeRound(roundIndex)}
-                className="remove-btn"
+                className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
               >
-                Remove
+                ✕ Remove
               </button>
             )}
           </div>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Round Type</label>
+          <div className="psg-create-grid">
+            <div className="psg-create-field">
+              <label className="psg-create-label">Round Type</label>
               <select
+                className="psg-create-select"
                 value={round.roundType}
                 onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
               >
@@ -397,27 +423,30 @@ const CreateExperience = () => {
                 <option value="System Design">System Design</option>
               </select>
             </div>
-            <div className="form-group">
-              <label>Duration (minutes) *</label>
+            <div className="psg-create-field">
+              <label className="psg-create-label psg-create-label-required">Duration (minutes)</label>
               <input
                 type="number"
+                className="psg-create-input"
                 value={round.duration}
-                onChange={(e) => handleInputChange('rounds', 'duration', parseInt(e.target.value), roundIndex)}
+                onChange={(e) => handleInputChange('rounds', 'duration', e.target.value ? parseInt(e.target.value) : '', roundIndex)}
                 required
               />
             </div>
-            <div className="form-group">
-              <label>Platform</label>
+            <div className="psg-create-field">
+              <label className="psg-create-label">Platform</label>
               <input
                 type="text"
+                className="psg-create-input"
                 value={round.platform}
                 onChange={(e) => handleInputChange('rounds', 'platform', e.target.value, roundIndex)}
                 placeholder="e.g., Zoom, Teams, In-person"
               />
             </div>
-            <div className="form-group">
-              <label>Round Result</label>
+            <div className="psg-create-field">
+              <label className="psg-create-label">Round Result</label>
               <select
+                className="psg-create-select"
                 value={round.roundResult}
                 onChange={(e) => handleInputChange('rounds', 'roundResult', e.target.value, roundIndex)}
               >
@@ -430,41 +459,44 @@ const CreateExperience = () => {
           </div>
 
           {/* Technical Questions */}
-          <div className="questions-section">
-            <div className="question-header">
-              <h4>Technical Questions</h4>
+          <div className="psg-create-question-section">
+            <div className="psg-create-question-header">
+              <h4 className="psg-create-question-title">💻 Technical Questions</h4>
               <button 
                 type="button" 
                 onClick={() => addQuestion(roundIndex, 'technical')}
-                className="add-question-btn"
+                className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
               >
-                + Add Question
+                ➕ Add Question
               </button>
             </div>
             {round.technicalQuestions.map((question, qIndex) => (
-              <div key={qIndex} className="question-card">
-                <div className="question-actions">
+              <div key={qIndex} className="psg-create-question-card">
+                <div className="psg-create-question-meta">
+                  <span className="psg-create-question-number">Q{qIndex + 1}</span>
                   <button
                     type="button"
                     onClick={() => removeQuestion(roundIndex, qIndex, 'technical')}
-                    className="remove-question-btn"
+                    className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
                   >
-                    ×
+                    ✕
                   </button>
                 </div>
-                <div className="form-grid">
-                  <div className="form-group full-width">
-                    <label>Question</label>
+                <div className="psg-create-grid">
+                  <div className="psg-create-field psg-create-grid-full">
+                    <label className="psg-create-label">Question</label>
                     <textarea
+                      className="psg-create-textarea"
                       value={question.question}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'technical')}
                       placeholder="Describe the technical question asked..."
                       rows="3"
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Difficulty</label>
+                  <div className="psg-create-field">
+                    <label className="psg-create-label">Difficulty</label>
                     <select
+                      className="psg-create-select"
                       value={question.difficulty}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'difficulty', e.target.value, 'technical')}
                     >
@@ -473,18 +505,20 @@ const CreateExperience = () => {
                       <option value="Hard">Hard</option>
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label>Topics (comma separated)</label>
+                  <div className="psg-create-field">
+                    <label className="psg-create-label">Topics (comma separated)</label>
                     <input
                       type="text"
+                      className="psg-create-input"
                       value={question.topics?.join(', ') || ''}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
                       placeholder="Arrays, Dynamic Programming, etc."
                     />
                   </div>
-                  <div className="form-group full-width">
-                    <label>Solution Approach</label>
+                  <div className="psg-create-field psg-create-grid-full">
+                    <label className="psg-create-label">Solution Approach</label>
                     <textarea
+                      className="psg-create-textarea"
                       value={question.solution}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'solution', e.target.value, 'technical')}
                       placeholder="Describe your approach to solving this question..."
@@ -497,41 +531,44 @@ const CreateExperience = () => {
           </div>
 
           {/* Behavioral Questions */}
-          <div className="questions-section">
-            <div className="question-header">
-              <h4>Behavioral Questions</h4>
+          <div className="psg-create-question-section">
+            <div className="psg-create-question-header">
+              <h4 className="psg-create-question-title">🗣️ Behavioral Questions</h4>
               <button 
                 type="button" 
                 onClick={() => addQuestion(roundIndex, 'behavioral')}
-                className="add-question-btn"
+                className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
               >
-                + Add Question
+                ➕ Add Question
               </button>
             </div>
             {round.behavioralQuestions.map((question, qIndex) => (
-              <div key={qIndex} className="question-card">
-                <div className="question-actions">
+              <div key={qIndex} className="psg-create-question-card">
+                <div className="psg-create-question-meta">
+                  <span className="psg-create-question-number">Q{qIndex + 1}</span>
                   <button
                     type="button"
                     onClick={() => removeQuestion(roundIndex, qIndex, 'behavioral')}
-                    className="remove-question-btn"
+                    className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
                   >
-                    ×
+                    ✕
                   </button>
                 </div>
-                <div className="form-grid">
-                  <div className="form-group full-width">
-                    <label>Question</label>
+                <div className="psg-create-grid">
+                  <div className="psg-create-field psg-create-grid-full">
+                    <label className="psg-create-label">Question</label>
                     <textarea
+                      className="psg-create-textarea"
                       value={question.question}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'behavioral')}
                       placeholder="Describe the behavioral question asked..."
                       rows="2"
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Category</label>
+                  <div className="psg-create-field">
+                    <label className="psg-create-label">Category</label>
                     <select
+                      className="psg-create-select"
                       value={question.category}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'category', e.target.value, 'behavioral')}
                     >
@@ -541,9 +578,10 @@ const CreateExperience = () => {
                       <option value="Company-specific">Company-specific</option>
                     </select>
                   </div>
-                  <div className="form-group full-width">
-                    <label>Your Answer</label>
+                  <div className="psg-create-field psg-create-grid-full">
+                    <label className="psg-create-label">Your Answer</label>
                     <textarea
+                      className="psg-create-textarea"
                       value={question.yourAnswer}
                       onChange={(e) => updateQuestion(roundIndex, qIndex, 'yourAnswer', e.target.value, 'behavioral')}
                       placeholder="How did you answer this question?"
@@ -555,10 +593,11 @@ const CreateExperience = () => {
             ))}
           </div>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Overall Experience (1-5)</label>
+          <div className="psg-create-grid">
+            <div className="psg-create-field">
+              <label className="psg-create-label">Overall Experience (1-5)</label>
               <select
+                className="psg-create-select"
                 value={round.overallExperience}
                 onChange={(e) => handleInputChange('rounds', 'overallExperience', parseInt(e.target.value), roundIndex)}
               >
@@ -571,20 +610,21 @@ const CreateExperience = () => {
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label>Tips for this round *</label>
+          <div className="psg-create-field psg-create-grid-full">
+            <label className="psg-create-label">Tips for this round</label>
             <textarea
+              className="psg-create-textarea"
               value={round.tips}
               onChange={(e) => handleInputChange('rounds', 'tips', e.target.value, roundIndex)}
               placeholder="Share tips and advice for this specific round..."
               rows="3"
-              required
             />
           </div>
 
-          <div className="form-group full-width">
-            <label>Feedback Received</label>
+          <div className="psg-create-field psg-create-grid-full">
+            <label className="psg-create-label">Feedback Received</label>
             <textarea
+              className="psg-create-textarea"
               value={round.feedback}
               onChange={(e) => handleInputChange('rounds', 'feedback', e.target.value, roundIndex)}
               placeholder="Any feedback you received after this round..."
@@ -597,21 +637,26 @@ const CreateExperience = () => {
   );
 
   const renderPreparation = () => (
-    <div className="form-section">
-      <h2>Preparation & Tips</h2>
-      <div className="form-grid">
-        <div className="form-group">
-          <label>Preparation Time (weeks)</label>
+    <div className="psg-create-section">
+      <div className="psg-create-section-header">
+        <h2 className="psg-create-section-title">Preparation & Tips</h2>
+        <div className="psg-create-section-divider"></div>
+      </div>
+      <div className="psg-create-grid">
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Preparation Time (weeks)</label>
           <input
             type="number"
+            className="psg-create-input"
             value={formData.preparationTime}
-            onChange={(e) => handleInputChange(null, 'preparationTime', parseInt(e.target.value))}
+            onChange={(e) => handleInputChange(null, 'preparationTime', e.target.value ? parseInt(e.target.value) : '')}
             placeholder="How many weeks did you prepare?"
           />
         </div>
-        <div className="form-group">
-          <label>Overall Rating (1-5)</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Overall Rating (1-5)</label>
           <select
+            className="psg-create-select"
             value={formData.overallRating}
             onChange={(e) => handleInputChange(null, 'overallRating', parseInt(e.target.value))}
           >
@@ -622,9 +667,20 @@ const CreateExperience = () => {
             <option value={5}>5 - Excellent</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Final Result</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label">Overall Experience Summary</label>
+          <textarea
+            className="psg-create-textarea"
+            value={formData.overallExperience}
+            onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
+            placeholder="Summarize your overall interview experience in a few sentences..."
+            rows="3"
+          />
+        </div>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Final Result</label>
           <select
+            className="psg-create-select"
             value={formData.finalResult}
             onChange={(e) => handleInputChange(null, 'finalResult', e.target.value)}
           >
@@ -634,9 +690,10 @@ const CreateExperience = () => {
             <option value="Pending">Pending</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Would you recommend this company?</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Would you recommend this company?</label>
           <select
+            className="psg-create-select"
             value={formData.wouldRecommend}
             onChange={(e) => handleInputChange(null, 'wouldRecommend', e.target.value === 'true')}
           >
@@ -644,18 +701,21 @@ const CreateExperience = () => {
             <option value={false}>No</option>
           </select>
         </div>
-        <div className="form-group full-width">
-          <label>Resources Used (comma separated)</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label">Resources Used (comma separated)</label>
           <input
             type="text"
-            value={formData.resourcesUsed.join(', ')}
-            onChange={(e) => handleArrayInput(null, 'resourcesUsed', e.target.value)}
+            className="psg-create-input"
+            value={Array.isArray(formData.resourcesUsed) ? formData.resourcesUsed.join(', ') : formData.resourcesUsed || ''}
+            onChange={(e) => handleStringInput(null, 'resourcesUsed', e.target.value)}
+            onBlur={(e) => handleArrayInput(null, 'resourcesUsed', e.target.value)}
             placeholder="LeetCode, GeeksforGeeks, System Design Primer, etc."
           />
         </div>
-        <div className="form-group full-width">
-          <label>Key Tips *</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label psg-create-label-required">Key Tips</label>
           <textarea
+            className="psg-create-textarea"
             value={formData.keyTips}
             onChange={(e) => handleInputChange(null, 'keyTips', e.target.value)}
             placeholder="Share your most important tips for others..."
@@ -663,9 +723,10 @@ const CreateExperience = () => {
             required
           />
         </div>
-        <div className="form-group full-width">
-          <label>Mistakes to Avoid *</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label psg-create-label-required">Mistakes to Avoid</label>
           <textarea
+            className="psg-create-textarea"
             value={formData.mistakesToAvoid}
             onChange={(e) => handleInputChange(null, 'mistakesToAvoid', e.target.value)}
             placeholder="What mistakes should others avoid?"
@@ -678,12 +739,16 @@ const CreateExperience = () => {
   );
 
   const renderBackground = () => (
-    <div className="form-section">
-      <h2>Background Information</h2>
-      <div className="form-grid">
-        <div className="form-group">
-          <label>Year of Study *</label>
+    <div className="psg-create-section">
+      <div className="psg-create-section-header">
+        <h2 className="psg-create-section-title">Background Information</h2>
+        <div className="psg-create-section-divider"></div>
+      </div>
+      <div className="psg-create-grid">
+        <div className="psg-create-field">
+          <label className="psg-create-label psg-create-label-required">Year of Study</label>
           <select
+            className="psg-create-select"
             value={formData.backgroundInfo.yearOfStudy}
             onChange={(e) => handleInputChange('backgroundInfo', 'yearOfStudy', e.target.value)}
             required
@@ -696,54 +761,61 @@ const CreateExperience = () => {
             <option value="Postgraduate">Postgraduate</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>CGPA</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">CGPA</label>
           <input
             type="number"
+            className="psg-create-input"
             step="0.01"
             min="0"
             max="10"
             value={formData.backgroundInfo.cgpa}
-            onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', parseFloat(e.target.value))}
+            onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
             placeholder="e.g., 8.5"
           />
         </div>
-        <div className="form-group">
-          <label>Previous Internships</label>
+        <div className="psg-create-field">
+          <label className="psg-create-label">Previous Internships</label>
           <input
             type="number"
+            className="psg-create-input"
             min="0"
             value={formData.backgroundInfo.previousInternships}
-            onChange={(e) => handleInputChange('backgroundInfo', 'previousInternships', parseInt(e.target.value))}
+            onChange={(e) => handleInputChange('backgroundInfo', 'previousInternships', e.target.value ? parseInt(e.target.value) : '')}
             placeholder="Number of previous internships"
           />
         </div>
-        <div className="form-group full-width">
-          <label>Relevant Projects (comma separated)</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label">Relevant Projects (comma separated)</label>
           <input
             type="text"
-            value={formData.backgroundInfo.relevantProjects.join(', ')}
-            onChange={(e) => handleArrayInput('backgroundInfo', 'relevantProjects', e.target.value)}
+            className="psg-create-input"
+            value={Array.isArray(formData.backgroundInfo.relevantProjects) ? formData.backgroundInfo.relevantProjects.join(', ') : formData.backgroundInfo.relevantProjects || ''}
+            onChange={(e) => handleStringInput('backgroundInfo', 'relevantProjects', e.target.value)}
+            onBlur={(e) => handleArrayInput('backgroundInfo', 'relevantProjects', e.target.value)}
             placeholder="Project 1, Project 2, etc."
           />
         </div>
-        <div className="form-group full-width">
-          <label>Skills (comma separated)</label>
+        <div className="psg-create-field psg-create-grid-full">
+          <label className="psg-create-label">Skills (comma separated)</label>
           <input
             type="text"
-            value={formData.backgroundInfo.skills.join(', ')}
-            onChange={(e) => handleArrayInput('backgroundInfo', 'skills', e.target.value)}
+            className="psg-create-input"
+            value={Array.isArray(formData.backgroundInfo.skills) ? formData.backgroundInfo.skills.join(', ') : formData.backgroundInfo.skills || ''}
+            onChange={(e) => handleStringInput('backgroundInfo', 'skills', e.target.value)}
+            onBlur={(e) => handleArrayInput('backgroundInfo', 'skills', e.target.value)}
             placeholder="JavaScript, Python, React, etc."
           />
         </div>
-        <div className="form-group">
-          <label>
+        <div className="psg-create-field">
+          <label style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
             <input
               type="checkbox"
               checked={formData.isAnonymous}
               onChange={(e) => handleInputChange(null, 'isAnonymous', e.target.checked)}
+              style={{width: 'auto', margin: 0}}
             />
-            Share anonymously
+            <span className="psg-create-label" style={{margin: 0, padding: 0}}>Share anonymously</span>
           </label>
         </div>
       </div>
@@ -751,40 +823,50 @@ const CreateExperience = () => {
   );
 
   const renderReview = () => (
-    <div className="form-section">
-      <h2>Review & Submit</h2>
-      <div className="review-summary">
-        <div className="summary-card">
-          <h3>{formData.companyInfo.companyName}</h3>
-          <p>{formData.companyInfo.role}</p>
-          <p>{formData.companyInfo.department} • {formData.companyInfo.internshipType}</p>
-          <p>{formData.companyInfo.location}</p>
-          <p className="result">{formData.finalResult}</p>
+    <div className="psg-create-section">
+      <div className="psg-create-section-header">
+        <h2 className="psg-create-section-title">Review & Submit</h2>
+        <div className="psg-create-section-divider"></div>
+      </div>
+      <div className="psg-create-grid">
+        <div className="psg-create-round-card" style={{gridColumn: '1 / -1'}}>
+          <h3 style={{color: 'var(--psg-create-primary)', marginBottom: 'var(--psg-create-spacing-lg)'}}>{formData.companyInfo.companyName}</h3>
+          <p style={{fontSize: '1.125rem', fontWeight: '600', marginBottom: 'var(--psg-create-spacing-sm)'}}>{formData.companyInfo.role}</p>
+          <p style={{color: 'var(--psg-create-gray-600)', marginBottom: 'var(--psg-create-spacing-md)'}}>{formData.companyInfo.department} • {formData.companyInfo.internshipType}</p>
+          <p style={{color: 'var(--psg-create-gray-600)', marginBottom: 'var(--psg-create-spacing-md)'}}>{formData.companyInfo.location}</p>
+          <p style={{
+            padding: 'var(--psg-create-spacing-sm) var(--psg-create-spacing-md)',
+            background: formData.finalResult === 'Selected' ? 'var(--psg-create-success)' : 'var(--psg-create-danger)',
+            color: 'white',
+            borderRadius: 'var(--psg-create-radius-md)',
+            display: 'inline-block',
+            fontWeight: '600'
+          }}>{formData.finalResult}</p>
         </div>
         
-        <div className="summary-stats">
-          <div className="stat">
-            <strong>{formData.rounds.length}</strong>
-            <span>Rounds</span>
+        <div style={{display: 'flex', gap: 'var(--psg-create-spacing-xl)', justifyContent: 'center', gridColumn: '1 / -1'}}>
+          <div style={{textAlign: 'center'}}>
+            <div style={{fontSize: '2rem', fontWeight: '700', color: 'var(--psg-create-primary)'}}>{formData.rounds.length}</div>
+            <div style={{color: 'var(--psg-create-gray-600)', fontSize: '0.875rem'}}>Rounds</div>
           </div>
-          <div className="stat">
-            <strong>{formData.overallRating}/5</strong>
-            <span>Rating</span>
+          <div style={{textAlign: 'center'}}>
+            <div style={{fontSize: '2rem', fontWeight: '700', color: 'var(--psg-create-primary)'}}>{formData.overallRating}/5</div>
+            <div style={{color: 'var(--psg-create-gray-600)', fontSize: '0.875rem'}}>Rating</div>
           </div>
-          <div className="stat">
-            <strong>{formData.preparationTime || 0}</strong>
-            <span>Weeks Prep</span>
+          <div style={{textAlign: 'center'}}>
+            <div style={{fontSize: '2rem', fontWeight: '700', color: 'var(--psg-create-primary)'}}>{formData.preparationTime || 0}</div>
+            <div style={{color: 'var(--psg-create-gray-600)', fontSize: '0.875rem'}}>Weeks Prep</div>
           </div>
         </div>
 
-        <div className="final-checks">
-          <h4>Before submitting, please ensure:</h4>
-          <ul>
-            <li>✅ All company information is accurate</li>
-            <li>✅ Interview rounds are detailed with helpful tips</li>
-            <li>✅ Questions and answers are clearly described</li>
-            <li>✅ Tips will help other candidates</li>
-            <li>✅ Personal information is appropriate for sharing</li>
+        <div className="psg-create-round-card" style={{gridColumn: '1 / -1'}}>
+          <h4 style={{color: 'var(--psg-create-gray-800)', marginBottom: 'var(--psg-create-spacing-lg)'}}>Before submitting, please ensure:</h4>
+          <ul style={{listStyle: 'none', padding: 0}}>
+            <li style={{marginBottom: 'var(--psg-create-spacing-sm)', color: 'var(--psg-create-success)'}}>✅ All company information is accurate</li>
+            <li style={{marginBottom: 'var(--psg-create-spacing-sm)', color: 'var(--psg-create-success)'}}>✅ Interview rounds are detailed with helpful tips</li>
+            <li style={{marginBottom: 'var(--psg-create-spacing-sm)', color: 'var(--psg-create-success)'}}>✅ Questions and answers are clearly described</li>
+            <li style={{marginBottom: 'var(--psg-create-spacing-sm)', color: 'var(--psg-create-success)'}}>✅ Tips will help other candidates</li>
+            <li style={{marginBottom: 'var(--psg-create-spacing-sm)', color: 'var(--psg-create-success)'}}>✅ Personal information is appropriate for sharing</li>
           </ul>
         </div>
       </div>
@@ -792,19 +874,26 @@ const CreateExperience = () => {
   );
 
   return (
-    <div className="create-experience">
-      <div className="create-header">
-        <h1>Share Your Interview Experience</h1>
-        <p>Help others succeed by sharing your interview journey</p>
-      </div>
-
-      {renderStepIndicator()}
-
-      {error && (
-        <div className="error-message">
-          {error}
+    <div className="psg-create-container">
+      <div className="psg-create-card">
+        <div className="psg-create-header">
+          <div className="psg-create-header-content">
+            <h1 className="psg-create-title">
+              <span className="psg-create-title-icon">📝</span>
+              Share Your Interview Experience
+            </h1>
+            <p className="psg-create-subtitle">Help others succeed by sharing your interview journey</p>
+          </div>
         </div>
-      )}
+
+        {renderStepIndicator()}
+
+        {error && (
+          <div className="psg-create-error">
+            <span className="psg-create-error-icon">⚠️</span>
+            {error}
+          </div>
+        )}
 
       <form onSubmit={handleSubmit}>
         {currentStep === 1 && renderCompanyInfo()}
@@ -813,23 +902,24 @@ const CreateExperience = () => {
         {currentStep === 4 && renderBackground()}
         {currentStep === 5 && renderReview()}
 
-        <div className="form-navigation">
+        <div className="psg-create-actions">
           {currentStep > 1 && (
-            <button type="button" onClick={prevStep} className="nav-btn prev-btn">
-              Previous
+            <button type="button" onClick={prevStep} className="psg-create-btn psg-create-btn-ghost">
+              ← Previous
             </button>
           )}
           {currentStep < 5 ? (
-            <button type="button" onClick={nextStep} className="nav-btn next-btn">
-              Next
+            <button type="button" onClick={nextStep} className="psg-create-btn psg-create-btn-primary">
+              Next →
             </button>
           ) : (
-            <button type="submit" disabled={loading} className="nav-btn submit-btn">
-              {loading ? 'Creating...' : 'Create Experience'}
+            <button type="submit" disabled={loading} className="psg-create-btn psg-create-btn-secondary psg-create-btn-lg">
+              {loading ? 'Creating...' : '✨ Create Experience'}
             </button>
           )}
         </div>
       </form>
+      </div>
     </div>
   );
 };

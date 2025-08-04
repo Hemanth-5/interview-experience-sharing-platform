@@ -72,7 +72,7 @@ router.post('/single',
         data: fileInfo
       });
     } catch (error) {
-      console.error('Error uploading file:', error);
+      // console.error('Error uploading file:', error);
       res.status(500).json({
         success: false,
         message: 'Error uploading file',
@@ -111,7 +111,7 @@ router.post('/multiple',
         data: filesInfo
       });
     } catch (error) {
-      console.error('Error uploading files:', error);
+      // console.error('Error uploading files:', error);
       res.status(500).json({
         success: false,
         message: 'Error uploading files',
@@ -171,7 +171,7 @@ router.post('/extract-text',
           }
         });
       } catch (extractError) {
-        console.error('Error extracting text:', extractError);
+        // console.error('Error extracting text:', extractError);
         res.status(400).json({
           success: false,
           message: 'Error extracting text from file',
@@ -179,7 +179,7 @@ router.post('/extract-text',
         });
       }
     } catch (error) {
-      console.error('Error in text extraction:', error);
+      // console.error('Error in text extraction:', error);
       res.status(500).json({
         success: false,
         message: 'Server error during text extraction',
@@ -213,7 +213,7 @@ router.delete('/:cloudinaryId',
         });
       }
     } catch (error) {
-      console.error('Error deleting file:', error);
+      // console.error('Error deleting file:', error);
       res.status(500).json({
         success: false,
         message: 'Error deleting file',
@@ -251,7 +251,7 @@ router.get('/signed-url',
         }
       });
     } catch (error) {
-      console.error('Error generating signed URL:', error);
+      // console.error('Error generating signed URL:', error);
       res.status(500).json({
         success: false,
         message: 'Error generating signed URL',

@@ -1,8 +1,48 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './About.css';
 
 const About = () => {
+  const { user } = useAuth();
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    setMessage(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!user) {
+      alert('Please log in to send a message.');
+      return;
+    }
+
+    if (!message.trim()) {
+      alert('Please enter a message before sending.');
+      return;
+    }
+
+    // Create simple message content
+    const subject = `PSG Tech Interview Experience Platform - Message from ${user.name}`;
+    const emailBody = `Hello,
+
+${message}
+
+Best regards,
+${user.name}`;
+
+    // Open Gmail with the message
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=22z225@psgtech.ac.in&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+    window.open(gmailLink, '_blank');
+
+    // Clear the form and show success message
+    setMessage('');
+  };
+
   const features = [
     {
       icon: '📝',
@@ -45,22 +85,10 @@ const About = () => {
 
   const teamMembers = [
     {
-      name: 'Dr. Rajesh Kumar',
-      role: 'Placement Officer',
-      image: 'https://ui-avatars.com/api/?name=Dr+Rajesh+Kumar&background=667eea&color=fff&size=200',
-      description: 'Experienced placement officer dedicated to helping PSG Tech students achieve their career goals.'
-    },
-    {
-      name: 'Priya Sharma',
-      role: 'Student Coordinator',
-      image: 'https://ui-avatars.com/api/?name=Priya+Sharma&background=764ba2&color=fff&size=200',
-      description: 'PSG Tech alumna who coordinates student activities and maintains the experience sharing community.'
-    },
-    {
-      name: 'Arjun Patel',
-      role: 'Tech Lead',
-      image: 'https://ui-avatars.com/api/?name=Arjun+Patel&background=10b981&color=fff&size=200',
-      description: 'CSE graduate from PSG Tech focused on developing this platform for fellow students.'
+      name: 'Hemanthkumar V',
+      role: 'Developer & Founder',
+      image: 'https://ui-avatars.com/api/?name=Hemanthkumar+V&background=667eea&color=fff&size=200',
+      description: 'Placement Representative for CSE (2026). Passionate about building tools that empower PSG Tech students.'
     }
   ];
 
@@ -80,10 +108,6 @@ const About = () => {
     {
       question: 'Can I edit my shared experiences?',
       answer: 'Yes, you can edit your shared PSG Tech placement experiences at any time from your profile dashboard. This helps keep information current and accurate for fellow students.'
-    },
-    {
-      question: 'How can PSG Tech students get the most out of this platform?',
-      answer: 'Start by browsing experiences from companies that visit PSG Tech, bookmark helpful content, and consider sharing your own placement experiences to give back to the PSG Tech community.'
     }
   ];
 
@@ -201,10 +225,9 @@ const About = () => {
       {/* Team Section */}
       <section className="team-section">
         <div className="container">
-          <h2>Meet Our PSG Tech Team</h2>
+          <h2>Meet Our Team</h2>
           <p className="team-intro">
-            We're a passionate team of PSG Tech faculty, alumni, and students 
-            dedicated to making placement preparation accessible to all PSG Tech students.
+
           </p>
           <div className="team-grid">
             {teamMembers.map((member, index) => (
@@ -268,32 +291,43 @@ const About = () => {
               <div className="contact-methods">
                 <div className="contact-method">
                   <span className="method-icon">📧</span>
-                  <span>placement@psgtech.edu</span>
+                  <span>placement@psgtech.ac.in</span>
                 </div>
                 <div className="contact-method">
                   <span className="method-icon">💬</span>
                   <span>Visit placement office for support</span>
                 </div>
-                <div className="contact-method">
-                  <span className="method-icon">🏫</span>
-                  <span>PSG College of Technology</span>
-                </div>
               </div>
             </div>
             <div className="contact-form">
               <h3>Send us a Message</h3>
-              <form>
-                <div className="form-group">
-                  <input type="text" placeholder="Your Name" required />
+              {user ? (
+                <>
+                  <div className="user-info-display">
+                    <p><strong>Logged in as:</strong> {user.name} ({user.email})</p>
+                  </div>
+                  <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                      <textarea 
+                        name="message"
+                        placeholder="Your Message" 
+                        rows="6" 
+                        value={message}
+                        onChange={handleInputChange}
+                        required
+                      ></textarea>
+                    </div>
+                    <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                      {isSubmitting ? 'Opening Gmail...' : 'Send Message'}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="login-prompt">
+                  <p>Please log in to send us a message.</p>
+                  <Link to="/login" className="login-btn">Log In</Link>
                 </div>
-                <div className="form-group">
-                  <input type="email" placeholder="Your Email" required />
-                </div>
-                <div className="form-group">
-                  <textarea placeholder="Your Message" rows="4" required></textarea>
-                </div>
-                <button type="submit" className="submit-btn">Send Message</button>
-              </form>
+              )}
             </div>
           </div>
         </div>

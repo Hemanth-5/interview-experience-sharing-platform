@@ -20,33 +20,48 @@ const EditExperience = () => {
       department: '',
       internshipType: 'Summer',
       duration: '',
-      location: 'Remote',
+      location: 'On-site',
+      city: '',
+      country: '',
+      stipend: '',
+      currency: 'USD',
       applicationDate: '',
-      description: ''
+      resultDate: ''
     },
-    rounds: [
-      {
-        roundType: 'Technical',
-        duration: '',
-        roundResult: 'Selected',
-        overallExperience: 5,
-        technicalQuestions: [],
-        behavioralQuestions: [],
-        feedback: ''
-      }
-    ],
+    rounds: [{
+      roundNumber: 1,
+      roundType: 'Technical',
+      duration: '',
+      platform: '',
+      technicalQuestions: [],
+      behavioralQuestions: [],
+      mcqSection: {
+        totalQuestions: '',
+        timeLimit: '',
+        topics: [],
+        difficulty: 'Medium',
+        cutoff: ''
+      },
+      interviewerDetails: [],
+      roundResult: 'Selected',
+      feedback: '',
+      tips: '',
+      overallExperience: 5
+    }],
     overallRating: 5,
+    overallExperience: '',
     finalResult: 'Selected',
     wouldRecommend: true,
     preparationTime: '',
+    resourcesUsed: [],
     keyTips: '',
     mistakesToAvoid: '',
     backgroundInfo: {
-      yearOfStudy: '3rd Year',
       cgpa: '',
-      skills: '',
-      projects: '',
-      previousInternships: ''
+      previousInternships: 0,
+      relevantProjects: [],
+      skills: [],
+      yearOfStudy: '3rd Year'
     },
     isAnonymous: false
   });
@@ -75,49 +90,87 @@ const EditExperience = () => {
           department: experienceData.companyInfo?.department || '',
           internshipType: experienceData.companyInfo?.internshipType || 'Summer',
           duration: experienceData.companyInfo?.duration || '',
-          location: experienceData.companyInfo?.location || 'Remote',
+          location: experienceData.companyInfo?.location || 'On-site',
+          city: experienceData.companyInfo?.city || '',
+          country: experienceData.companyInfo?.country || '',
+          stipend: experienceData.companyInfo?.stipend || '',
+          currency: experienceData.companyInfo?.currency || 'USD',
           applicationDate: experienceData.companyInfo?.applicationDate ? 
             experienceData.companyInfo.applicationDate.split('T')[0] : '',
-          description: experienceData.companyInfo?.description || ''
+          resultDate: experienceData.companyInfo?.resultDate ? 
+            experienceData.companyInfo.resultDate.split('T')[0] : ''
         },
-        rounds: experienceData.rounds?.map(round => ({
+        rounds: experienceData.rounds?.map((round, index) => ({
+          roundNumber: round.roundNumber || index + 1,
           roundType: round.roundType || 'Technical',
           duration: round.duration || '',
+          platform: round.platform || '',
+          technicalQuestions: (round.technicalQuestions || []).map(q => ({
+            question: q.question || '',
+            difficulty: q.difficulty || 'Medium',
+            topics: q.topics || [],
+            leetcodeLink: q.leetcodeLink || '',
+            solution: q.solution || q.answer || '', // Handle both old and new field names
+            timeGiven: q.timeGiven || ''
+          })),
+          behavioralQuestions: (round.behavioralQuestions || []).map(q => ({
+            question: q.question || '',
+            category: q.category || 'Personal',
+            yourAnswer: q.yourAnswer || q.answer || '', // Handle both old and new field names
+            tips: q.tips || ''
+          })),
+          mcqSection: {
+            totalQuestions: round.mcqSection?.totalQuestions || '',
+            timeLimit: round.mcqSection?.timeLimit || '',
+            topics: round.mcqSection?.topics || [],
+            difficulty: round.mcqSection?.difficulty || 'Medium',
+            cutoff: round.mcqSection?.cutoff || ''
+          },
+          interviewerDetails: round.interviewerDetails || [],
           roundResult: round.roundResult || 'Selected',
-          overallExperience: round.overallExperience || 5,
-          technicalQuestions: round.technicalQuestions || [],
-          behavioralQuestions: round.behavioralQuestions || [],
-          feedback: round.feedback || ''
+          feedback: round.feedback || '',
+          tips: round.tips || '',
+          overallExperience: round.overallExperience || 5
         })) || [{
+          roundNumber: 1,
           roundType: 'Technical',
           duration: '',
-          roundResult: 'Selected',
-          overallExperience: 5,
+          platform: '',
           technicalQuestions: [],
           behavioralQuestions: [],
-          feedback: ''
+          mcqSection: {
+            totalQuestions: '',
+            timeLimit: '',
+            topics: [],
+            difficulty: 'Medium',
+            cutoff: ''
+          },
+          interviewerDetails: [],
+          roundResult: 'Selected',
+          feedback: '',
+          tips: '',
+          overallExperience: 5
         }],
         overallRating: experienceData.overallRating || 5,
         finalResult: experienceData.finalResult || 'Selected',
         wouldRecommend: experienceData.wouldRecommend !== undefined ? experienceData.wouldRecommend : true,
         preparationTime: experienceData.preparationTime || '',
+        resourcesUsed: experienceData.resourcesUsed || [],
         keyTips: experienceData.keyTips || '',
         mistakesToAvoid: experienceData.mistakesToAvoid || '',
         backgroundInfo: {
           yearOfStudy: experienceData.backgroundInfo?.yearOfStudy || '3rd Year',
           cgpa: experienceData.backgroundInfo?.cgpa || '',
-          skills: Array.isArray(experienceData.backgroundInfo?.skills) ? 
-            experienceData.backgroundInfo.skills.join(', ') : (experienceData.backgroundInfo?.skills || ''),
-          projects: Array.isArray(experienceData.backgroundInfo?.relevantProjects) ? 
-            experienceData.backgroundInfo.relevantProjects.join(', ') : (experienceData.backgroundInfo?.relevantProjects || ''),
-          previousInternships: experienceData.backgroundInfo?.previousInternships || ''
+          previousInternships: experienceData.backgroundInfo?.previousInternships || 0,
+          relevantProjects: experienceData.backgroundInfo?.relevantProjects || [],
+          skills: experienceData.backgroundInfo?.skills || []
         },
         isAnonymous: experienceData.isAnonymous || false
       };
       
       setFormData(transformedData);
     } catch (error) {
-      console.error('Error fetching experience:', error);
+      // console.error('Error fetching experience:', error);
       setError('Failed to load experience data. Please try again.');
     } finally {
       setLoading(false);
@@ -136,23 +189,33 @@ const EditExperience = () => {
         companyInfo: {
           ...formData.companyInfo,
           applicationDate: formData.companyInfo.applicationDate ? 
-            new Date(formData.companyInfo.applicationDate).toISOString() : null
+            new Date(formData.companyInfo.applicationDate).toISOString() : null,
+          resultDate: formData.companyInfo.resultDate ? 
+            new Date(formData.companyInfo.resultDate).toISOString() : null,
+          stipend: formData.companyInfo.stipend ? parseFloat(formData.companyInfo.stipend) || null : null
         },
         rounds: formData.rounds.map(round => ({
           ...round,
-          duration: round.duration ? parseInt(round.duration) || round.duration : ''
+          duration: round.duration ? parseInt(round.duration) || round.duration : '',
+          mcqSection: {
+            ...round.mcqSection,
+            totalQuestions: round.mcqSection.totalQuestions ? parseInt(round.mcqSection.totalQuestions) || null : null,
+            timeLimit: round.mcqSection.timeLimit ? parseInt(round.mcqSection.timeLimit) || null : null,
+            cutoff: round.mcqSection.cutoff ? parseFloat(round.mcqSection.cutoff) || null : null
+          }
         })),
         overallRating: parseInt(formData.overallRating) || 5,
+        overallExperience: formData.overallExperience || '',
         finalResult: formData.finalResult,
         wouldRecommend: formData.wouldRecommend,
         preparationTime: formData.preparationTime ? parseInt(formData.preparationTime) || formData.preparationTime : '',
+        resourcesUsed: formData.resourcesUsed,
         keyTips: formData.keyTips,
         mistakesToAvoid: formData.mistakesToAvoid,
         backgroundInfo: {
           ...formData.backgroundInfo,
-          cgpa: formData.backgroundInfo.cgpa ? parseFloat(formData.backgroundInfo.cgpa) || formData.backgroundInfo.cgpa : '',
-          skills: formData.backgroundInfo.skills ? formData.backgroundInfo.skills.split(',').map(s => s.trim()) : [],
-          relevantProjects: formData.backgroundInfo.projects ? formData.backgroundInfo.projects.split(',').map(s => s.trim()) : []
+          cgpa: formData.backgroundInfo.cgpa ? parseFloat(formData.backgroundInfo.cgpa) || null : null,
+          previousInternships: formData.backgroundInfo.previousInternships ? parseInt(formData.backgroundInfo.previousInternships) || 0 : 0
         },
         isAnonymous: formData.isAnonymous
       };
@@ -165,41 +228,80 @@ const EditExperience = () => {
       }, 2000);
       
     } catch (error) {
-      console.error('Error updating experience:', error);
+      // console.error('Error updating experience:', error);
       setError(error.response?.data?.message || 'Failed to update experience. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleInputChange = (section, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
+  const handleInputChange = (section, field, value, index = null, subSection = null) => {
+    if (section === null) {
+      setFormData(prev => ({
+        ...prev,
         [field]: value
-      }
-    }));
+      }));
+    } else if (section === 'rounds' && index !== null) {
+      setFormData(prev => ({
+        ...prev,
+        rounds: prev.rounds.map((round, i) => {
+          if (i === index) {
+            if (subSection) {
+              // Handle nested objects like mcqSection
+              return {
+                ...round,
+                [subSection]: {
+                  ...round[subSection],
+                  [field]: value
+                }
+              };
+            } else {
+              return { ...round, [field]: value };
+            }
+          }
+          return round;
+        })
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      }));
+    }
   };
 
-  const handleRoundChange = (roundIndex, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      rounds: prev.rounds.map((round, index) => 
-        index === roundIndex ? { ...round, [field]: value } : round
-      )
-    }));
+  const handleArrayInput = (section, field, value, index = null) => {
+    const array = value.split(',').map(item => item.trim()).filter(item => item);
+    handleInputChange(section, field, array, index);
+  };
+
+  const handleStringInput = (section, field, value) => {
+    handleInputChange(section, field, value);
   };
 
   const addRound = () => {
     const newRound = {
+      roundNumber: formData.rounds.length + 1,
       roundType: 'Technical',
       duration: '',
-      roundResult: 'Selected',
-      overallExperience: 5,
+      platform: '',
       technicalQuestions: [],
       behavioralQuestions: [],
-      feedback: ''
+      mcqSection: {
+        totalQuestions: '',
+        timeLimit: '',
+        topics: [],
+        difficulty: 'Medium',
+        cutoff: ''
+      },
+      interviewerDetails: [],
+      roundResult: 'Selected',
+      feedback: '',
+      tips: '',
+      overallExperience: 5
     };
     
     setFormData(prev => ({
@@ -234,10 +336,17 @@ const EditExperience = () => {
   };
 
   const addQuestion = (roundIndex, type) => {
-    const newQuestion = {
+    const newQuestion = type === 'technical' ? {
       question: '',
-      answer: '',
       difficulty: 'Medium',
+      topics: [],
+      leetcodeLink: '',
+      solution: '',
+      timeGiven: ''
+    } : {
+      question: '',
+      category: 'Personal',
+      yourAnswer: '',
       tips: ''
     };
 
@@ -389,7 +498,7 @@ const EditExperience = () => {
                   className="psg-edit-input"
                   value={formData?.companyInfo?.companyName || ''}
                   onChange={(e) => handleInputChange('companyInfo', 'companyName', e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder="e.g., Google"
                   required
                 />
               </div>
@@ -409,7 +518,7 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Department
                 </label>
                 <input
@@ -418,6 +527,7 @@ const EditExperience = () => {
                   value={formData.companyInfo.department}
                   onChange={(e) => handleInputChange('companyInfo', 'department', e.target.value)}
                   placeholder="e.g., Engineering"
+                  required
                 />
               </div>
 
@@ -430,16 +540,17 @@ const EditExperience = () => {
                   value={formData.companyInfo.internshipType}
                   onChange={(e) => handleInputChange('companyInfo', 'internshipType', e.target.value)}
                 >
-                  <option value="Summer">Summer Internship</option>
-                  <option value="Winter">Winter Internship</option>
+                  <option value="Summer">Summer</option>
+                  <option value="Winter">Winter</option>
                   <option value="Full-time">Full-time</option>
                   <option value="Part-time">Part-time</option>
+                  <option value="PPO">PPO</option>
                   <option value="Contract">Contract</option>
                 </select>
               </div>
 
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Duration
                 </label>
                 <input
@@ -448,12 +559,13 @@ const EditExperience = () => {
                   value={formData.companyInfo.duration}
                   onChange={(e) => handleInputChange('companyInfo', 'duration', e.target.value)}
                   placeholder="e.g., 3 months"
+                  required
                 />
               </div>
 
               <div className="psg-edit-field">
                 <label className="psg-edit-label">
-                  Location
+                  Work Location
                 </label>
                 <select
                   className="psg-edit-select"
@@ -468,6 +580,58 @@ const EditExperience = () => {
 
               <div className="psg-edit-field">
                 <label className="psg-edit-label">
+                  City
+                </label>
+                <input
+                  type="text"
+                  className="psg-edit-input"
+                  value={formData.companyInfo.city}
+                  onChange={(e) => handleInputChange('companyInfo', 'city', e.target.value)}
+                  placeholder="e.g., San Francisco"
+                />
+              </div>
+
+              <div className="psg-edit-field">
+                <label className="psg-edit-label">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  className="psg-edit-input"
+                  value={formData.companyInfo.country}
+                  onChange={(e) => handleInputChange('companyInfo', 'country', e.target.value)}
+                  placeholder="e.g., USA"
+                />
+              </div>
+
+              <div className="psg-edit-field">
+                <label className="psg-edit-label">
+                  Stipend
+                </label>
+                <div style={{display: 'flex', gap: 'var(--psg-edit-spacing-sm)'}}>
+                  <select
+                    value={formData.companyInfo.currency}
+                    onChange={(e) => handleInputChange('companyInfo', 'currency', e.target.value)}
+                    className="psg-edit-select"
+                    style={{maxWidth: '100px'}}
+                  >
+                    <option value="USD">USD</option>
+                    <option value="INR">INR</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                  </select>
+                  <input
+                    type="number"
+                    className="psg-edit-input"
+                    value={formData.companyInfo.stipend}
+                    onChange={(e) => handleInputChange('companyInfo', 'stipend', e.target.value)}
+                    placeholder="Amount"
+                  />
+                </div>
+              </div>
+
+              <div className="psg-edit-field">
+                <label className="psg-edit-label psg-edit-label-required">
                   Application Date
                 </label>
                 <input
@@ -475,19 +639,19 @@ const EditExperience = () => {
                   className="psg-edit-input"
                   value={formData.companyInfo.applicationDate}
                   onChange={(e) => handleInputChange('companyInfo', 'applicationDate', e.target.value)}
+                  required
                 />
               </div>
 
-              <div className="psg-edit-field psg-edit-grid-full">
+              <div className="psg-edit-field">
                 <label className="psg-edit-label">
-                  Job Description
+                  Result Date
                 </label>
-                <textarea
-                  className="psg-edit-textarea"
-                  value={formData.companyInfo.description}
-                  onChange={(e) => handleInputChange('companyInfo', 'description', e.target.value)}
-                  placeholder="Brief description of the role and responsibilities..."
-                  rows="4"
+                <input
+                  type="date"
+                  className="psg-edit-input"
+                  value={formData.companyInfo.resultDate}
+                  onChange={(e) => handleInputChange('companyInfo', 'resultDate', e.target.value)}
                 />
               </div>
             </div>
@@ -528,7 +692,7 @@ const EditExperience = () => {
                     <select
                       className="psg-edit-select"
                       value={round?.roundType || 'Technical'}
-                      onChange={(e) => handleRoundChange(roundIndex, 'roundType', e.target.value)}
+                      onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
                     >
                       <option value="Technical">Technical Round</option>
                       <option value="HR">HR Round</option>
@@ -540,15 +704,30 @@ const EditExperience = () => {
                   </div>
 
                   <div className="psg-edit-field">
+                    <label className="psg-edit-label psg-edit-label-required">
+                      Duration (minutes)
+                    </label>
+                    <input
+                      type="number"
+                      className="psg-edit-input"
+                      value={round.duration}
+                      onChange={(e) => handleInputChange('rounds', 'duration', e.target.value ? parseInt(e.target.value) : '', roundIndex)}
+                      placeholder="e.g., 60"
+                      min="1"
+                      required
+                    />
+                  </div>
+
+                  <div className="psg-edit-field">
                     <label className="psg-edit-label">
-                      Duration
+                      Platform
                     </label>
                     <input
                       type="text"
                       className="psg-edit-input"
-                      value={round.duration}
-                      onChange={(e) => handleRoundChange(roundIndex, 'duration', e.target.value)}
-                      placeholder="e.g., 60 minutes"
+                      value={round.platform}
+                      onChange={(e) => handleInputChange('rounds', 'platform', e.target.value, roundIndex)}
+                      placeholder="e.g., Zoom, Teams, In-person"
                     />
                   </div>
 
@@ -559,7 +738,7 @@ const EditExperience = () => {
                     <select
                       className="psg-edit-select"
                       value={round.roundResult}
-                      onChange={(e) => handleRoundChange(roundIndex, 'roundResult', e.target.value)}
+                      onChange={(e) => handleInputChange('rounds', 'roundResult', e.target.value, roundIndex)}
                     >
                       <option value="Selected">Selected</option>
                       <option value="Rejected">Rejected</option>
@@ -570,7 +749,7 @@ const EditExperience = () => {
 
                   <div className="psg-edit-field">
                     <label className="psg-edit-label">
-                      Overall Experience (1-10)
+                      Overall Experience (1-5)
                     </label>
                     <input
                       type="number"
@@ -578,7 +757,20 @@ const EditExperience = () => {
                       min="1"
                       max="10"
                       value={round.overallExperience}
-                      onChange={(e) => handleRoundChange(roundIndex, 'overallExperience', parseInt(e.target.value))}
+                      onChange={(e) => handleInputChange('rounds', 'overallExperience', parseInt(e.target.value), roundIndex)}
+                    />
+                  </div>
+
+                  <div className="psg-edit-field psg-edit-grid-full">
+                    <label className="psg-edit-label">
+                      Tips for this round
+                    </label>
+                    <textarea
+                      className="psg-edit-textarea"
+                      value={round.tips}
+                      onChange={(e) => handleInputChange('rounds', 'tips', e.target.value, roundIndex)}
+                      placeholder="Share tips and advice for this specific round..."
+                      rows="3"
                     />
                   </div>
 
@@ -589,7 +781,7 @@ const EditExperience = () => {
                     <textarea
                       className="psg-edit-textarea"
                       value={round.feedback}
-                      onChange={(e) => handleRoundChange(roundIndex, 'feedback', e.target.value)}
+                      onChange={(e) => handleInputChange('rounds', 'feedback', e.target.value, roundIndex)}
                       placeholder="Share your thoughts about this round..."
                       rows="3"
                     />
@@ -635,20 +827,7 @@ const EditExperience = () => {
                             className="psg-edit-textarea"
                             value={question.question}
                             onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'technical')}
-                            placeholder="Enter the interview question..."
-                            rows="2"
-                          />
-                        </div>
-
-                        <div className="psg-edit-field psg-edit-grid-full">
-                          <label className="psg-edit-label">
-                            Your Answer/Approach
-                          </label>
-                          <textarea
-                            className="psg-edit-textarea"
-                            value={question.answer}
-                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'answer', e.target.value, 'technical')}
-                            placeholder="How did you approach this question?"
+                            placeholder="Describe the technical question asked..."
                             rows="3"
                           />
                         </div>
@@ -668,16 +847,29 @@ const EditExperience = () => {
                           </select>
                         </div>
 
+                        <div className="psg-edit-field">
+                          <label className="psg-edit-label">
+                            Topics (comma separated)
+                          </label>
+                          <input
+                            type="text"
+                            className="psg-edit-input"
+                            value={question.topics?.join(', ') || ''}
+                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
+                            placeholder="Arrays, Dynamic Programming, etc."
+                          />
+                        </div>
+
                         <div className="psg-edit-field psg-edit-grid-full">
                           <label className="psg-edit-label">
-                            Tips for Others
+                            Solution Approach
                           </label>
                           <textarea
                             className="psg-edit-textarea"
-                            value={question.tips}
-                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'tips', e.target.value, 'technical')}
-                            placeholder="Any tips for future candidates?"
-                            rows="2"
+                            value={question.solution}
+                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'solution', e.target.value, 'technical')}
+                            placeholder="Describe your approach to solving this question..."
+                            rows="3"
                           />
                         </div>
                       </div>
@@ -724,9 +916,25 @@ const EditExperience = () => {
                             className="psg-edit-textarea"
                             value={question.question}
                             onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'behavioral')}
-                            placeholder="Enter the behavioral question..."
+                            placeholder="Describe the behavioral question asked..."
                             rows="2"
                           />
+                        </div>
+
+                        <div className="psg-edit-field">
+                          <label className="psg-edit-label">
+                            Category
+                          </label>
+                          <select
+                            className="psg-edit-select"
+                            value={question.category}
+                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'category', e.target.value, 'behavioral')}
+                          >
+                            <option value="Personal">Personal</option>
+                            <option value="Behavioral">Behavioral</option>
+                            <option value="Situational">Situational</option>
+                            <option value="Company-specific">Company-specific</option>
+                          </select>
                         </div>
 
                         <div className="psg-edit-field psg-edit-grid-full">
@@ -735,8 +943,8 @@ const EditExperience = () => {
                           </label>
                           <textarea
                             className="psg-edit-textarea"
-                            value={question.answer}
-                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'answer', e.target.value, 'behavioral')}
+                            value={question.yourAnswer}
+                            onChange={(e) => updateQuestion(roundIndex, qIndex, 'yourAnswer', e.target.value, 'behavioral')}
                             placeholder="How did you answer this question?"
                             rows="3"
                           />
@@ -772,27 +980,57 @@ const EditExperience = () => {
             </div>
           </div>
 
-          {/* Overall Experience Section */}
+          {/* Preparation & Tips Section */}
           <div className="psg-edit-section">
             <div className="psg-edit-section-header">
               <h2 className="psg-edit-section-title">
-                📊 Overall Experience
+                📊 Preparation & Tips
               </h2>
               <div className="psg-edit-section-divider"></div>
             </div>
 
             <div className="psg-edit-grid">
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
-                  Overall Rating (1-10)
+                <label className="psg-edit-label psg-edit-label-required">
+                  Preparation Time (weeks)
                 </label>
                 <input
                   type="number"
                   className="psg-edit-input"
-                  min="1"
-                  max="10"
+                  value={formData.preparationTime}
+                  onChange={(e) => handleInputChange(null, 'preparationTime', e.target.value ? parseInt(e.target.value) : '')}
+                  placeholder="How many weeks did you prepare?"
+                  required
+                />
+              </div>
+
+              <div className="psg-edit-field">
+                <label className="psg-edit-label">
+                  Overall Rating (1-5)
+                </label>
+                <select
+                  className="psg-edit-select"
                   value={formData.overallRating}
-                  onChange={(e) => setFormData(prev => ({...prev, overallRating: parseInt(e.target.value)}))}
+                  onChange={(e) => handleInputChange(null, 'overallRating', parseInt(e.target.value))}
+                >
+                  <option value={1}>1 - Poor</option>
+                  <option value={2}>2 - Below Average</option>
+                  <option value={3}>3 - Average</option>
+                  <option value={4}>4 - Good</option>
+                  <option value={5}>5 - Excellent</option>
+                </select>
+              </div>
+
+              <div className="psg-edit-field psg-edit-grid-full">
+                <label className="psg-edit-label">
+                  Overall Experience Summary
+                </label>
+                <textarea
+                  className="psg-edit-textarea"
+                  value={formData.overallExperience}
+                  onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
+                  placeholder="Summarize your overall interview experience in a few sentences..."
+                  rows="3"
                 />
               </div>
 
@@ -803,63 +1041,68 @@ const EditExperience = () => {
                 <select
                   className="psg-edit-select"
                   value={formData.finalResult}
-                  onChange={(e) => setFormData(prev => ({...prev, finalResult: e.target.value}))}
+                  onChange={(e) => handleInputChange(null, 'finalResult', e.target.value)}
                 >
                   <option value="Selected">Selected</option>
                   <option value="Rejected">Rejected</option>
-                  <option value="Waitlisted">Waitlisted</option>
+                  <option value="Withdrawn">Withdrawn</option>
                   <option value="Pending">Pending</option>
                 </select>
               </div>
 
               <div className="psg-edit-field">
                 <label className="psg-edit-label">
-                  Preparation Time
+                  Would you recommend this company?
+                </label>
+                <select
+                  className="psg-edit-select"
+                  value={formData.wouldRecommend}
+                  onChange={(e) => handleInputChange(null, 'wouldRecommend', e.target.value === 'true')}
+                >
+                  <option value={true}>Yes</option>
+                  <option value={false}>No</option>
+                </select>
+              </div>
+
+              <div className="psg-edit-field psg-edit-grid-full">
+                <label className="psg-edit-label">
+                  Resources Used (comma separated)
                 </label>
                 <input
                   type="text"
                   className="psg-edit-input"
-                  value={formData.preparationTime}
-                  onChange={(e) => setFormData(prev => ({...prev, preparationTime: e.target.value}))}
-                  placeholder="e.g., 2 weeks"
+                  value={Array.isArray(formData.resourcesUsed) ? formData.resourcesUsed.join(', ') : formData.resourcesUsed || ''}
+                  onChange={(e) => handleStringInput(null, 'resourcesUsed', e.target.value)}
+                  onBlur={(e) => handleArrayInput(null, 'resourcesUsed', e.target.value)}
+                  placeholder="LeetCode, GeeksforGeeks, System Design Primer, etc."
                 />
               </div>
 
               <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-checkbox">
-                  <input
-                    type="checkbox"
-                    className="psg-edit-checkbox-input"
-                    checked={formData.wouldRecommend}
-                    onChange={(e) => setFormData(prev => ({...prev, wouldRecommend: e.target.checked}))}
-                  />
-                  Would you recommend this company to others?
-                </label>
-              </div>
-
-              <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-label">
-                  Key Tips for Success
+                <label className="psg-edit-label psg-edit-label-required">
+                  Key Tips
                 </label>
                 <textarea
                   className="psg-edit-textarea"
                   value={formData.keyTips}
-                  onChange={(e) => setFormData(prev => ({...prev, keyTips: e.target.value}))}
-                  placeholder="Share your top tips for future candidates..."
+                  onChange={(e) => handleInputChange(null, 'keyTips', e.target.value)}
+                  placeholder="Share your most important tips for others..."
                   rows="4"
+                  required
                 />
               </div>
 
               <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Mistakes to Avoid
                 </label>
                 <textarea
                   className="psg-edit-textarea"
                   value={formData.mistakesToAvoid}
-                  onChange={(e) => setFormData(prev => ({...prev, mistakesToAvoid: e.target.value}))}
-                  placeholder="What should future candidates avoid?"
+                  onChange={(e) => handleInputChange(null, 'mistakesToAvoid', e.target.value)}
+                  placeholder="What mistakes should others avoid?"
                   rows="4"
+                  required
                 />
               </div>
             </div>
@@ -876,13 +1119,14 @@ const EditExperience = () => {
 
             <div className="psg-edit-grid">
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Year of Study
                 </label>
                 <select
                   className="psg-edit-select"
                   value={formData.backgroundInfo.yearOfStudy}
                   onChange={(e) => handleInputChange('backgroundInfo', 'yearOfStudy', e.target.value)}
+                  required
                 >
                   <option value="1st Year">1st Year</option>
                   <option value="2nd Year">2nd Year</option>
@@ -898,10 +1142,13 @@ const EditExperience = () => {
                   CGPA
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   className="psg-edit-input"
+                  step="0.01"
+                  min="0"
+                  max="10"
                   value={formData.backgroundInfo.cgpa}
-                  onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value)}
+                  onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
                   placeholder="e.g., 8.5"
                 />
               </div>
@@ -911,49 +1158,52 @@ const EditExperience = () => {
                   Previous Internships
                 </label>
                 <input
+                  type="number"
+                  className="psg-edit-input"
+                  min="0"
+                  value={formData.backgroundInfo.previousInternships}
+                  onChange={(e) => handleInputChange('backgroundInfo', 'previousInternships', e.target.value ? parseInt(e.target.value) : '')}
+                  placeholder="Number of previous internships"
+                />
+              </div>
+
+              <div className="psg-edit-field psg-edit-grid-full">
+                <label className="psg-edit-label">
+                  Relevant Projects (comma separated)
+                </label>
+                <input
                   type="text"
                   className="psg-edit-input"
-                  value={formData.backgroundInfo.previousInternships}
-                  onChange={(e) => handleInputChange('backgroundInfo', 'previousInternships', e.target.value)}
-                  placeholder="Brief description of previous internships"
+                  value={Array.isArray(formData.backgroundInfo.relevantProjects) ? formData.backgroundInfo.relevantProjects.join(', ') : formData.backgroundInfo.relevantProjects || ''}
+                  onChange={(e) => handleStringInput('backgroundInfo', 'relevantProjects', e.target.value)}
+                  onBlur={(e) => handleArrayInput('backgroundInfo', 'relevantProjects', e.target.value)}
+                  placeholder="Project 1, Project 2, etc."
                 />
               </div>
 
               <div className="psg-edit-field psg-edit-grid-full">
                 <label className="psg-edit-label">
-                  Relevant Skills
+                  Skills (comma separated)
                 </label>
-                <textarea
-                  className="psg-edit-textarea"
-                  value={formData.backgroundInfo.skills}
-                  onChange={(e) => handleInputChange('backgroundInfo', 'skills', e.target.value)}
-                  placeholder="List your relevant technical and soft skills..."
-                  rows="3"
+                <input
+                  type="text"
+                  className="psg-edit-input"
+                  value={Array.isArray(formData.backgroundInfo.skills) ? formData.backgroundInfo.skills.join(', ') : formData.backgroundInfo.skills || ''}
+                  onChange={(e) => handleStringInput('backgroundInfo', 'skills', e.target.value)}
+                  onBlur={(e) => handleArrayInput('backgroundInfo', 'skills', e.target.value)}
+                  placeholder="JavaScript, Python, React, etc."
                 />
               </div>
 
-              <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-label">
-                  Relevant Projects
-                </label>
-                <textarea
-                  className="psg-edit-textarea"
-                  value={formData.backgroundInfo.projects}
-                  onChange={(e) => handleInputChange('backgroundInfo', 'projects', e.target.value)}
-                  placeholder="Describe your relevant projects..."
-                  rows="3"
-                />
-              </div>
-
-              <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-checkbox">
+              <div className="psg-edit-field">
+                <label style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
                   <input
                     type="checkbox"
-                    className="psg-edit-checkbox-input"
                     checked={formData.isAnonymous}
-                    onChange={(e) => setFormData(prev => ({...prev, isAnonymous: e.target.checked}))}
+                    onChange={(e) => handleInputChange(null, 'isAnonymous', e.target.checked)}
+                    style={{width: 'auto', margin: 0}}
                   />
-                  Make this experience anonymous
+                  <span className="psg-edit-label" style={{margin: 0, padding: 0}}>Share anonymously</span>
                 </label>
               </div>
             </div>

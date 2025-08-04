@@ -17,7 +17,7 @@ router.get('/profile', isAuthenticated, async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.error('Error fetching user profile:', error);
+    // console.error('Error fetching user profile:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching profile',
@@ -71,7 +71,7 @@ router.put('/profile',
         data: user
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // console.error('Error updating profile:', error);
       res.status(500).json({
         success: false,
         message: 'Error updating profile',
@@ -100,7 +100,7 @@ router.get('/bookmarks', isAuthenticated, async (req, res) => {
       data: user.bookmarks
     });
   } catch (error) {
-    console.error('Error fetching bookmarks:', error);
+    // console.error('Error fetching bookmarks:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching bookmarks',
@@ -145,7 +145,7 @@ router.get('/my-experiences', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching user experiences:', error);
+    // console.error('Error fetching user experiences:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching experiences',
@@ -226,7 +226,7 @@ router.get('/leaderboard', async (req, res) => {
       data: leaderboard
     });
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
+    // console.error('Error fetching leaderboard:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching leaderboard',
@@ -290,7 +290,7 @@ router.get('/:id/public-profile',
         data: publicProfile
       });
     } catch (error) {
-      console.error('Error fetching public profile:', error);
+      // console.error('Error fetching public profile:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching profile',
@@ -314,11 +314,11 @@ router.delete('/account', isAuthenticated, async (req, res) => {
     // Destroy session
     req.logout((err) => {
       if (err) {
-        console.error('Error during logout:', err);
+        // console.error('Error during logout:', err);
       }
       req.session.destroy((err) => {
         if (err) {
-          console.error('Error destroying session:', err);
+          // console.error('Error destroying session:', err);
         }
         res.clearCookie('connect.sid');
         res.json({
@@ -328,7 +328,7 @@ router.delete('/account', isAuthenticated, async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Error deleting account:', error);
+    // console.error('Error deleting account:', error);
     res.status(500).json({
       success: false,
       message: 'Error deleting account',
@@ -383,7 +383,7 @@ router.get('/admin/all', isAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    // console.error('Error fetching users:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching users',
@@ -425,7 +425,7 @@ router.put('/admin/:id/role',
         data: user
       });
     } catch (error) {
-      console.error('Error updating user role:', error);
+      // console.error('Error updating user role:', error);
       res.status(500).json({
         success: false,
         message: 'Error updating user role',

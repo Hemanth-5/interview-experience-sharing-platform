@@ -103,10 +103,6 @@ const Header = () => {
                         <i className="fas fa-user"></i>
                         Profile
                       </Link>
-                      <Link to="/dashboard" className="dropdown-item">
-                        <i className="fas fa-chart-bar"></i>
-                        Dashboard
-                      </Link>
                       <div className="dropdown-divider"></div>
                       <button onClick={handleLogout} className="dropdown-item">
                         <i className="fas fa-sign-out-alt"></i>
