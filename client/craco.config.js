@@ -28,9 +28,10 @@ module.exports = {
             deadCodeInjectionThreshold: 0.2,
             
             // Anti-debugging and domain protection (only in production)
-            // debugProtection: false,
-            // debugProtectionInterval: 2000,
-            // disableConsoleOutput: true,
+            debugProtection: false,
+            debugProtectionInterval: 0,
+            disableConsoleOutput: false,
+
             
             // Performance settings
             compact: true,

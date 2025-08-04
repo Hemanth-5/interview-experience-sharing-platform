@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -17,7 +14,7 @@
   "scripts": {
     "start": "craco start",
     "build": "ESLINT_NO_DEV_ERRORS=true craco build",
-    "build:obfuscated": "NODE_ENV=production craco build",
+    "build:prod": "NODE_ENV=production craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
