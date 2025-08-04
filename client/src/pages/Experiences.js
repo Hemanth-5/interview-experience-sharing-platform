@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
 import axios from 'axios';
 import CompanyLogo from '../components/CompanyLogo';
 import './Experiences.css';
 
 const Experiences = () => {
-  // const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,21 +45,7 @@ const Experiences = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, []);
 
-  useEffect(() => {
-    fetchExperiences();
-  }, [filters, pagination.page]);
-
-  useEffect(() => {
-    // Update URL when filters change
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-    if (pagination.page > 1) params.set('page', pagination.page.toString());
-    setSearchParams(params);
-  }, [filters, pagination.page, setSearchParams]);
-
-  const fetchExperiences = async () => {
+  const fetchExperiences = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -106,7 +90,21 @@ const Experiences = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchExperiences();
+  }, [fetchExperiences]);
+
+  useEffect(() => {
+    // Update URL when filters change
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    if (pagination.page > 1) params.set('page', pagination.page.toString());
+    setSearchParams(params);
+  }, [filters, pagination.page, setSearchParams]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
@@ -25,9 +25,9 @@ const ExperienceDetail = () => {
     if (user) {
       checkBookmarkStatus();
     }
-  }, [id, user]);
+  }, [id, user, checkBookmarkStatus, fetchExperience]);
 
-  const fetchExperience = async () => {
+  const fetchExperience = useCallback(async () => {
     try {
       const response = await axios.get(createApiUrl(`/api/experiences/${id}`), {
         withCredentials: true
@@ -38,9 +38,9 @@ const ExperienceDetail = () => {
       setError('Failed to load experience');
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  const checkBookmarkStatus = async () => {
+  const checkBookmarkStatus = useCallback(async () => {
     try {
       const response = await axios.get(createApiUrl(`/api/experiences/${id}/bookmark-status`), {
         withCredentials: true
@@ -49,7 +49,7 @@ const ExperienceDetail = () => {
     } catch (error) {
       // console.error('Error checking bookmark status:', error);
     }
-  };
+  }, [id]);
 
   const handleVote = async (voteType) => {
     if (!user) {

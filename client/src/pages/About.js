@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './About.css';
 
@@ -80,13 +80,6 @@ ${user.name}`;
       title: 'Analytics',
       description: 'Track your contributions and see how your shared PSG Tech experiences help other students.'
     }
-  ];
-
-  const stats = [
-    { number: '500+', label: 'PSG Tech Experiences' },
-    { number: '100+', label: 'Companies Visited' },
-    { number: '25+', label: 'Different Departments' },
-    { number: '95%', label: 'Student Satisfaction' }
   ];
 
   const teamMembers = [

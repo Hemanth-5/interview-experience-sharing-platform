@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { experienceAPI } from '../utils/api';
@@ -77,9 +77,9 @@ const EditExperience = () => {
       return;
     }
     fetchExperience();
-  }, [id, user, navigate]);
+  }, [id, user, navigate, fetchExperience]);
 
-  const fetchExperience = async () => {
+  const fetchExperience = useCallback(async () => {
     try {
       setLoading(true);
       const response = await experienceAPI.getById(id);
@@ -180,7 +180,7 @@ const EditExperience = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

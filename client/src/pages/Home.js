@@ -8,12 +8,6 @@ import './Home.css';
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    totalExperiences: 0,
-    totalCompanies: 0,
-    totalUsers: 0,
-    recentExperiences: []
-  });
   const [recentExperiences, setRecentExperiences] = useState([]);
   const [topCompanies, setTopCompanies] = useState([]);
   const [featuredExperience, setFeaturedExperience] = useState(null);
@@ -37,11 +31,6 @@ const Home = () => {
         fetch(createApiUrl('/api/analytics/top-companies?limit=6')),
         fetch(createApiUrl('/api/experiences/featured?limit=1'))
       ]);
-
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
-      }
 
       if (experiencesResponse.ok) {
         const experiencesData = await experiencesResponse.json();

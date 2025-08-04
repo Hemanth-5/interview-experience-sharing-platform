@@ -6,16 +6,13 @@ import { createApiUrl } from '../config/api';
 import './Profile.css';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
-  const [profile, setProfile] = useState(null);
+  const { user } = useAuth();
   const [userExperiences, setUserExperiences] = useState([]);
   const [bookmarkedExperiences, setBookmarkedExperiences] = useState([]);
   const [stats, setStats] = useState({});
   const [activeTab, setActiveTab] = useState('experiences');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [editData, setEditData] = useState({});
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -29,11 +26,6 @@ const Profile = () => {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch user profile
-      const profileResponse = await axios.get(createApiUrl('/api/users/profile'), {
-        withCredentials: true
-      });
       
       // Fetch user's experiences
       const experiencesResponse = await axios.get(createApiUrl('/api/users/my-experiences'), {
@@ -50,15 +42,9 @@ const Profile = () => {
         withCredentials: true
       });
 
-      setProfile(profileResponse.data.data);
       setUserExperiences(experiencesResponse.data.data);
       setBookmarkedExperiences(bookmarksResponse.data.data);
       setStats(statsResponse.data.data);
-      setEditData({
-        name: profileResponse.data.data.name,
-        university: profileResponse.data.data.university,
-        graduationYear: profileResponse.data.data.graduationYear
-      });
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to fetch profile data');
     } finally {

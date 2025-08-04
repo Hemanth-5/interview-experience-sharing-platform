@@ -21,7 +21,9 @@ export const createApiUrl = (endpoint) => {
   return `${API_BASE_URL}/${cleanEndpoint}`;
 };
 
-export default {
+const apiConfig = {
   BASE_URL: API_BASE_URL,
   createUrl: createApiUrl
 };
+
+export default apiConfig;
