@@ -7,8 +7,15 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Share and discover interview experiences from top companies"
+      content="PSG Tech Interview Experience Sharing Platform - By Students, For Students"
     />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     
@@ -20,7 +27,48 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <title>Interview Experience Platform</title>
+    <title>PSG Tech Interview Hub</title>
+    
+    <!-- Anti-debugging measures -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Disable right-click context menu in production
+        if (window.location.hostname !== 'localhost') {
+          document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+          });
+          
+          // Disable F12, Ctrl+Shift+I, Ctrl+U
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U')) {
+              e.preventDefault();
+              return false;
+            }
+          });
+          
+          // Basic dev tools detection
+          let devtools = {open: false, orientation: null};
+          const threshold = 160;
+          setInterval(function() {
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+              if (!devtools.open) {
+                devtools.open = true;
+                console.clear();
+                console.log('%cDeveloper tools detected!', 'color: red; font-size: 20px; font-weight: bold;');
+              }
+            } else {
+              devtools.open = false;
+            }
+          }, 500);
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
