@@ -15,10 +15,30 @@ router.get('/google',
 // @desc    Google OAuth callback
 // @access  Public
 router.get('/google/callback',
-  passport.authenticate('google', { 
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=auth_failed`,
-    successRedirect: process.env.CLIENT_URL || 'http://localhost:3000'
-  })
+  (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+      if (err) {
+        // Handle domain restriction error
+        if (err.message.includes('PSG Tech')) {
+          return res.redirect(`${process.env.CLIENT_URL}/login?error=domain_restricted`);
+        }
+        // Handle other authentication errors
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
+      }
+      
+      if (!user) {
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
+      }
+      
+      // Login the user
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.redirect(`${process.env.CLIENT_URL}/login?error=login_failed`);
+        }
+        return res.redirect(process.env.CLIENT_URL || 'http://localhost:3000');
+      });
+    })(req, res, next);
+  }
 );
 
 // @route   GET /auth/user

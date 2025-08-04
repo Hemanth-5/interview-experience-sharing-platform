@@ -7,7 +7,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
+dotenv.config({ path: envFile });
 
 // Import routes
 const authRoutes = require('./routes/auth');

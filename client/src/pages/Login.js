@@ -1,14 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [error, setError] = useState('');
 
   const from = location.state?.from?.pathname || '/';
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -16,25 +22,40 @@ const Login = () => {
     }
   }, [user, navigate, from]);
 
+  useEffect(() => {
+    // Check for error in URL params
+    const urlParams = new URLSearchParams(location.search);
+    const errorParam = urlParams.get('error');
+    
+    if (errorParam === 'domain_restricted') {
+      setError('Access restricted to PSG Tech students only. Please use your PSG Tech email address (@psgtech.ac.in).');
+    } else if (errorParam === 'auth_failed') {
+      setError('Authentication failed. Please try again.');
+    } else if (errorParam === 'login_failed') {
+      setError('Login failed. Please try again.');
+    }
+  }, [location.search]);
+
   const handleGoogleLogin = () => {
-    window.location.href = '/auth/google';
+    setError(''); // Clear any existing errors
+    login(); // Use the login function from auth context
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <h1>Welcome Back!</h1>
-            <p>Sign in to share your interview experiences and help others succeed</p>
+    <div className="psg-login-page">
+      <div className="psg-login-container">
+        <div className="psg-login-card">
+          <div className="psg-login-header">
+            <h1>Welcome to PSG Tech Interview Hub!</h1>
+            <p>Connect with fellow PSG Tech students and share your placement journey</p>
           </div>
 
-          <div className="login-content">
-            <div className="login-benefits">
-              <h3>Join our community to:</h3>
+          <div className="psg-login-content">
+            <div className="psg-login-benefits">
+              <h3>Join the PSG Tech community to:</h3>
               <ul>
                 <li>
-                  <span className="icon">📝</span>
+                  <span className="icon">✏️</span>
                   Share your interview experiences
                 </li>
                 <li>
@@ -56,12 +77,20 @@ const Login = () => {
               </ul>
             </div>
 
-            <div className="login-form">
+            <div className="psg-login-form">
+              {error && (
+                <div className="psg-error-message">
+                  <div className="psg-error-content">
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
+              
               <button 
-                className="google-login-btn"
+                className="psg-google-login-btn"
                 onClick={handleGoogleLogin}
               >
-                <svg className="google-icon" viewBox="0 0 24 24">
+                <svg className="psg-google-icon" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -70,30 +99,29 @@ const Login = () => {
                 Continue with Google
               </button>
 
-              <div className="login-footer">
+              <div className="psg-login-footer">
                 <p>
                   By signing in, you agree to our terms of service and privacy policy.
-                  We use your university email to verify your student status.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="login-stats">
-          <div className="stat">
-            <h4>10,000+</h4>
-            <p>Interview Experiences</p>
+        {/* <div className="psg-login-stats">
+          <div className="psg-stat">
+            <h4>2,500+</h4>
+            <p>PSG Tech Experiences</p>
           </div>
-          <div className="stat">
-            <h4>500+</h4>
+          <div className="psg-stat">
+            <h4>300+</h4>
             <p>Companies</p>
           </div>
-          <div className="stat">
-            <h4>95%</h4>
-            <p>Success Rate</p>
+          <div className="psg-stat">
+            <h4>98%</h4>
+            <p>Student Success Rate</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

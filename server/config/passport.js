@@ -8,6 +8,20 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    // Extract email and validate domain
+    const email = profile.emails[0]?.value;
+    
+    if (!email) {
+      return done(new Error('No email found in Google profile'), null);
+    }
+    
+    const emailDomain = email.split('@')[1];
+    
+    // Only allow PSG Tech emails
+    if (emailDomain !== 'psgtech.ac.in') {
+      return done(new Error('Access restricted to PSG Tech students only. Please use your PSG Tech email address.'), null);
+    }
+    
     // Check if user already exists
     let existingUser = await User.findOne({ googleId: profile.id });
     
@@ -15,14 +29,11 @@ passport.use(new GoogleStrategy({
       // Update user info if needed
       existingUser.name = profile.displayName;
       existingUser.avatar = profile.photos[0]?.value;
+      existingUser.email = email; // Update email in case it changed
       await existingUser.save();
       return done(null, existingUser);
     }
 
-    // Extract email domain for university validation
-    const email = profile.emails[0]?.value;
-    const emailDomain = email?.split('@')[1];
-    
     // Create new user
     const newUser = new User({
       googleId: profile.id,
@@ -30,7 +41,7 @@ passport.use(new GoogleStrategy({
       name: profile.displayName,
       avatar: profile.photos[0]?.value,
       role: 'Student',
-      university: emailDomain?.includes('.edu') ? emailDomain : null,
+      university: 'PSG College of Technology',
       isEmailVerified: true,
       joinedAt: new Date()
     });

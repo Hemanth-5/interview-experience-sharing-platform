@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Experiences from './pages/Experiences';
@@ -13,12 +14,14 @@ import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import About from './pages/About';
 import PrivateRoute from './components/PrivateRoute';
+import DesktopModePrompt from './components/DesktopModePrompt';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="App">
           <Header />
           <main className="main-content">
@@ -56,6 +59,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <DesktopModePrompt />
         </div>
       </Router>
     </AuthProvider>

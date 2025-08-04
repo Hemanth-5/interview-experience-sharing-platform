@@ -13,6 +13,11 @@ const EditExperience = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+  
   const [formData, setFormData] = useState({
     companyInfo: {
       companyName: '',

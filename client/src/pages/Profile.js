@@ -17,6 +17,11 @@ const Profile = () => {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({});
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     fetchProfileData();
   }, []);
@@ -319,7 +324,7 @@ const Profile = () => {
   if (error) {
     return (
       <div className="profile-error">
-        <div className="error-icon">⚠️</div>
+        <div className="error-icon">!</div>
         <h2>Unable to load profile</h2>
         <p>{error}</p>
         <button onClick={fetchProfileData} className="retry-btn">

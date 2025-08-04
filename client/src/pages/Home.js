@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
 import CompanyLogo from '../components/CompanyLogo';
@@ -7,6 +7,7 @@ import './Home.css';
 
 const Home = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalExperiences: 0,
     totalCompanies: 0,
@@ -17,6 +18,11 @@ const Home = () => {
   const [topCompanies, setTopCompanies] = useState([]);
   const [featuredExperience, setFeaturedExperience] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     fetchHomeData();
@@ -108,9 +114,9 @@ const Home = () => {
                   Share Your Experience
                 </Link>
               ) : (
-                <button onClick={() => window.location.href = createApiUrl('/auth/google')} className="btn btn-primary btn-lg">
-                  <i className="fab fa-google"></i>
-                  Sign in with PSG Email
+                <button onClick={() => navigate('/login')} className="btn btn-primary btn-lg">
+                  <i className="fab fa-login"></i>
+                  Sign in
                 </button>
               )}
               <Link to="/experiences" className="btn btn-outline btn-lg">
@@ -148,7 +154,7 @@ const Home = () => {
             ) : (
               <div className="hero-card">
                 <div className="hero-card-header">
-                  <div className="company-logo">🎯</div>
+                  <div className="company-logo">PSG</div>
                   <div className="company-info">
                     <h3>Be the First to Share!</h3>
                     <p>Your experience matters</p>
@@ -255,7 +261,7 @@ const Home = () => {
                     Share First Experience
                   </Link>
                 ) : (
-                  <button onClick={() => window.location.href = createApiUrl('/auth/google')} className="btn btn-primary">
+                  <button onClick={() => navigate('/login')} className="btn btn-primary">
                     Sign In to Share
                   </button>
                 )}

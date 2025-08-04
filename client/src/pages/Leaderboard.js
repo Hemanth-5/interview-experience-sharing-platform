@@ -349,6 +349,11 @@ import './Leaderboard.css';
 // We'll implement the full leaderboard functionality soon
 const Leaderboard = () => {
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+  
   // Placeholder for future implementation
   return (
     <div className="leaderboard-placeholder">

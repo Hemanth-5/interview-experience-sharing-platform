@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './Header.css';
 
 const Header = () => {
-  const { user, isAuthenticated, logout, login } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const Header = () => {
   }, []);
 
   const handleLogin = () => {
-    login();
+    navigate('/login');
   };
 
   const handleLogout = async () => {
@@ -113,8 +113,8 @@ const Header = () => {
                 </>
               ) : (
                 <button onClick={handleLogin} className="btn btn-primary btn-sm">
-                  <i className="fab fa-google"></i>
-                  <span>Login with Google</span>
+                  {/* <i className="fab fa-google"></i> */}
+                  <span>Login</span>
                 </button>
               )}
 
