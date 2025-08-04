@@ -35,7 +35,7 @@ const ExperienceDetail = () => {
 
   const checkBookmarkStatus = useCallback(async () => {
     try {
-      const response = await axios.get(createApiUrl(`/api/experiences/${id}/bookmark-status`), {
+      const response = await axios.get(createApiUrl(`/api/experiences/${id}/bookmark`), {
         withCredentials: true
       });
       setIsBookmarked(response.data.isBookmarked);
@@ -58,7 +58,7 @@ const ExperienceDetail = () => {
     }
 
     try {
-      await axios.post(`/api/experiences/${id}/vote`, {
+      await axios.post(createApiUrl(`/api/experiences/${id}/vote`), {
         voteType
       }, {
         withCredentials: true
@@ -78,12 +78,12 @@ const ExperienceDetail = () => {
     }
 
     try {
-      await axios.post(`/api/experiences/${id}/bookmark`, {}, {
+      await axios.post(createApiUrl(`/api/experiences/${id}/bookmark`), {}, {
         withCredentials: true
       });
       setIsBookmarked(!isBookmarked);
     } catch (error) {
-      // console.error('Error bookmarking:', error);
+      console.error('Error bookmarking:', error);
     }
   };
 
