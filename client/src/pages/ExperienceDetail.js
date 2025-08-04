@@ -20,13 +20,6 @@ const ExperienceDetail = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, []);
 
-  useEffect(() => {
-    fetchExperience();
-    if (user) {
-      checkBookmarkStatus();
-    }
-  }, [id, user, checkBookmarkStatus, fetchExperience]);
-
   const fetchExperience = useCallback(async () => {
     try {
       const response = await axios.get(createApiUrl(`/api/experiences/${id}`), {
@@ -50,6 +43,13 @@ const ExperienceDetail = () => {
       // console.error('Error checking bookmark status:', error);
     }
   }, [id]);
+
+  useEffect(() => {
+    fetchExperience();
+    if (user) {
+      checkBookmarkStatus();
+    }
+  }, [id, user, checkBookmarkStatus, fetchExperience]);
 
   const handleVote = async (voteType) => {
     if (!user) {
