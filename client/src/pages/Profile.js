@@ -332,9 +332,6 @@ const Profile = () => {
         <div className="profile-info">
           <h1>{user.name}</h1>
           <p className="profile-email">{user.email}</p>
-          <p className="profile-joined">
-            Member since {formatDate(user.createdAt)}
-          </p>
           <div className="profile-badges">
             {stats.totalExperiences >= 5 && <span className="badge storyteller">Storyteller</span>}
             {stats.totalUpvotes >= 10 && <span className="badge helpful">Helpful</span>}
