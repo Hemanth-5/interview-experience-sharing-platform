@@ -1,4 +1,3 @@
-import React from 'react';
 import { createCompanyPlaceholder, createDefaultPlaceholder } from '../utils/companyLogo';
 
 const CompanyLogo = ({ companyName, size = 40, className = '' }) => {
