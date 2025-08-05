@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
+import CompanySearch from '../components/CompanySearch';
 import './CreateExperience_new.css';
 
 const CreateExperience = () => {
@@ -80,6 +81,8 @@ const CreateExperience = () => {
     },
     isAnonymous: false
   });
+
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   const handleInputChange = (section, field, value, index = null) => {
     setFormData(prev => {
@@ -259,11 +262,17 @@ const CreateExperience = () => {
       <div className="psg-create-grid">
         <div className="psg-create-field">
           <label className="psg-create-label psg-create-label-required">Company Name</label>
-          <input
-            type="text"
-            className="psg-create-input"
+          <CompanySearch
             value={formData.companyInfo.companyName}
-            onChange={(e) => handleInputChange('companyInfo', 'companyName', e.target.value)}
+            onChange={(value) => handleInputChange('companyInfo', 'companyName', value)}
+            onCompanySelect={(company) => {
+              setSelectedCompany(company);
+              if (company) {
+                handleInputChange('companyInfo', 'companyName', company.displayName);
+                handleInputChange('companyInfo', 'companyId', company._id);
+              }
+            }}
+            className="psg-create-input"
             placeholder="e.g., Google"
             required
           />

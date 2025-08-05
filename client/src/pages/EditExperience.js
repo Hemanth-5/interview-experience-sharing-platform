@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { experienceAPI } from '../utils/api';
+import CompanySearch from '../components/CompanySearch';
 import './EditExperience.css';
 
 const EditExperience = () => {
@@ -70,6 +71,8 @@ const EditExperience = () => {
     },
     isAnonymous: false
   });
+
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   const fetchExperience = useCallback(async () => {
     try {
@@ -497,11 +500,17 @@ const EditExperience = () => {
                 <label className="psg-edit-label psg-edit-label-required">
                   Company Name
                 </label>
-                <input
-                  type="text"
-                  className="psg-edit-input"
+                <CompanySearch
                   value={formData?.companyInfo?.companyName || ''}
-                  onChange={(e) => handleInputChange('companyInfo', 'companyName', e.target.value)}
+                  onChange={(value) => handleInputChange('companyInfo', 'companyName', value)}
+                  onCompanySelect={(company) => {
+                    setSelectedCompany(company);
+                    if (company) {
+                      handleInputChange('companyInfo', 'companyName', company.displayName);
+                      handleInputChange('companyInfo', 'companyId', company._id);
+                    }
+                  }}
+                  className="psg-edit-input"
                   placeholder="e.g., Google"
                   required
                 />

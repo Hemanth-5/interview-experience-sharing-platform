@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, query, param } = require('express-validator');
 const Experience = require('../models/Experience');
+const Company = require('../models/Company');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 const { isAuthenticated, isOwnerOrAdmin } = require('../middleware/auth');
@@ -69,6 +70,17 @@ router.post('/',
         userId: req.user._id
       };
 
+      // Handle company association
+      if (experienceData.companyInfo.companyName) {
+        try {
+          const company = await Company.findOrCreate(experienceData.companyInfo.companyName);
+          experienceData.companyInfo.companyId = company._id;
+        } catch (error) {
+          console.warn('Error creating/finding company:', error);
+          // Continue without company association if it fails
+        }
+      }
+
       // Generate tags for better searchability
       const tags = [
         experienceData.companyInfo.companyName.toLowerCase(),
@@ -81,6 +93,18 @@ router.post('/',
 
       const experience = new Experience(experienceData);
       await experience.save();
+
+      // Update company's associated experiences
+      if (experienceData.companyInfo.companyId) {
+        try {
+          await Company.findByIdAndUpdate(
+            experienceData.companyInfo.companyId,
+            { $addToSet: { associatedExperiences: experience._id } }
+          );
+        } catch (error) {
+          console.warn('Error updating company experiences:', error);
+        }
+      }
 
       // Update user stats
       await req.user.updateStats('experiencesShared');

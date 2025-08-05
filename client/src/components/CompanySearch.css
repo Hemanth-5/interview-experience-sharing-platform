@@ -1,0 +1,166 @@
+/* Company Search Component Styles */
+.company-search {
+  position: relative;
+  width: 100%;
+}
+
+.company-search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.company-search-input {
+  width: 100%;
+  padding-right: 40px; /* Space for loading spinner and verification badge */
+}
+
+.company-search-loading {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-search-loading .loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.company-search-verified {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.verified-badge {
+  background: #28a745;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.company-search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.company-suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.company-suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+.company-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.company-suggestion-item.create-new {
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+  color: #007bff;
+  font-weight: 500;
+}
+
+.company-suggestion-item.create-new:hover {
+  background-color: #e3f2fd;
+}
+
+.company-suggestion-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.company-suggestion-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #e0e0e0;
+}
+
+.create-new-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.company-suggestion-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.company-suggestion-name {
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.company-suggestion-industry {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .company-search-suggestions {
+    max-height: 200px;
+  }
+  
+  .company-suggestion-item {
+    padding: 10px 12px;
+  }
+  
+  .company-suggestion-logo,
+  .create-new-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .create-new-icon {
+    font-size: 14px;
+  }
+}
