@@ -1,6 +1,11 @@
 // API Configuration
 const getBaseURL = () => {
-  // Get the current window location
+  // Check for environment variable first
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Fallback to dynamic detection
   const { hostname } = window.location;
   
   // For development, use the backend port

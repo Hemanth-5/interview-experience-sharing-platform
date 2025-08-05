@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { extractUserName } from '../../utils/avatar';
+import Avatar from '../Avatar';
 import './Header.css';
 
 const Header = () => {
@@ -10,6 +12,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userMenuRef = useRef(null);
+
+  const displayName = user?.name ? extractUserName(user.name) : '';
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -82,19 +86,19 @@ const Header = () => {
                       className="user-menu-toggle"
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     >
-                      <img
-                        src={user?.avatar || '/default-avatar.png'}
-                        alt={user?.name}
+                      <Avatar 
+                        user={user}
+                        size={32}
                         className="user-avatar"
                       />
-                      <span className="user-name hidden md:inline">{user?.name}</span>
+                      <span className="user-name hidden md:inline">{displayName}</span>
                       <i className={`fas fa-chevron-down ${isUserMenuOpen ? 'rotate' : ''}`}></i>
                     </button>
 
                     <div className={`dropdown-menu ${isUserMenuOpen ? 'show' : ''}`}>
                       <div className="user-info">
                         <div className="user-details">
-                          <div className="user-name-mobile">{user?.name}</div>
+                          <div className="user-name-mobile">{displayName}</div>
                           <div className="user-email">{user?.email}</div>
                         </div>
                       </div>

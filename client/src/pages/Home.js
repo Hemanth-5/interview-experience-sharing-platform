@@ -40,6 +40,9 @@ const Home = () => {
       if (companiesResponse.ok) {
         const companiesData = await companiesResponse.json();
         setTopCompanies(companiesData.data || []);
+        console.log('Top Companies Full Response:', companiesData);
+        console.log('First Company Data:', companiesData.data?.[0]);
+        console.log('First Company Logo:', companiesData.data?.[0]?.logo);
       }
 
       if (featuredResponse.ok) {
@@ -120,6 +123,7 @@ const Home = () => {
                 <div className="hero-card-header">
                   <CompanyLogo 
                     companyName={featuredExperience.companyInfo?.companyName} 
+                    companyLogo={featuredExperience.companyInfo?.companyLogo}
                     size={48}
                     className="hero-company-logo"
                   />
@@ -229,12 +233,13 @@ const Home = () => {
                   to={`/experiences?company=${encodeURIComponent(company._id)}`}
                   className="company-card"
                 >
-                  <CompanyLogo 
-                    companyName={company._id} 
-                    size={60}
-                    className="company-logo-large"
-                  />
                   <div className="company-details">
+                    <CompanyLogo 
+                      companyName={company._id} 
+                      companyLogo={company.logo}
+                      size={60}
+                      className="company-logo-large"
+                    />
                     <h3 className="company-name">{company._id}</h3>
                     <p className="company-count">{company.count} experience{company.count !== 1 ? 's' : ''}</p>
                   </div>
@@ -278,9 +283,17 @@ const Home = () => {
                   className="experience-card"
                 >
                   <div className="experience-header">
-                    <div className="company-info">
-                      <h3 className="company-name">{experience.companyInfo?.companyName}</h3>
-                      <p className="role">{experience.companyInfo?.role}</p>
+                    <div className="company-info recent-experience">
+                      <CompanyLogo 
+                        companyName={experience.companyInfo?.companyName}
+                        companyLogo={experience.companyInfo?.companyLogo}
+                        size={32}
+                        className="experience-company-logo"
+                      />
+                      <div className="company-details">
+                        <h3 className="company-name">{experience.companyInfo?.companyName}</h3>
+                        {/* <p className="role">{experience.companyInfo?.role}</p> */}
+                      </div>
                     </div>
                     <span className={`result-badge ${experience.finalResult?.toLowerCase()}`}>
                       {experience.finalResult}
@@ -289,7 +302,7 @@ const Home = () => {
                   <div className="experience-meta">
                     <div className="experience-details">
                       <span className="department">{experience.companyInfo?.department}</span>
-                      <span className="location">{experience.companyInfo?.location}</span>
+                      {/* <span className="location">{experience.companyInfo?.location}</span> */}
                     </div>
                     <div className="experience-stats">
                       <span className="rating">⭐ {experience.overallRating}/5</span>

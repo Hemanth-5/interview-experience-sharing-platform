@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
+import CompanySearch from '../components/CompanySearch';
 import './CreateExperience_new.css';
 
 const CreateExperience = () => {
@@ -80,6 +81,24 @@ const CreateExperience = () => {
     },
     isAnonymous: false
   });
+
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [pendingCompany, setPendingCompany] = useState(null); // For companies to be created
+  const [pendingAppDatabaseCompany, setPendingAppDatabaseCompany] = useState(null); // For AppDatabase companies
+
+  const handleCompanySelection = (company) => {
+    setSelectedCompany(company);
+    if (company?.isPending) {
+      setPendingCompany(company.pendingName);
+      setPendingAppDatabaseCompany(null);
+    } else if (company?.isFromAppDatabase || company?.isAppDatabaseVerified) {
+      setPendingAppDatabaseCompany(company);
+      setPendingCompany(null);
+    } else {
+      setPendingCompany(null);
+      setPendingAppDatabaseCompany(null);
+    }
+  };
 
   const handleInputChange = (section, field, value, index = null) => {
     setFormData(prev => {
@@ -216,7 +235,52 @@ const CreateExperience = () => {
     setError(null);
 
     try {
-      const response = await axios.post(createApiUrl('/api/experiences'), formData, {
+      let submissionData = { ...formData };
+
+      // Handle pending company creation
+      if ((pendingCompany && !selectedCompany?._id) || pendingAppDatabaseCompany) {
+        try {
+          let companyData;
+          
+          if (pendingAppDatabaseCompany) {
+            // Create company from AppDatabase data
+            companyData = {
+              name: pendingAppDatabaseCompany.displayName || pendingAppDatabaseCompany.name,
+              linkedinId: pendingAppDatabaseCompany.linkedinId,
+              requireAppDatabaseValidation: false // Skip validation since it's from AppDatabase
+            };
+          } else {
+            // Create regular company
+            companyData = {
+              companyName: pendingCompany,
+              requireAppDatabaseValidation: true // Enable AppDatabase validation
+            };
+          }
+
+          // Create the company first
+          const companyResponse = await axios.post(createApiUrl('/api/companies'), companyData, {
+            withCredentials: true
+          });
+
+          if (companyResponse.data.success) {
+            const createdCompany = companyResponse.data.data;
+            submissionData.companyInfo.companyId = createdCompany._id;
+            submissionData.companyInfo.companyName = createdCompany.displayName;
+          }
+        } catch (companyError) {
+          console.warn('Failed to create company, proceeding without company ID:', companyError);
+          
+          // If AppDatabase validation failed, show specific error
+          if (companyError.response?.data?.code === 'LINKEDIN_VALIDATION_FAILED') {
+            setError(`Company "${pendingCompany}" not found on AppDatabase. Please select a AppDatabase-verified company or contact support.`);
+            setLoading(false);
+            return;
+          }
+          // Continue with submission even if company creation fails
+        }
+      }
+
+      const response = await axios.post(createApiUrl('/api/experiences'), submissionData, {
         withCredentials: true
       });
 
@@ -259,11 +323,20 @@ const CreateExperience = () => {
       <div className="psg-create-grid">
         <div className="psg-create-field">
           <label className="psg-create-label psg-create-label-required">Company Name</label>
-          <input
-            type="text"
-            className="psg-create-input"
+          <CompanySearch
             value={formData.companyInfo.companyName}
-            onChange={(e) => handleInputChange('companyInfo', 'companyName', e.target.value)}
+            onChange={(value) => handleInputChange('companyInfo', 'companyName', value)}
+            onCompanySelect={(company) => {
+              handleCompanySelection(company);
+              if (company && !company.isPending) {
+                handleInputChange('companyInfo', 'companyName', company.displayName);
+                handleInputChange('companyInfo', 'companyId', company._id);
+              } else if (company?.isPending) {
+                handleInputChange('companyInfo', 'companyName', company.displayName);
+                // Don't set companyId for pending companies
+              }
+            }}
+            className="psg-create-input"
             placeholder="e.g., Google"
             required
           />
