@@ -73,6 +73,31 @@ const EditExperience = () => {
   });
 
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [pendingCompany, setPendingCompany] = useState(null); // For companies to be created
+  const [pendingAppDatabaseCompany, setPendingAppDatabaseCompany] = useState(null); // For application database companies
+
+  const handleCompanySelection = (company) => {
+    setSelectedCompany(company);
+    if (company?.isPending) {
+      setPendingCompany(company.pendingName);
+      setPendingAppDatabaseCompany(null);
+      // For pending companies, use the typed name
+      handleInputChange('companyInfo', 'companyName', company.pendingName);
+    } else if (company?.isFromAppDatabase || company?.isAppDatabaseVerified) {
+      setPendingAppDatabaseCompany(company);
+      setPendingCompany(null);
+      // For application database companies, use the database data
+      handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
+    } else {
+      setPendingCompany(null);
+      setPendingAppDatabaseCompany(null);
+      if (company) {
+        // For existing companies, use the standardized name
+        handleInputChange('companyInfo', 'companyName', company.displayName);
+        handleInputChange('companyInfo', 'companyId', company._id);
+      }
+    }
+  };
 
   const fetchExperience = useCallback(async () => {
     try {
@@ -227,6 +252,65 @@ const EditExperience = () => {
         },
         isAnonymous: formData.isAnonymous
       };
+      
+      // Pre-submission company creation if pending
+      if ((pendingCompany && !selectedCompany?._id) || pendingAppDatabaseCompany) {
+        try {
+          let companyData;
+          
+          if (pendingAppDatabaseCompany) {
+            // Create company from application database data
+            companyData = {
+              name: pendingAppDatabaseCompany.displayName || pendingAppDatabaseCompany.name,
+              companyId: pendingAppDatabaseCompany.companyId,
+              requireAppValidation: false // Skip validation since it's from application database
+            };
+          } else {
+            // Create regular company
+            companyData = {
+              name: pendingCompany,
+              requireAppValidation: true // Enable application database validation
+            };
+          }
+
+          const companyResponse = await fetch('/api/companies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(companyData)
+          });
+
+          if (!companyResponse.ok) {
+            const errorData = await companyResponse.json();
+            
+            // If application database validation failed, show specific error
+            if (errorData.code === 'APP_DATABASE_VALIDATION_FAILED') {
+              setError(`Company "${pendingCompany}" not found in application database. Please select a database-verified company.`);
+              setSubmitting(false);
+              return;
+            }
+            
+            throw new Error('Failed to create company');
+          }
+
+          const newCompany = await companyResponse.json();
+          
+          // Update the form data with the new company
+          submitData.companyInfo.companyName = newCompany.data.name;
+          submitData.companyInfo.companyId = newCompany.data._id;
+          
+          // Reset pending state
+          setPendingCompany(null);
+          setSelectedCompany({ id: newCompany.data._id, name: newCompany.data.name });
+        } catch (companyError) {
+          console.error('Company creation error:', companyError);
+          setError('Failed to create company. Please try again.');
+          setSubmitting(false);
+          return;
+        }
+      }
       
       await experienceAPI.update(id, submitData);
       
@@ -503,13 +587,7 @@ const EditExperience = () => {
                 <CompanySearch
                   value={formData?.companyInfo?.companyName || ''}
                   onChange={(value) => handleInputChange('companyInfo', 'companyName', value)}
-                  onCompanySelect={(company) => {
-                    setSelectedCompany(company);
-                    if (company) {
-                      handleInputChange('companyInfo', 'companyName', company.displayName);
-                      handleInputChange('companyInfo', 'companyId', company._id);
-                    }
-                  }}
+                  onCompanySelect={handleCompanySelection}
                   className="psg-edit-input"
                   placeholder="e.g., Google"
                   required
