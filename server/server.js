@@ -16,6 +16,7 @@ const experienceRoutes = require('./routes/experiences');
 const uploadRoutes = require('./routes/upload');
 const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
+const companyRoutes = require('./routes/companies');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -112,6 +113,7 @@ app.use('/api/experiences', experienceRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/companies', companyRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

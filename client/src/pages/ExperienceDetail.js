@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
 import axios from 'axios';
+import Avatar from '../components/Avatar';
+import { extractUserName } from '../utils/avatar';
 import './ExperienceDetail.css';
 
 const ExperienceDetail = () => {
@@ -130,7 +132,7 @@ const ExperienceDetail = () => {
   return (
     <div className="experience-detail">
       <div className="experience-header">
-        <div className="company-info">
+        <div className="experience-company-info">
           <h1>{experience.companyInfo.companyName}</h1>
           <h2>{experience.companyInfo.role}</h2>
           <div className="experience-meta">
@@ -314,13 +316,13 @@ const ExperienceDetail = () => {
               <p>Anonymous</p>
             ) : (
               <div className="author">
-                <img 
-                  src={experience.userId.avatar || '/api/placeholder/40/40'} 
-                  alt="Author"
+                <Avatar 
+                  user={experience.userId}
+                  size={40}
                   className="author-avatar"
                 />
                 <div>
-                  <p className="author-name">{experience.userId.name}</p>
+                  <p className="author-name">{extractUserName(experience.userId.name) || experience.userId.name}</p>
                   <p className="author-university">{experience.userId.university}</p>
                 </div>
               </div>
@@ -355,7 +357,7 @@ const ExperienceDetail = () => {
             )}
           </div>
 
-          <div className="company-details">
+          <div className="experience-company-details">
             <h4>Company Details</h4>
             <div className="info-item">
               <span>Duration:</span>

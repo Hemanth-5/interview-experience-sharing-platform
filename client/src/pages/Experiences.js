@@ -142,6 +142,7 @@ const Experiences = () => {
           <div className="exp-company-logo-container">
             <CompanyLogo 
               companyName={experience.companyInfo?.companyName || 'Unknown Company'} 
+              companyLogo={experience.companyInfo?.companyLogo}
               size={40}
             />
           </div>

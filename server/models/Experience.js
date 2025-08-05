@@ -134,6 +134,12 @@ const interviewRoundSchema = new mongoose.Schema({
 });
 
 const companyInfoSchema = new mongoose.Schema({
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    default: null,
+    index: true
+  },
   companyName: {
     type: String,
     required: true,

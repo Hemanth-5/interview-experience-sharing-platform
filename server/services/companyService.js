@@ -9,7 +9,7 @@ class CompanyService {
     this.cache = new Map();
     this.cacheExpiration = 1000 * 60 * 30; // 30 minutes
     
-    // console.log(`🏢 Company Service initialized with ${this.companiesDatabase.length} companies in database`);
+    console.log(`🏢 Company Service initialized with ${this.companiesDatabase.length} companies in database`);
   }
 
   /**
@@ -18,10 +18,10 @@ class CompanyService {
   initializeCompanyDatabase() {
     try {
       const companiesData = require('../data/companies');
-      // console.log(`📊 Loaded ${companiesData.length} companies from application database`);
+      console.log(`📊 Loaded ${companiesData.length} companies from application database`);
       return companiesData;
     } catch (error) {
-      // d('❌ Error loading companies database:', error.message);
+      console.error('❌ Error loading companies database:', error.message);
       return this.getFallbackCompanies();
     }
   }
@@ -59,7 +59,7 @@ class CompanyService {
    */
   async searchCompanies(query, limit = 10) {
     try {
-      // console.log(`🔍 Searching application database for: "${query}"`);
+      console.log(`🔍 Searching application database for: "${query}"`);
 
       if (!query || query.trim().length < 2) {
         return [];
@@ -72,7 +72,7 @@ class CompanyService {
       if (this.cache.has(cacheKey)) {
         const cached = this.cache.get(cacheKey);
         if (Date.now() - cached.timestamp < this.cacheExpiration) {
-          // console.log(`📦 Returning cached results for "${query}"`);
+          console.log(`📦 Returning cached results for "${query}"`);
           return cached.data;
         } else {
           this.cache.delete(cacheKey);
@@ -106,11 +106,11 @@ class CompanyService {
         });
       }
 
-      // console.log(`✅ Found ${sortedResults.length} companies matching "${query}" from application database`);
+      console.log(`✅ Found ${sortedResults.length} companies matching "${query}" from application database`);
       return sortedResults;
 
     } catch (error) {
-      // d('❌ Company search error:', error.message);
+      console.error('❌ Company search error:', error.message);
       return [];
     }
   }
@@ -200,7 +200,7 @@ class CompanyService {
       
       return false;
     } catch (error) {
-      // d('Company validation error:', error);
+      console.error('Company validation error:', error);
       return false;
     }
   }
@@ -215,7 +215,7 @@ class CompanyService {
       const results = await this.searchCompanies(identifier, 1);
       return results.length > 0 ? results[0] : null;
     } catch (error) {
-      // d('Error getting company details:', error);
+      console.error('Error getting company details:', error);
       return null;
     }
   }
@@ -240,7 +240,7 @@ class CompanyService {
     };
 
     this.companiesDatabase.push(newCompany);
-    // console.log(`✅ Added new company: ${newCompany.displayName}`);
+    console.log(`✅ Added new company: ${newCompany.displayName}`);
     
     // Clear cache since database changed
     this.cache.clear();

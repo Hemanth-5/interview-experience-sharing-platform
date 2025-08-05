@@ -17,12 +17,12 @@
   gap: 2rem;
 }
 
-.company-info {
+.experience-company-info {
   flex: 1;
   min-width: 0;
 }
 
-.company-info h1 {
+.experience-company-info h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -33,7 +33,7 @@
   line-height: 1.2;
 }
 
-.company-info h2 {
+.experience-company-info h2 {
   font-size: 1.5rem;
   color: #333;
   margin-bottom: 1rem;
@@ -389,7 +389,7 @@
   overflow-y: auto;
 }
 
-.author-info, .background-info, .company-details {
+.author-info, .background-info, .experience-company-details {
   background: #f8f9ff;
   border-radius: 15px;
   padding: 1.5rem;
@@ -398,7 +398,7 @@
   text-align: center;
 }
 
-.author-info h4, .background-info h4, .company-details h4 {
+.author-info h4, .background-info h4, .experience-company-details h4 {
   color: #333;
   margin-bottom: 1rem;
   font-size: 1.1rem;
@@ -559,7 +559,7 @@
     justify-content: center;
   }
 
-  .company-info h1 {
+  .experience-company-info h1 {
     font-size: 2rem;
   }
 
@@ -588,7 +588,7 @@
     padding: 0.75rem;
   }
 
-  .company-info h1 {
+  .experience-company-info h1 {
     font-size: 1.75rem;
   }
 
@@ -596,7 +596,7 @@
     padding: 1.25rem;
   }
 
-  .author-info, .background-info, .company-details {
+  .author-info, .background-info, .experience-company-details {
     padding: 1.25rem;
   }
   

@@ -35,7 +35,7 @@ router.get('/search', async (req, res) => {
     // If application database search is enabled, fetch data from our company service
     if (includeAppData === 'true') {
       try {
-        // d(`🔍 Fetching application database data for: "${searchTerm}"`);
+        console.log(`🔍 Fetching application database data for: "${searchTerm}"`);
         // Get company data from our application database
         const companyResults = await companyService.searchCompanies(searchTerm, 20);
         
@@ -59,7 +59,7 @@ router.get('/search', async (req, res) => {
         const newCompanyResults = companyResults.filter(companyItem => {
           // Check if profileId already exists
           if (companyItem.profileId && existingCompanyIds.includes(companyItem.profileId)) {
-            // d(`🔍 Filtered out ${companyItem.name} - profileId already exists`);
+            console.log(`🔍 Filtered out ${companyItem.name} - profileId already exists`);
             return false;
           }
           
@@ -68,7 +68,7 @@ router.get('/search', async (req, res) => {
           const itemDisplayName = (companyItem.displayName || '').toLowerCase();
           
           if (existingNames.has(itemName) || (itemDisplayName && existingNames.has(itemDisplayName))) {
-            // d(`🔍 Filtered out ${companyItem.name} - name already exists in database`);
+            console.log(`🔍 Filtered out ${companyItem.name} - name already exists in database`);
             return false;
           }
           
@@ -95,10 +95,10 @@ router.get('/search', async (req, res) => {
         
         allResults = [...allResults, ...markedCompanyResults];
         
-        // d(`✅ Found ${existingCompanies.length} existing + ${markedCompanyResults.length} application database companies`);
+        console.log(`✅ Found ${existingCompanies.length} existing + ${markedCompanyResults.length} application database companies`);
         
       } catch (companyServiceError) {
-        // console.error('❌ Company service search error:', companyServiceError.message);
+        console.error('❌ Company service search error:', companyServiceError.message);
         // Continue with just database results if application database fails
       }
     }
@@ -114,7 +114,7 @@ router.get('/search', async (req, res) => {
       }
     });
   } catch (error) {
-    // console.error('Error searching companies:', error);
+    console.error('Error searching companies:', error);
     res.status(500).json({ success: false, message: 'Error searching companies' });
   }
 });
@@ -141,7 +141,7 @@ router.post('/find-or-create', isAuthenticated, async (req, res) => {
       isNewCompany: company.createdAt && (Date.now() - company.createdAt.getTime()) < 5000
     });
   } catch (error) {
-    // console.error('Error finding/creating company:', error);
+    console.error('Error finding/creating company:', error);
     res.status(500).json({ success: false, message: 'Error processing company' });
   }
 });
@@ -172,7 +172,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     });
 
     if (existingCompany) {
-      // d(`🔍 Found existing company: ${existingCompany.displayName} for search: ${companyName}`);
+      console.log(`🔍 Found existing company: ${existingCompany.displayName} for search: ${companyName}`);
       return res.json({ 
         success: true, 
         data: existingCompany,
@@ -181,12 +181,12 @@ router.post('/', isAuthenticated, async (req, res) => {
       });
     }
 
-    // d(`🆕 No existing company found for: ${companyName}, proceeding with creation...`);
+    console.log(`🆕 No existing company found for: ${companyName}, proceeding with creation...`);
 
     // Live company validation if required
     if (requireAppValidation && !companyId) {
       try {
-        // d(`🔍 Validating "${companyName}" with live company data`);
+        console.log(`🔍 Validating "${companyName}" with live company data`);
         const companyResults = await companyService.searchCompanies(companyName, 5);
         
         // Look for exact or close match
@@ -242,7 +242,7 @@ router.post('/', isAuthenticated, async (req, res) => {
         });
 
       } catch (appDataError) {
-        // console.error('❌ Application database validation error:', appDataError.message);
+        console.error('❌ Application database validation error:', appDataError.message);
         // Allow creation without application database data if validation service fails
       }
     }
@@ -250,7 +250,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     // Create company from provided application database data
     if (companyId || companyUrl) {
       try {
-        // d(`🔍 Getting company details from LinkedIn for: ${linkedinId || linkedinUrl}`);
+        console.log(`🔍 Getting company details from LinkedIn for: ${linkedinId || linkedinUrl}`);
         const linkedinDetails = await linkedinService.getCompanyDetails(linkedinId || companyName);
         
         if (linkedinDetails) {
@@ -282,7 +282,7 @@ router.post('/', isAuthenticated, async (req, res) => {
           });
         }
       } catch (linkedinError) {
-        // console.error('❌ LinkedIn company creation error:', linkedinError.message);
+        console.error('❌ LinkedIn company creation error:', linkedinError.message);
         return res.status(400).json({ 
           success: false, 
           message: 'Failed to fetch company data from LinkedIn'
@@ -307,7 +307,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     });
 
   } catch (error) {
-    // console.error('Error creating company:', error);
+    console.error('Error creating company:', error);
     res.status(500).json({ success: false, message: 'Error creating company' });
   }
 });
@@ -326,7 +326,7 @@ router.post('/validate-linkedin', async (req, res) => {
       });
     }
 
-    // d(`🔍 Live LinkedIn validation for: "${companyName}"`);
+    console.log(`🔍 Live LinkedIn validation for: "${companyName}"`);
     
     const searchResults = await linkedinService.searchCompanies(companyName.trim(), 5);
     const isValid = searchResults.length > 0;
@@ -356,7 +356,7 @@ router.post('/validate-linkedin', async (req, res) => {
           : 'No companies found on LinkedIn'
     });
   } catch (error) {
-    // console.error('❌ Error validating company:', error.message);
+    console.error('❌ Error validating company:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Error validating company with LinkedIn',
@@ -376,7 +376,7 @@ router.get('/linkedin/search', async (req, res) => {
       return res.json({ success: true, data: [], meta: { searchTerm: query, totalResults: 0 } });
     }
 
-    // d(`🔍 Direct LinkedIn search for: "${query}"`);
+    console.log(`🔍 Direct LinkedIn search for: "${query}"`);
     
     const linkedinResults = await linkedinService.searchCompanies(query.trim(), parseInt(limit));
 
@@ -392,7 +392,7 @@ router.get('/linkedin/search', async (req, res) => {
       source: 'live-linkedin'
     });
   } catch (error) {
-    // console.error('❌ Error searching LinkedIn companies:', error.message);
+    console.error('❌ Error searching LinkedIn companies:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Error searching LinkedIn companies',
@@ -415,7 +415,7 @@ router.get('/:id', async (req, res) => {
     
     res.json({ success: true, data: company });
   } catch (error) {
-    // console.error('Error fetching company:', error);
+    console.error('Error fetching company:', error);
     res.status(500).json({ success: false, message: 'Error fetching company' });
   }
 });
@@ -450,7 +450,7 @@ router.post('/:id/linkedin-data', isAuthenticated, async (req, res) => {
       message: 'LinkedIn data updated successfully'
     });
   } catch (error) {
-    // console.error('Error updating LinkedIn data:', error);
+    console.error('Error updating LinkedIn data:', error);
     res.status(500).json({ success: false, message: 'Error updating LinkedIn data' });
   }
 });
@@ -534,7 +534,7 @@ router.post('/migrate/bulk-create', isAuthenticated, async (req, res) => {
     });
     
   } catch (error) {
-    // console.error('Error in bulk company creation:', error);
+    console.error('Error in bulk company creation:', error);
     res.status(500).json({ success: false, message: 'Error in bulk migration' });
   }
 });
@@ -613,7 +613,7 @@ router.post('/migrate/link-experiences', isAuthenticated, async (req, res) => {
     });
     
   } catch (error) {
-    // console.error('Error linking experiences:', error);
+    console.error('Error linking experiences:', error);
     res.status(500).json({ success: false, message: 'Error linking experiences' });
   }
 });
@@ -673,7 +673,7 @@ router.get('/migrate/status', isAuthenticated, async (req, res) => {
     });
     
   } catch (error) {
-    // console.error('Error getting migration status:', error);
+    console.error('Error getting migration status:', error);
     res.status(500).json({ success: false, message: 'Error getting migration status' });
   }
 });
@@ -762,14 +762,14 @@ router.post('/update-from-database', isAuthenticated, async (req, res) => {
           isVerified: updatedCompany.isVerified
         });
 
-        // d(`✅ Updated company: ${dbCompany.name} -> ${updatedCompany.displayName}`);
+        console.log(`✅ Updated company: ${dbCompany.name} -> ${updatedCompany.displayName}`);
 
       } catch (error) {
         results.errors.push({
           companyId,
           error: error.message
         });
-        // console.error(`❌ Error updating company ${companyId}:`, error.message);
+        console.error(`❌ Error updating company ${companyId}:`, error.message);
       }
     }
 
@@ -780,7 +780,7 @@ router.post('/update-from-database', isAuthenticated, async (req, res) => {
     });
 
   } catch (error) {
-    // console.error('Error in update-from-database:', error);
+    console.error('Error in update-from-database:', error);
     res.status(500).json({ success: false, message: 'Error updating companies' });
   }
 });
@@ -831,7 +831,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       });
     }
     
-    // d(`🔄 Updating company "${existingCompany.displayName}" with:`, filteredUpdateData);
+    console.log(`🔄 Updating company "${existingCompany.displayName}" with:`, filteredUpdateData);
     
     // Update the company (this will trigger the post-save middleware for cascading updates)
     const updatedCompany = await Company.findByIdAndUpdate(
@@ -847,7 +847,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     });
     
   } catch (error) {
-    // console.error('❌ Error updating company:', error);
+    console.error('❌ Error updating company:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update company',
