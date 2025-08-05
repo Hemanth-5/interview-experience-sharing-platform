@@ -69,6 +69,24 @@ router.post('/',
         userId: req.user._id
       };
 
+<<<<<<< Updated upstream
+=======
+      // Handle company association
+      if (experienceData.companyInfo.companyName) {
+        try {
+          const company = await Company.findOrCreate(experienceData.companyInfo.companyName);
+          experienceData.companyInfo.companyId = company._id;
+          // Automatically populate company logo and display name
+          experienceData.companyInfo.companyLogo = company.logo;
+          experienceData.companyInfo.companyName = company.displayName;
+          // console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+        } catch (error) {
+          console.warn('Error creating/finding company:', error);
+          // Continue without company association if it fails
+        }
+      }
+
+>>>>>>> Stashed changes
       // Generate tags for better searchability
       const tags = [
         experienceData.companyInfo.companyName.toLowerCase(),
