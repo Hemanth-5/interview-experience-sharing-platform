@@ -75,6 +75,10 @@ router.post('/',
         try {
           const company = await Company.findOrCreate(experienceData.companyInfo.companyName);
           experienceData.companyInfo.companyId = company._id;
+          // Automatically populate company logo and display name
+          experienceData.companyInfo.companyLogo = company.logo;
+          experienceData.companyInfo.companyName = company.displayName;
+          console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
         } catch (error) {
           console.warn('Error creating/finding company:', error);
           // Continue without company association if it fails
@@ -367,6 +371,28 @@ router.put('/:id',
         });
       }
 
+      // Handle company association for updates
+      let oldCompanyId = null;
+      let newCompanyId = null;
+      
+      if (req.body.companyInfo && req.body.companyInfo.companyName) {
+        try {
+          // Store the old company ID for cleanup
+          oldCompanyId = experience.companyInfo?.companyId;
+          
+          const company = await Company.findOrCreate(req.body.companyInfo.companyName);
+          newCompanyId = company._id;
+          req.body.companyInfo.companyId = company._id;
+          // Automatically populate company logo and display name
+          req.body.companyInfo.companyLogo = company.logo;
+          req.body.companyInfo.companyName = company.displayName;
+          console.log(`🏢 Updated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+        } catch (error) {
+          console.warn('Error creating/finding company during update:', error);
+          // Continue without company association if it fails
+        }
+      }
+
       // Update tags only if relevant fields are provided
       if (req.body.companyInfo || req.body.backgroundInfo) {
         const companyInfo = req.body.companyInfo || experience.companyInfo;
@@ -388,6 +414,38 @@ router.put('/:id',
         req.body,
         { new: true, runValidators: true }
       ).populate('userId', 'name avatar university');
+
+      // Clean up company associations after successful update
+      if (oldCompanyId && newCompanyId && oldCompanyId.toString() !== newCompanyId.toString()) {
+        try {
+          // Remove experience from old company's associatedExperiences
+          await Company.findByIdAndUpdate(
+            oldCompanyId,
+            { $pull: { associatedExperiences: req.params.id } }
+          );
+          console.log(`🧹 Removed experience ${req.params.id} from old company ${oldCompanyId}`);
+          
+          // Add experience to new company's associatedExperiences
+          await Company.findByIdAndUpdate(
+            newCompanyId,
+            { $addToSet: { associatedExperiences: req.params.id } }
+          );
+          console.log(`🔗 Added experience ${req.params.id} to new company ${newCompanyId}`);
+        } catch (error) {
+          console.warn('Error updating company associations:', error);
+        }
+      } else if (newCompanyId && !oldCompanyId) {
+        // New company association (no old company to clean up)
+        try {
+          await Company.findByIdAndUpdate(
+            newCompanyId,
+            { $addToSet: { associatedExperiences: req.params.id } }
+          );
+          console.log(`🔗 Added experience ${req.params.id} to company ${newCompanyId}`);
+        } catch (error) {
+          console.warn('Error adding company association:', error);
+        }
+      }
 
       res.json({
         success: true,

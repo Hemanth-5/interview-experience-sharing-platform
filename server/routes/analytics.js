@@ -18,7 +18,17 @@ router.get('/trending', async (req, res) => {
       { $group: { 
         _id: '$companyInfo.companyName', 
         count: { $sum: 1 },
-        avgRating: { $avg: '$overallRating' }
+        avgRating: { $avg: '$overallRating' },
+        // Include logo for consistency
+        logo: { 
+          $first: {
+            $cond: {
+              if: { $ne: ['$companyInfo.companyLogo', null] },
+              then: '$companyInfo.companyLogo',
+              else: null
+            }
+          }
+        }
       }},
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -398,7 +408,26 @@ router.get('/top-companies', async (req, res) => {
         $group: { 
           _id: '$companyInfo.companyName', 
           count: { $sum: 1 },
-          avgRating: { $avg: '$overallRating' }
+          avgRating: { $avg: '$overallRating' },
+          // Get the first non-null companyLogo for each company group
+          logo: { 
+            $first: {
+              $cond: {
+                if: { $ne: ['$companyInfo.companyLogo', null] },
+                then: '$companyInfo.companyLogo',
+                else: null
+              }
+            }
+          },
+          companyId: { 
+            $first: {
+              $cond: {
+                if: { $ne: ['$companyInfo.companyId', null] },
+                then: '$companyInfo.companyId',
+                else: null
+              }
+            }
+          }
         }
       },
       { $sort: { count: -1 } },

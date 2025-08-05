@@ -1,12 +1,31 @@
 import { createCompanyPlaceholder, createDefaultPlaceholder } from '../utils/companyLogo';
 
-const CompanyLogo = ({ companyName, size = 40, className = '' }) => {
-  // For now, we'll just use placeholder SVGs
-  // Later this can be updated to fetch real logos with fallback to placeholder
+const CompanyLogo = ({ 
+  companyName, 
+  companyLogo, 
+  size = 40, 
+  className = '', 
+  useFallback = true 
+}) => {
+  // Priority order:
+  // 1. Use companyLogo from database if available
+  // 2. Use placeholder based on company name if useFallback is true
+  // 3. Use default placeholder
   
-  const logoUrl = companyName ? 
-    createCompanyPlaceholder(companyName, size) : 
-    createDefaultPlaceholder(size);
+  const logoUrl = companyLogo || (
+    useFallback && companyName ? 
+      createCompanyPlaceholder(companyName, size) : 
+      createDefaultPlaceholder(size)
+  );
+
+  const handleImageError = (e) => {
+    // If database logo fails to load, fallback to placeholder
+    if (companyLogo && useFallback) {
+      e.target.src = companyName ? 
+        createCompanyPlaceholder(companyName, size) : 
+        createDefaultPlaceholder(size);
+    }
+  };
 
   return (
     <img
@@ -20,6 +39,7 @@ const CompanyLogo = ({ companyName, size = 40, className = '' }) => {
         objectFit: 'contain',
         backgroundColor: 'transparent'
       }}
+      onError={handleImageError}
     />
   );
 };

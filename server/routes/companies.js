@@ -44,14 +44,36 @@ router.get('/search', async (req, res) => {
           .filter(company => company.profileId)
           .map(company => company.profileId);
         
-        const existingNames = existingCompanies.map(company => 
-          company.name.toLowerCase()
-        );
+        // Create a comprehensive list of existing names (including name, displayName, and aliases)
+        const existingNames = new Set();
+        existingCompanies.forEach(company => {
+          existingNames.add(company.name.toLowerCase());
+          if (company.displayName) {
+            existingNames.add(company.displayName.toLowerCase());
+          }
+          if (company.aliases && Array.isArray(company.aliases)) {
+            company.aliases.forEach(alias => existingNames.add(alias.toLowerCase()));
+          }
+        });
         
-        const newCompanyResults = companyResults.filter(companyItem => 
-          !existingCompanyIds.includes(companyItem.profileId) &&
-          !existingNames.includes(companyItem.name.toLowerCase())
-        );
+        const newCompanyResults = companyResults.filter(companyItem => {
+          // Check if profileId already exists
+          if (companyItem.profileId && existingCompanyIds.includes(companyItem.profileId)) {
+            console.log(`🔍 Filtered out ${companyItem.name} - profileId already exists`);
+            return false;
+          }
+          
+          // Check if name or displayName already exists
+          const itemName = companyItem.name.toLowerCase();
+          const itemDisplayName = (companyItem.displayName || '').toLowerCase();
+          
+          if (existingNames.has(itemName) || (itemDisplayName && existingNames.has(itemDisplayName))) {
+            console.log(`🔍 Filtered out ${companyItem.name} - name already exists in database`);
+            return false;
+          }
+          
+          return true;
+        });
         
         // Mark company results as from our application database with enhanced data
         const markedCompanyResults = newCompanyResults.map(company => ({
@@ -140,16 +162,17 @@ router.post('/', isAuthenticated, async (req, res) => {
 
     const companyName = name.trim();
 
-    // Check if company already exists
+    // Check if company already exists (case-insensitive search)
     const existingCompany = await Company.findOne({
       $or: [
         { name: { $regex: `^${companyName}$`, $options: 'i' } },
         { displayName: { $regex: `^${companyName}$`, $options: 'i' } },
-        { aliases: { $regex: `^${companyName}$`, $options: 'i' } }
+        { aliases: { $in: [new RegExp(`^${companyName}$`, 'i')] } }
       ]
     });
 
     if (existingCompany) {
+      console.log(`🔍 Found existing company: ${existingCompany.displayName} for search: ${companyName}`);
       return res.json({ 
         success: true, 
         data: existingCompany,
@@ -157,6 +180,8 @@ router.post('/', isAuthenticated, async (req, res) => {
         message: 'Company already exists'
       });
     }
+
+    console.log(`🆕 No existing company found for: ${companyName}, proceeding with creation...`);
 
     // Live company validation if required
     if (requireAppValidation && !companyId) {
@@ -652,5 +677,202 @@ router.get('/migrate/status', isAuthenticated, async (req, res) => {
     res.status(500).json({ success: false, message: 'Error getting migration status' });
   }
 });
+
+// @route   POST /api/companies/update-from-database
+// @desc    Update specific companies with data from companies.js database
+// @access  Private
+router.post('/update-from-database', isAuthenticated, async (req, res) => {
+  try {
+    const { companyIds } = req.body;
+    
+    if (!companyIds || !Array.isArray(companyIds)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'companyIds array is required' 
+      });
+    }
+
+    // Load company data from our database
+    const companiesDatabase = require('../data/companies');
+    
+    const results = {
+      updated: [],
+      notFound: [],
+      errors: []
+    };
+
+    for (const companyId of companyIds) {
+      try {
+        // Find the company in our database
+        const dbCompany = await Company.findById(companyId);
+        
+        if (!dbCompany) {
+          results.notFound.push({ companyId, reason: 'Company not found in database' });
+          continue;
+        }
+
+        // Find matching data in companies.js
+        const companyData = findCompanyDataFromDatabase(dbCompany.name, companiesDatabase);
+        
+        if (!companyData) {
+          results.notFound.push({ 
+            companyId, 
+            companyName: dbCompany.name,
+            reason: 'No matching data in companies database' 
+          });
+          continue;
+        }
+
+        // Update the company with rich data
+        const updateData = {
+          displayName: companyData.displayName,
+          logo: companyData.logo,
+          linkedinUrl: companyData.linkedinUrl,
+          website: companyData.website,
+          industry: companyData.industry,
+          size: companyData.size,
+          isVerified: companyData.isVerified,
+          linkedinData: {
+            description: companyData.linkedinData?.description || '',
+            headquarters: companyData.linkedinData?.headquarters || '',
+            employeeCount: companyData.linkedinData?.employeeCount || '',
+            founded: companyData.linkedinData?.founded || '',
+            lastUpdated: new Date()
+          }
+        };
+
+        // Perform the update
+        const updatedCompany = await Company.findByIdAndUpdate(
+          companyId,
+          { 
+            $set: updateData,
+            $addToSet: {
+              aliases: { $each: companyData.aliases || [] }
+            }
+          },
+          { new: true, runValidators: true }
+        );
+
+        results.updated.push({
+          companyId: companyId,
+          oldName: dbCompany.name,
+          newDisplayName: updatedCompany.displayName,
+          industry: updatedCompany.industry,
+          size: updatedCompany.size,
+          isVerified: updatedCompany.isVerified
+        });
+
+        console.log(`✅ Updated company: ${dbCompany.name} -> ${updatedCompany.displayName}`);
+
+      } catch (error) {
+        results.errors.push({
+          companyId,
+          error: error.message
+        });
+        console.error(`❌ Error updating company ${companyId}:`, error.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Updated ${results.updated.length} companies`,
+      data: results
+    });
+
+  } catch (error) {
+    console.error('Error in update-from-database:', error);
+    res.status(500).json({ success: false, message: 'Error updating companies' });
+  }
+});
+
+// @route   PUT /api/companies/:id
+// @desc    Update a company and automatically sync to related experiences
+// @access  Private (authenticated)
+router.put('/:id', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    // Validate company ID
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid company ID format'
+      });
+    }
+    
+    // Check if company exists
+    const existingCompany = await Company.findById(id);
+    if (!existingCompany) {
+      return res.status(404).json({
+        success: false,
+        message: 'Company not found'
+      });
+    }
+    
+    // Extract allowed fields for update
+    const allowedFields = [
+      'displayName', 'logo', 'website', 'industry', 'size', 
+      'linkedinUrl', 'isVerified', 'linkedinData'
+    ];
+    
+    const filteredUpdateData = {};
+    allowedFields.forEach(field => {
+      if (updateData.hasOwnProperty(field)) {
+        filteredUpdateData[field] = updateData[field];
+      }
+    });
+    
+    // Ensure we have some data to update
+    if (Object.keys(filteredUpdateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid fields provided for update'
+      });
+    }
+    
+    console.log(`🔄 Updating company "${existingCompany.displayName}" with:`, filteredUpdateData);
+    
+    // Update the company (this will trigger the post-save middleware for cascading updates)
+    const updatedCompany = await Company.findByIdAndUpdate(
+      id,
+      { $set: filteredUpdateData },
+      { new: true, runValidators: true }
+    );
+    
+    res.json({
+      success: true,
+      message: 'Company updated successfully (related experiences will be synced automatically)',
+      data: updatedCompany
+    });
+    
+  } catch (error) {
+    console.error('❌ Error updating company:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update company',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Helper function to find company data from companies.js
+function findCompanyDataFromDatabase(searchName, companiesDatabase) {
+  const normalizedSearch = searchName.toLowerCase();
+  
+  return companiesDatabase.find(c => {
+    const nameMatch = c.name.toLowerCase() === normalizedSearch;
+    const displayNameMatch = c.displayName.toLowerCase() === normalizedSearch;
+    const aliasMatch = c.aliases.some(alias => alias.toLowerCase() === normalizedSearch);
+    
+    // Special handling for "citi india" -> "citigroup"
+    if (normalizedSearch === 'citi india') {
+      return c.name.toLowerCase() === 'citigroup' || 
+             c.aliases.some(alias => alias.toLowerCase() === 'citi');
+    }
+    
+    return nameMatch || displayNameMatch || aliasMatch;
+  });
+}
 
 module.exports = router;

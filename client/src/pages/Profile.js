@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
+import Avatar from '../components/Avatar';
+import { extractUserName } from '../utils/avatar';
 import './Profile.css';
 
 const Profile = () => {
@@ -324,13 +326,14 @@ const Profile = () => {
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-avatar">
-          <img 
-            src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=667eea&color=fff&size=128`}
-            alt={user.name}
+          <Avatar 
+            user={user}
+            size={128}
+            className="profile-avatar-img"
           />
         </div>
         <div className="profile-info">
-          <h1>{user.name}</h1>
+          <h1>{extractUserName(user.name) || user.name}</h1>
           <p className="profile-email">{user.email}</p>
           <div className="profile-badges">
             {stats.totalExperiences >= 5 && <span className="badge storyteller">Storyteller</span>}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { experienceAPI } from '../utils/api';
+import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
 import './EditExperience.css';
 
@@ -77,25 +78,39 @@ const EditExperience = () => {
   const [pendingAppDatabaseCompany, setPendingAppDatabaseCompany] = useState(null); // For application database companies
 
   const handleCompanySelection = (company) => {
+    console.log('Company selected:', company); // Debug log
     setSelectedCompany(company);
+    
     if (company?.isPending) {
+      // This is a new company that needs to be created
       setPendingCompany(company.pendingName);
       setPendingAppDatabaseCompany(null);
-      // For pending companies, use the typed name
       handleInputChange('companyInfo', 'companyName', company.pendingName);
-    } else if (company?.isFromAppDatabase || company?.isAppDatabaseVerified) {
+      handleInputChange('companyInfo', 'companyId', null); // Clear any existing ID
+    } else if ((company?.isFromAppDatabase || company?.isAppDatabaseVerified) && !company?.existingId) {
+      // This is a company from the application database that needs to be created in our DB
+      // Only if it doesn't already exist (checked by existingId)
       setPendingAppDatabaseCompany(company);
       setPendingCompany(null);
-      // For application database companies, use the database data
       handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
-    } else {
+      handleInputChange('companyInfo', 'companyId', null); // Clear any existing ID since we'll create new
+    } else if (company?._id && company._id.match(/^[0-9a-fA-F]{24}$/)) {
+      // This is an existing company in our database (has valid MongoDB ObjectId)
       setPendingCompany(null);
       setPendingAppDatabaseCompany(null);
-      if (company) {
-        // For existing companies, use the standardized name
-        handleInputChange('companyInfo', 'companyName', company.displayName);
-        handleInputChange('companyInfo', 'companyId', company._id);
-      }
+      handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
+      handleInputChange('companyInfo', 'companyId', company._id);
+      console.log('Set existing company:', {
+        name: company.displayName || company.name,
+        id: company._id
+      });
+    } else {
+      // Clear selections if no valid company, or treat as new company to be created
+      console.log('Unclear company type, treating as new:', company);
+      setPendingCompany(company.displayName || company.name);
+      setPendingAppDatabaseCompany(null);
+      handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
+      handleInputChange('companyInfo', 'companyId', null);
     }
   };
 
@@ -254,7 +269,19 @@ const EditExperience = () => {
       };
       
       // Pre-submission company creation if pending
-      if ((pendingCompany && !selectedCompany?._id) || pendingAppDatabaseCompany) {
+      console.log('Checking company creation needs:', {
+        pendingCompany,
+        pendingAppDatabaseCompany,
+        selectedCompanyId: selectedCompany?._id,
+        formDataCompanyId: submitData.companyInfo.companyId,
+        formDataCompanyName: submitData.companyInfo.companyName
+      });
+      
+      // Only create a company if:
+      // 1. There's a pending company name AND no existing company is selected, OR
+      // 2. There's a pending app database company
+      if ((pendingCompany && !selectedCompany?._id && !submitData.companyInfo.companyId) || pendingAppDatabaseCompany) {
+        console.log('Creating new company...');
         try {
           let companyData;
           
@@ -273,12 +300,12 @@ const EditExperience = () => {
             };
           }
 
-          const companyResponse = await fetch('/api/companies', {
+          const companyResponse = await fetch(createApiUrl('/api/companies'), {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Content-Type': 'application/json'
             },
+            credentials: 'include', // This sends cookies for authentication
             body: JSON.stringify(companyData)
           });
 
@@ -303,6 +330,7 @@ const EditExperience = () => {
           
           // Reset pending state
           setPendingCompany(null);
+          setPendingAppDatabaseCompany(null);
           setSelectedCompany({ id: newCompany.data._id, name: newCompany.data.name });
         } catch (companyError) {
           console.error('Company creation error:', companyError);
@@ -310,6 +338,14 @@ const EditExperience = () => {
           setSubmitting(false);
           return;
         }
+      } else if (selectedCompany?._id) {
+        // Use existing selected company
+        console.log('Using existing company:', selectedCompany);
+        submitData.companyInfo.companyId = selectedCompany._id;
+        submitData.companyInfo.companyName = selectedCompany.displayName || selectedCompany.name;
+      } else {
+        // If no company is selected but we have a company name, check if it's already linked
+        console.log('No specific company selected, using form data as-is');
       }
       
       await experienceAPI.update(id, submitData);
