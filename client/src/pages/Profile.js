@@ -47,6 +47,7 @@ const Profile = () => {
       setUserExperiences(experiencesResponse.data.data);
       setBookmarkedExperiences(bookmarksResponse.data.data);
       setStats(statsResponse.data.data);
+      console.log(stats);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to fetch profile data');
     } finally {
@@ -163,7 +164,7 @@ const Profile = () => {
       <div className="stats-grid">
         <div className="stat-item">
           <div className="stat-info">
-            <span className="stat-number">{stats.totalExperiences || 0}</span>
+            <span className="stat-number">{stats.experiencesShared || 0}</span>
             <span className="stat-label">Experiences Shared</span>
           </div>
         </div>
@@ -179,18 +180,18 @@ const Profile = () => {
             <span className="stat-label">Total Views</span>
           </div>
         </div>
-        <div className="stat-item">
+        {/* <div className="stat-item">
           <div className="stat-info">
             <span className="stat-number">{stats.totalComments || 0}</span>
             <span className="stat-label">Comments Received</span>
           </div>
-        </div>
-        <div className="stat-item">
+        </div> */}
+        {/* <div className="stat-item">
           <div className="stat-info">
             <span className="stat-number">{stats.totalBookmarks || 0}</span>
             <span className="stat-label">Bookmarks</span>
           </div>
-        </div>
+        </div> */}
         <div className="stat-item">
           <div className="stat-info">
             <span className="stat-number">{stats.helpfulnessScore || 0}</span>

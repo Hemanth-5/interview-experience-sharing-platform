@@ -598,8 +598,9 @@ const CreateExperience = () => {
                     <input
                       type="text"
                       className="psg-create-input"
-                      value={question.topics?.join(', ') || ''}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
+                      value={Array.isArray(question.topics) ? question.topics.join(', ') : (question.topics || '')}
+                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value, 'technical')}
+                      onBlur={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
                       placeholder="Arrays, Dynamic Programming, etc."
                     />
                   </div>

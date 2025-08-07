@@ -246,7 +246,7 @@ h6 {
 
 p {
   margin-bottom: var(--spacing-4);
-  color: var(--text-secondary);
+  /* color: var(--text-secondary); */
   line-height: var(--line-height-relaxed);
 }
 
