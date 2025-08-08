@@ -84,7 +84,12 @@ const userSchema = new mongoose.Schema({
   lastActive: {
     type: Date,
     default: Date.now
-  }
+  },
+  // Track seen announcements/news by notification _id
+  announcementsSeen: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification'
+  }]
 }, {
   timestamps: true
 });

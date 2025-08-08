@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
@@ -16,6 +17,16 @@ const ExperienceDetail = () => {
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [userVote, setUserVote] = useState(null);
+
+  // Report modal state
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState({
+    reason: '',
+    details: ''
+  });
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState('');
+  const [reportError, setReportError] = useState('');
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -129,6 +140,17 @@ const ExperienceDetail = () => {
     );
   }
 
+  // Helper function for closing the report modal and resetting state
+  function closeReportModal() {
+    setIsReportModalOpen(false);
+    setReportReason({
+      reason: '',
+      details: ''
+    });
+    setReportSuccess('');
+    setReportError('');
+  }
+
   return (
     <div className="experience-detail">
       <div className="experience-header">
@@ -164,22 +186,121 @@ const ExperienceDetail = () => {
             </button>
           </div>
           <div className="action-buttons">
-            {user && experience.userId._id === user._id && (
-              <Link 
-                to={`/experiences/${id}/edit`}
+            {user && experience.userId._id === user.id && (
+              // <Link 
+              //   to={`/experiences/${id}/edit`}
+              //   className="edit-btn"
+              // >
+              //   ✏️ Edit
+              // </Link>
+              <button
                 className="edit-btn"
+                onClick={() => navigate(`/experiences/${id}/edit`)}
               >
-                ✏️ Edit
-              </Link>
+                Edit
+              </button>
             )}
+            
             <button 
               className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
               onClick={handleBookmark}
             >
               {isBookmarked ? '🔖' : '📖'} Bookmark
             </button>
+            {/* // Show report button only if user is NOT the owner */}
+            {user && experience.userId._id !== user.id && (
+              !experience.reports?.some(report => report.reportedBy === user.id) ? (
+                <button 
+                  className="report-btn"
+                  onClick={() => setIsReportModalOpen(true)}
+                  title="Report this experience"
+                >
+                  <i className="fas fa-flag" style={{ color: '#ef4444', marginRight: 6 }}></i> Report
+                </button>
+              ) : (
+                <button
+                  className="report-btn reported"
+                  disabled={true}
+                  title="You've already reported this experience"
+                >
+                  <i className="fas fa-flag-checkered" style={{ color: '#ef4444', marginRight: 6 }}></i> Reported
+                </button>
+              )
+            )}
+            {/* {user && experience.userId._id !== user._id && experience.reports?.includes({ reportedBy: user._id }) && (
+              <span className="already-reported-msg" style={{ color: '#ef4444', fontWeight: 500, marginLeft: 8 }}>
+                <i className="fas fa-flag" style={{ marginRight: 4 }}></i>Reported
+              </span>
+            )} */}
           </div>
         </div>
+      {/* Custom Report Modal */}
+      {isReportModalOpen && (
+        <div className="report-modal-overlay" onClick={e => { if (e.target.classList.contains('report-modal-overlay')) closeReportModal(); }}>
+          <div className="report-modal" tabIndex={-1} onKeyDown={e => { if (e.key === 'Escape') closeReportModal(); }}>
+            <h2>Report Experience</h2>
+            <p>Please let us know why you are reporting this experience:</p>
+            <select
+              value={reportReason.reason || ''}
+              onChange={e => setReportReason({ ...reportReason, reason: e.target.value })}
+              style={{ width: '100%', marginBottom: 12 }}
+            >
+              <option value="">Select a reason</option>
+              <option value="spam">Spam or advertising</option>
+              <option value="inappropriate_content">Inappropriate content</option>
+              <option value="fake_information">Fake information</option>
+              <option value="offensive_language">Offensive language</option>
+              <option value="other">Other</option>
+            </select>
+            {reportReason.reason === 'other' && (
+              <textarea
+                placeholder="Please describe the issue..."
+                value={reportReason.details || ''}
+                onChange={e => setReportReason({ ...reportReason, details: e.target.value })}
+                style={{ width: '100%', minHeight: 60, marginBottom: 12 }}
+              />
+            )}
+            {reportError && <div style={{ color: 'red', marginBottom: 8 }}>{reportError}</div>}
+            {reportSuccess && <div style={{ color: 'green', marginBottom: 8 }}>{reportSuccess}</div>}
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button
+                onClick={async () => {
+                  if (!reportReason || (typeof reportReason === 'object' && !reportReason.details)) {
+                    setReportError('Please select or enter a reason.');
+                    return;
+                  }
+                  setReportLoading(true);
+                  setReportError('');
+                  setReportSuccess('');
+                  try {
+                    const reasonToSend = typeof reportReason === 'string' ? reportReason : reportReason.details;
+                    await axios.post(createApiUrl(`/api/experiences/${id}/report`), { reason: reasonToSend }, { withCredentials: true });
+                    setReportSuccess('Report submitted. Thank you!');
+                    setTimeout(() => {
+                      closeReportModal();
+                    }, 1200);
+                  } catch (err) {
+                    setReportError('Failed to submit report. Please try again.');
+                  } finally {
+                    setReportLoading(false);
+                  }
+                }}
+                disabled={reportLoading}
+              >
+                {reportLoading ? 'Reporting...' : 'Submit'}
+              </button>
+              <button
+                onClick={closeReportModal}
+                disabled={reportLoading}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Helper for closing modal and resetting state (no-op) */}
       </div>
 
       <div className="experience-stats">

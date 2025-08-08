@@ -49,7 +49,7 @@ const CompanySearch = ({
         setSuggestions(existingCompanies);
         setAppDatabaseSuggestions(appDatabaseCompanies);
         
-        console.log(`Found ${existingCompanies.length} existing companies and ${appDatabaseCompanies.length} application database companies`);
+        // console.log(`Found ${existingCompanies.length} existing companies and ${appDatabaseCompanies.length} application database companies`);
       }
       
     } catch (error) {

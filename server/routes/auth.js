@@ -35,6 +35,12 @@ router.get('/google/callback',
         if (err) {
           return res.redirect(`${process.env.CLIENT_URL}/login?error=login_failed`);
         }
+        
+        // Redirect admin users to admin panel
+        if (user.role === 'Admin') {
+          return res.redirect(`${process.env.CLIENT_URL}/admin`);
+        }
+        
         return res.redirect(process.env.CLIENT_URL || 'http://localhost:3000');
       });
     })(req, res, next);

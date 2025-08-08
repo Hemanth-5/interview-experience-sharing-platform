@@ -5,15 +5,15 @@ require('dotenv').config();
 
 const migrateCompanies = async () => {
   try {
-    console.log('Starting company migration...');
+    // console.log('Starting company migration...');
     
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    // console.log('Connected to MongoDB');
     
     // Get all experiences
     const experiences = await Experience.find({});
-    console.log(`Found ${experiences.length} experiences to migrate`);
+    // console.log(`Found ${experiences.length} experiences to migrate`);
     
     // Group experiences by company name (normalized)
     const companyMap = new Map();
@@ -34,7 +34,7 @@ const migrateCompanies = async () => {
       companyMap.get(companyName).experiences.push(exp);
     });
     
-    console.log(`Found ${companyMap.size} unique companies`);
+    // console.log(`Found ${companyMap.size} unique companies`);
     
     let processedCount = 0;
     let errorCount = 0;
@@ -53,7 +53,7 @@ const migrateCompanies = async () => {
             associatedExperiences: companyData.experiences.map(exp => exp._id),
             aliases: [normalizedName]
           });
-          console.log(`Created company: ${company.displayName}`);
+          // console.log(`Created company: ${company.displayName}`);
         } else {
           // Update existing company
           await Company.findByIdAndUpdate(company._id, {
@@ -61,7 +61,7 @@ const migrateCompanies = async () => {
               associatedExperiences: { $each: companyData.experiences.map(exp => exp._id) }
             }
           });
-          console.log(`Updated existing company: ${company.displayName}`);
+          // console.log(`Updated existing company: ${company.displayName}`);
         }
         
         // Update all experiences to reference the company
@@ -79,24 +79,24 @@ const migrateCompanies = async () => {
       }
     }
     
-    console.log(`\nMigration completed!`);
-    console.log(`- Processed: ${processedCount} companies`);
-    console.log(`- Errors: ${errorCount} companies`);
-    console.log(`- Total experiences updated: ${experiences.length}`);
+    // console.log(`\nMigration completed!`);
+    // console.log(`- Processed: ${processedCount} companies`);
+    // console.log(`- Errors: ${errorCount} companies`);
+    // console.log(`- Total experiences updated: ${experiences.length}`);
     
     // Verify migration
     const totalCompanies = await Company.countDocuments();
     const experiencesWithCompanyId = await Experience.countDocuments({ 'companyInfo.companyId': { $exists: true, $ne: null } });
     
-    console.log(`\nVerification:`);
-    console.log(`- Total companies in database: ${totalCompanies}`);
-    console.log(`- Experiences with companyId: ${experiencesWithCompanyId}/${experiences.length}`);
+    // console.log(`\nVerification:`);
+    // console.log(`- Total companies in database: ${totalCompanies}`);
+    // console.log(`- Experiences with companyId: ${experiencesWithCompanyId}/${experiences.length}`);
     
   } catch (error) {
     console.error('Migration failed:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    // console.log('Disconnected from MongoDB');
   }
 };
 
@@ -104,7 +104,7 @@ const migrateCompanies = async () => {
 if (require.main === module) {
   migrateCompanies()
     .then(() => {
-      console.log('Migration script completed');
+      // console.log('Migration script completed');
       process.exit(0);
     })
     .catch((error) => {

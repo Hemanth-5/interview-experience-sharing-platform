@@ -4,6 +4,7 @@ const Experience = require('../models/Experience');
 const Company = require('../models/Company');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { isAuthenticated, isOwnerOrAdmin } = require('../middleware/auth');
 const handleValidationErrors = require('../middleware/validation');
 const router = express.Router();
@@ -78,7 +79,7 @@ router.post('/',
           // Automatically populate company logo and display name
           experienceData.companyInfo.companyLogo = company.logo;
           experienceData.companyInfo.companyName = company.displayName;
-          console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+          // console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
         } catch (error) {
           console.warn('Error creating/finding company:', error);
           // Continue without company association if it fails
@@ -202,8 +203,12 @@ router.get('/',
         yearOfStudy
       } = req.query;
 
-      // Build filter object
-      const filter = { isPublished: true };
+      // Build filter object - show published experiences, including flagged ones
+      const filter = { 
+        isPublished: true
+        // Note: We intentionally don't filter out flagged content
+        // Flagged content should be visible but marked as such in the frontend
+      };
 
       if (company) {
         filter['companyInfo.companyName'] = new RegExp(company, 'i');
@@ -360,7 +365,7 @@ router.put('/:id',
   handleValidationErrors,
   async (req, res) => {
     try {
-      // console.log('PUT /api/experiences/:id - Update request body:', JSON.stringify(req.body, null, 2));
+      // // console.log('PUT /api/experiences/:id - Update request body:', JSON.stringify(req.body, null, 2));
       
       const experience = await Experience.findById(req.params.id);
 
@@ -386,7 +391,7 @@ router.put('/:id',
           // Automatically populate company logo and display name
           req.body.companyInfo.companyLogo = company.logo;
           req.body.companyInfo.companyName = company.displayName;
-          console.log(`🏢 Updated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+          // console.log(`🏢 Updated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
         } catch (error) {
           console.warn('Error creating/finding company during update:', error);
           // Continue without company association if it fails
@@ -423,14 +428,14 @@ router.put('/:id',
             oldCompanyId,
             { $pull: { associatedExperiences: req.params.id } }
           );
-          console.log(`🧹 Removed experience ${req.params.id} from old company ${oldCompanyId}`);
+          // console.log(`🧹 Removed experience ${req.params.id} from old company ${oldCompanyId}`);
           
           // Add experience to new company's associatedExperiences
           await Company.findByIdAndUpdate(
             newCompanyId,
             { $addToSet: { associatedExperiences: req.params.id } }
           );
-          console.log(`🔗 Added experience ${req.params.id} to new company ${newCompanyId}`);
+          // console.log(`🔗 Added experience ${req.params.id} to new company ${newCompanyId}`);
         } catch (error) {
           console.warn('Error updating company associations:', error);
         }
@@ -441,7 +446,7 @@ router.put('/:id',
             newCompanyId,
             { $addToSet: { associatedExperiences: req.params.id } }
           );
-          console.log(`🔗 Added experience ${req.params.id} to company ${newCompanyId}`);
+          // console.log(`🔗 Added experience ${req.params.id} to company ${newCompanyId}`);
         } catch (error) {
           console.warn('Error adding company association:', error);
         }
@@ -643,6 +648,110 @@ router.get('/:id/bookmark',
       res.status(500).json({
         success: false,
         message: 'Error checking bookmark status',
+        error: error.message
+      });
+    }
+  }
+);
+
+// @route   POST /api/experiences/:id/report
+// @desc    Report an experience for inappropriate content
+// @access  Private
+router.post(
+  '/:id/report',
+  isAuthenticated,
+  [
+    body('reason')
+      .notEmpty()
+      .withMessage('Report reason is required')
+      .isIn([
+        'inappropriate_content',
+        'fake_information', 
+        'spam',
+        'offensive_language',
+        'copyright_violation',
+        'personal_attacks',
+        'off_topic',
+        'duplicate_content',
+        'other'
+      ])
+      .withMessage('Invalid report reason'),
+    body('details')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Details must be 500 characters or less')
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { reason, details } = req.body;
+      const experienceId = req.params.id;
+      const reporterId = req.user._id;
+
+      // Check if experience exists
+      const experience = await Experience.findById(experienceId);
+      if (!experience) {
+        return res.status(404).json({
+          success: false,
+          message: 'Experience not found'
+        });
+      }
+
+      // Check if user already reported this experience
+      const existingReport = experience.reports.find(
+        report => report.reportedBy.toString() === reporterId.toString()
+      );
+
+      if (existingReport) {
+        return res.status(400).json({
+          success: false,
+          message: 'You have already reported this experience'
+        });
+      }
+
+      // Add report to experience
+      experience.reports.push({
+        reportedBy: reporterId,
+        reason,
+        details,
+        reportedAt: new Date()
+      });
+
+      // Check if we should auto-flag based on report threshold
+      const reportThreshold = experience.autoFlagThreshold || 5;
+      if (experience.reports.length >= reportThreshold && !experience.flagged) {
+        experience.flagged = true;
+        experience.flaggedBy = 'system';
+        experience.flagReason = 'Multiple reports received';
+        experience.flaggedAt = new Date();
+
+        // Create notification for experience owner
+        await Notification.create({
+          user: experience.userId,
+          type: 'experience_flagged',
+          message: 'Your experience has been flagged due to multiple reports',
+          reason: 'Multiple reports received',
+          details: `Your experience has been automatically flagged after receiving ${experience.reports.length} reports.`,
+          relatedExperience: experienceId
+        });
+      }
+
+      await experience.save();
+
+      res.json({
+        success: true,
+        message: 'Experience reported successfully',
+        data: {
+          reportCount: experience.reports.length,
+          autoFlagged: experience.flagged
+        }
+      });
+
+    } catch (error) {
+      console.error('Error reporting experience:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error reporting experience',
         error: error.message
       });
     }

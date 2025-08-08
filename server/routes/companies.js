@@ -35,7 +35,7 @@ router.get('/search', async (req, res) => {
     // If application database search is enabled, fetch data from our company service
     if (includeAppData === 'true') {
       try {
-        console.log(`🔍 Fetching application database data for: "${searchTerm}"`);
+        // console.log(`🔍 Fetching application database data for: "${searchTerm}"`);
         // Get company data from our application database
         const companyResults = await companyService.searchCompanies(searchTerm, 20);
         
@@ -59,7 +59,7 @@ router.get('/search', async (req, res) => {
         const newCompanyResults = companyResults.filter(companyItem => {
           // Check if profileId already exists
           if (companyItem.profileId && existingCompanyIds.includes(companyItem.profileId)) {
-            console.log(`🔍 Filtered out ${companyItem.name} - profileId already exists`);
+            // console.log(`🔍 Filtered out ${companyItem.name} - profileId already exists`);
             return false;
           }
           
@@ -68,7 +68,7 @@ router.get('/search', async (req, res) => {
           const itemDisplayName = (companyItem.displayName || '').toLowerCase();
           
           if (existingNames.has(itemName) || (itemDisplayName && existingNames.has(itemDisplayName))) {
-            console.log(`🔍 Filtered out ${companyItem.name} - name already exists in database`);
+            // console.log(`🔍 Filtered out ${companyItem.name} - name already exists in database`);
             return false;
           }
           
@@ -95,7 +95,7 @@ router.get('/search', async (req, res) => {
         
         allResults = [...allResults, ...markedCompanyResults];
         
-        console.log(`✅ Found ${existingCompanies.length} existing + ${markedCompanyResults.length} application database companies`);
+        // console.log(`✅ Found ${existingCompanies.length} existing + ${markedCompanyResults.length} application database companies`);
         
       } catch (companyServiceError) {
         console.error('❌ Company service search error:', companyServiceError.message);
@@ -172,7 +172,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     });
 
     if (existingCompany) {
-      console.log(`🔍 Found existing company: ${existingCompany.displayName} for search: ${companyName}`);
+      // console.log(`🔍 Found existing company: ${existingCompany.displayName} for search: ${companyName}`);
       return res.json({ 
         success: true, 
         data: existingCompany,
@@ -181,12 +181,12 @@ router.post('/', isAuthenticated, async (req, res) => {
       });
     }
 
-    console.log(`🆕 No existing company found for: ${companyName}, proceeding with creation...`);
+    // console.log(`🆕 No existing company found for: ${companyName}, proceeding with creation...`);
 
     // Live company validation if required
     if (requireAppValidation && !companyId) {
       try {
-        console.log(`🔍 Validating "${companyName}" with live company data`);
+        // console.log(`🔍 Validating "${companyName}" with live company data`);
         const companyResults = await companyService.searchCompanies(companyName, 5);
         
         // Look for exact or close match
@@ -250,7 +250,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     // Create company from provided application database data
     if (companyId || companyUrl) {
       try {
-        console.log(`🔍 Getting company details from LinkedIn for: ${linkedinId || linkedinUrl}`);
+        // console.log(`🔍 Getting company details from LinkedIn for: ${linkedinId || linkedinUrl}`);
         const linkedinDetails = await linkedinService.getCompanyDetails(linkedinId || companyName);
         
         if (linkedinDetails) {
@@ -326,7 +326,7 @@ router.post('/validate-linkedin', async (req, res) => {
       });
     }
 
-    console.log(`🔍 Live LinkedIn validation for: "${companyName}"`);
+    // console.log(`🔍 Live LinkedIn validation for: "${companyName}"`);
     
     const searchResults = await linkedinService.searchCompanies(companyName.trim(), 5);
     const isValid = searchResults.length > 0;
@@ -376,7 +376,7 @@ router.get('/linkedin/search', async (req, res) => {
       return res.json({ success: true, data: [], meta: { searchTerm: query, totalResults: 0 } });
     }
 
-    console.log(`🔍 Direct LinkedIn search for: "${query}"`);
+    // console.log(`🔍 Direct LinkedIn search for: "${query}"`);
     
     const linkedinResults = await linkedinService.searchCompanies(query.trim(), parseInt(limit));
 
@@ -762,7 +762,7 @@ router.post('/update-from-database', isAuthenticated, async (req, res) => {
           isVerified: updatedCompany.isVerified
         });
 
-        console.log(`✅ Updated company: ${dbCompany.name} -> ${updatedCompany.displayName}`);
+        // console.log(`✅ Updated company: ${dbCompany.name} -> ${updatedCompany.displayName}`);
 
       } catch (error) {
         results.errors.push({
@@ -831,7 +831,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       });
     }
     
-    console.log(`🔄 Updating company "${existingCompany.displayName}" with:`, filteredUpdateData);
+    // console.log(`🔄 Updating company "${existingCompany.displayName}" with:`, filteredUpdateData);
     
     // Update the company (this will trigger the post-save middleware for cascading updates)
     const updatedCompany = await Company.findByIdAndUpdate(

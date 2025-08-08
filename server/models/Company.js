@@ -93,7 +93,7 @@ companySchema.post('save', async function(doc) {
     const modifiedFields = fieldsToSync.filter(field => doc.isModified && doc.isModified(field));
     
     if (modifiedFields.length > 0) {
-      console.log(`🔄 Company "${doc.displayName}" updated. Syncing ${modifiedFields.join(', ')} to related experiences...`);
+      // console.log(`🔄 Company "${doc.displayName}" updated. Syncing ${modifiedFields.join(', ')} to related experiences...`);
       
       // Update all experiences that reference this company
       const updateResult = await Experience.updateMany(
@@ -107,7 +107,7 @@ companySchema.post('save', async function(doc) {
       );
       
       if (updateResult.modifiedCount > 0) {
-        console.log(`✅ Updated ${updateResult.modifiedCount} experiences with new company data for "${doc.displayName}"`);
+        // console.log(`✅ Updated ${updateResult.modifiedCount} experiences with new company data for "${doc.displayName}"`);
       }
     }
   } catch (error) {
@@ -124,7 +124,7 @@ companySchema.post(['findOneAndUpdate', 'updateOne', 'updateMany'], async functi
     const updatedDoc = await this.model.findOne(this.getQuery());
     
     if (updatedDoc) {
-      console.log(`🔄 Company "${updatedDoc.displayName}" updated via findOneAndUpdate. Syncing to related experiences...`);
+      // console.log(`🔄 Company "${updatedDoc.displayName}" updated via findOneAndUpdate. Syncing to related experiences...`);
       
       // Update all experiences that reference this company
       const updateResult = await Experience.updateMany(
@@ -138,7 +138,7 @@ companySchema.post(['findOneAndUpdate', 'updateOne', 'updateMany'], async functi
       );
       
       if (updateResult.modifiedCount > 0) {
-        console.log(`✅ Updated ${updateResult.modifiedCount} experiences with new company data for "${updatedDoc.displayName}"`);
+        // console.log(`✅ Updated ${updateResult.modifiedCount} experiences with new company data for "${updatedDoc.displayName}"`);
       }
     }
   } catch (error) {
@@ -188,7 +188,7 @@ companySchema.statics.findOrCreate = async function(companyName) {
         isVerified: matchingCompanyData.isVerified || false,
         linkedinData: matchingCompanyData.linkedinData || {}
       });
-      console.log(`✅ Created company from imported data: ${matchingCompanyData.displayName}`);
+      // console.log(`✅ Created company from imported data: ${matchingCompanyData.displayName}`);
     } else {
       // Create basic company entry
       company = await this.create({
@@ -197,7 +197,7 @@ companySchema.statics.findOrCreate = async function(companyName) {
         aliases: [normalizedName],
         logo: `https://logo.clearbit.com/${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
       });
-      console.log(`ℹ️ Created basic company entry: ${companyName.trim()}`);
+      // console.log(`ℹ️ Created basic company entry: ${companyName.trim()}`);
     }
   }
   

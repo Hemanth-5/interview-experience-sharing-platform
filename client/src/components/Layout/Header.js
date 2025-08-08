@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { extractUserName } from '../../utils/avatar';
 import Avatar from '../Avatar';
+import NotificationBell from '../NotificationBell';
 import './Header.css';
 
 const Header = () => {
@@ -81,6 +82,9 @@ const Header = () => {
                     <span className="hidden md:inline">Share Experience</span>
                   </Link> */}
                   
+                  {/* Notification Bell */}
+                  <NotificationBell />
+                  
                   <div className="dropdown user-menu" ref={userMenuRef}>
                     <button
                       className="user-menu-toggle"
@@ -107,6 +111,12 @@ const Header = () => {
                         <i className="fas fa-user"></i>
                         Profile
                       </Link>
+                      {user?.role === 'Admin' && (
+                        <Link to="/admin" className="dropdown-item admin-link">
+                          <i className="fas fa-shield-alt"></i>
+                          Admin Panel
+                        </Link>
+                      )}
                       <div className="dropdown-divider"></div>
                       <button onClick={handleLogout} className="dropdown-item">
                         <i className="fas fa-sign-out-alt"></i>

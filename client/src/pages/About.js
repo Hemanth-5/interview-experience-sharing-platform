@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import PSGNotification from '../components/PSGNotification';
 import { useAuth } from '../contexts/AuthContext';
 import './About.css';
 
@@ -7,6 +8,7 @@ const About = () => {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
   // const navigate = useNavigate();
 
   // Scroll to top when component mounts
@@ -22,12 +24,12 @@ const About = () => {
     e.preventDefault();
 
     if (!user) {
-      alert('Please log in to send a message.');
+      setNotification({ open: true, message: 'Please log in to send a message.', type: 'error' });
       return;
     }
 
     if (!message.trim()) {
-      alert('Please enter a message before sending.');
+      setNotification({ open: true, message: 'Please enter a message before sending.', type: 'error' });
       return;
     }
 
@@ -112,6 +114,12 @@ ${user.name}`;
 
   return (
     <div className="about-page">
+      <PSGNotification
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, open: false })}
+      />
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">

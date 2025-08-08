@@ -76,11 +76,16 @@ class ApiService {
 
   // Admin endpoints (if user has admin privileges)
   static admin = {
-    getAllUsers: (params = {}) => axios.get(createApiUrl('/api/users/admin/all'), { params }),
-    updateUserRole: (userId, role) => axios.put(createApiUrl(`/api/users/admin/${userId}/role`), { role }),
-    getAllExperiences: (params = {}) => axios.get(createApiUrl('/api/experiences/admin/all'), { params }),
-    moderateExperience: (id, action) => axios.post(createApiUrl(`/api/experiences/admin/${id}/moderate`), { action }),
-    getAnalytics: (params = {}) => axios.get(createApiUrl('/api/analytics/admin'), { params }),
+    // Dashboard
+    getDashboard: () => axios.get(createApiUrl('/api/admin/dashboard')),
+    
+    // Users management
+    getAllUsers: (params = {}) => axios.get(createApiUrl('/api/admin/users'), { params }),
+    updateUserRole: (userId, role) => axios.put(createApiUrl(`/api/admin/users/${userId}/role`), { role }),
+    
+    // Experiences management
+    getAllExperiences: (params = {}) => axios.get(createApiUrl('/api/admin/experiences'), { params }),
+    moderateExperience: (id, action) => axios.post(createApiUrl(`/api/admin/experiences/${id}/moderate`), { action }),
   };
 }
 
