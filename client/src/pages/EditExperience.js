@@ -744,8 +744,6 @@ const EditExperience = () => {
                   >
                     <option value="USD">USD</option>
                     <option value="INR">INR</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
                   </select>
                   <input
                     type="number"
@@ -820,12 +818,13 @@ const EditExperience = () => {
                       value={round?.roundType || 'Technical'}
                       onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
                     >
+                      <option value="Online Assessment">Online Assessment</option>
                       <option value="Technical">Technical Round</option>
                       <option value="HR">HR Round</option>
-                      <option value="Managerial">Managerial Round</option>
-                      <option value="Coding">Coding Round</option>
-                      <option value="System Design">System Design</option>
                       <option value="Group Discussion">Group Discussion</option>
+                      <option value="Case Study">Case Study</option>
+                      <option value="System Design">System Design</option>
+                      <option value="Coding Round">Coding Round</option>
                     </select>
                   </div>
 

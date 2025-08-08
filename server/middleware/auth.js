@@ -18,6 +18,33 @@ const isAdmin = (req, res, next) => {
   });
 };
 
+// Enhanced admin middleware with dual authentication
+const isAdminWithDualAuth = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ 
+      message: 'Authentication required',
+      error: 'Please log in to access this resource'
+    });
+  }
+
+  if (req.user.role !== 'Admin') {
+    return res.status(403).json({ 
+      message: 'Admin access required',
+      error: 'You do not have permission to access this resource'
+    });
+  }
+
+  // Check for admin session (dual authentication)
+  if (!req.session.adminAuthenticated) {
+    return res.status(403).json({ 
+      message: 'Admin credentials required',
+      error: 'Please enter admin credentials to access this resource'
+    });
+  }
+
+  return next();
+};
+
 const isModerator = (req, res, next) => {
   if (req.isAuthenticated() && (req.user.role === 'Admin' || req.user.role === 'Moderator')) {
     return next();
@@ -74,6 +101,7 @@ const isOwnerOrAdmin = async (req, res, next) => {
 module.exports = {
   isAuthenticated,
   isAdmin,
+  isAdminWithDualAuth,
   isModerator,
   isOwnerOrAdmin
 };

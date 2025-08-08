@@ -361,6 +361,84 @@ const experienceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }],
+  // Moderation and Flagging
+  isPublished: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  flagged: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  flaggedAt: {
+    type: Date,
+    default: null
+  },
+  flaggedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  flagReason: {
+    type: String,
+    enum: [
+      'inappropriate_content',
+      'fake_information', 
+      'spam',
+      'offensive_language',
+      'copyright_violation',
+      'personal_attacks',
+      'off_topic',
+      'duplicate_content',
+      'other'
+    ],
+    default: null
+  },
+  flagReasonDetails: {
+    type: String,
+    default: null
+  },
+  reports: [{
+    reportedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    reason: {
+      type: String,
+      enum: [
+        'inappropriate_content',
+        'fake_information',
+        'spam', 
+        'offensive_language',
+        'copyright_violation',
+        'personal_attacks',
+        'off_topic',
+        'duplicate_content',
+        'other'
+      ],
+      required: true
+    },
+    reasonDetails: {
+      type: String,
+      maxlength: 500
+    },
+    reportedAt: {
+      type: Date,
+      default: Date.now
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'reviewed', 'dismissed', 'resolved'],
+      default: 'pending'
+    }
+  }],
+  autoFlagThreshold: {
+    type: Number,
+    default: 3 // Auto-flag after 3 reports
+  },
   // Tags for better searchability
   tags: [{
     type: String,
@@ -392,22 +470,24 @@ experienceSchema.index({ isPublished: 1, createdAt: -1 });
 
 // Virtual for upvote count
 experienceSchema.virtual('upvoteCount').get(function() {
-  return this.upvotes.length;
+  return this.upvotes ? this.upvotes.length : 0;
 });
 
 // Virtual for downvote count
 experienceSchema.virtual('downvoteCount').get(function() {
-  return this.downvotes.length;
+  return this.downvotes ? this.downvotes.length : 0;
 });
 
 // Virtual for comment count
 experienceSchema.virtual('commentCount').get(function() {
-  return this.comments.length;
+  return this.comments ? this.comments.length : 0;
 });
 
 // Virtual for net score
 experienceSchema.virtual('netScore').get(function() {
-  return this.upvotes.length - this.downvotes.length;
+  const upvoteCount = this.upvotes ? this.upvotes.length : 0;
+  const downvoteCount = this.downvotes ? this.downvotes.length : 0;
+  return upvoteCount - downvoteCount;
 });
 
 // Ensure virtuals are included in JSON

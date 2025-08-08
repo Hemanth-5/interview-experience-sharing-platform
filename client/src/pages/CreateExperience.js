@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
-import './CreateExperience_new.css';
+import './CreateExperience.css';
 
 const CreateExperience = () => {
   const navigate = useNavigate();
@@ -432,8 +432,6 @@ const CreateExperience = () => {
             >
               <option value="USD">USD</option>
               <option value="INR">INR</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
             </select>
             <input
               type="number"

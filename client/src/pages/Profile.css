@@ -644,7 +644,7 @@
   flex-wrap: wrap;
 }
 
-.view-btn, .edit-btn {
+.view-btn {
   background: #667eea;
   color: white;
   text-decoration: none;
@@ -656,20 +656,20 @@
   flex-shrink: 0;
 }
 
-.edit-btn {
+/* .edit-btn {
   background: #f59e0b;
-}
+} */
 
-.view-btn:hover, .edit-btn:hover {
+.view-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   text-decoration: none;
   color: white;
 }
 
-.edit-btn:hover {
+/* .edit-btn:hover {
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
+} */
 
 .experience-tags {
   display: flex;

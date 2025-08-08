@@ -78,7 +78,7 @@ const Home = () => {
       <div className="page-container">
         <div className="loading-layout">
           <div className="loading-spinner"></div>
-          <p>Loading...</p>
+          {/* <p>Loading...</p> */}
         </div>
       </div>
     );
