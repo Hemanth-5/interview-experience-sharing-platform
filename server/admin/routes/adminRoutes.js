@@ -663,4 +663,8 @@ router.put('/notifications/:notificationId/read', isAdminWithDualAuth, async (re
     }
 });
 
+// Announcement/news route
+const adminAnnounceRoutes = require('./admin_announce');
+router.use(adminAnnounceRoutes);
+
 module.exports = router;

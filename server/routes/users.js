@@ -539,6 +539,29 @@ router.put('/notifications/mark-all-read', isAuthenticated, async (req, res) => 
   }
 });
 
+
+// @route   DELETE /api/users/notifications/clear-all
+// @desc    Clear all notifications for current user
+// @access  Private
+router.delete('/notifications/clear-all', isAuthenticated, async (req, res) => {
+  try {
+    const result = await Notification.deleteMany({
+      recipient: req.user._id
+    });
+
+    res.json({
+      success: true,
+      message: `Cleared ${result.deletedCount} notifications`
+    });
+  } catch (error) {
+    console.error('Error clearing all notifications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error clearing notifications'
+    });
+  }
+});
+
 // @route   DELETE /api/users/notifications/:notificationId
 // @desc    Delete a specific notification
 // @access  Private
@@ -567,28 +590,6 @@ router.delete('/notifications/:notificationId', isAuthenticated, async (req, res
     res.status(500).json({
       success: false,
       message: 'Error deleting notification'
-    });
-  }
-});
-
-// @route   DELETE /api/users/notifications/clear-all
-// @desc    Clear all notifications for current user
-// @access  Private
-router.delete('/notifications/clear-all', isAuthenticated, async (req, res) => {
-  try {
-    const result = await Notification.deleteMany({
-      recipient: req.user._id
-    });
-
-    res.json({
-      success: true,
-      message: `Cleared ${result.deletedCount} notifications`
-    });
-  } catch (error) {
-    console.error('Error clearing all notifications:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error clearing notifications'
     });
   }
 });

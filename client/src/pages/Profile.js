@@ -15,6 +15,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('experiences');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [announcement, setAnnouncement] = useState(null);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -23,7 +25,35 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfileData();
+    fetchAnnouncement();
   }, []);
+
+  // Fetch latest announcement/news notification if not seen
+  const fetchAnnouncement = async () => {
+    try {
+      const res = await fetch('/api/users/notifications?limit=1&unreadOnly=false');
+      const data = await res.json();
+      if (data.success && data.data.notifications.length > 0) {
+        const ann = data.data.notifications.find(n => n.announcement);
+        if (ann && !(user?.announcementsSeen || []).includes(ann._id)) {
+          setAnnouncement(ann);
+          setShowAnnouncement(true);
+        }
+      }
+    } catch {}
+  };
+  // Mark announcement as seen
+  const dismissAnnouncement = async () => {
+    setShowAnnouncement(false);
+    if (announcement) {
+      await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ announcementsSeen: [...(user.announcementsSeen || []), announcement._id] })
+      });
+    }
+  };
 
   const fetchProfileData = async () => {
     try {
@@ -325,6 +355,15 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
+      {showAnnouncement && announcement && (
+        <div className="announcement-banner">
+          <div className="announcement-content">
+            <strong>{announcement.title}</strong>
+            <p>{announcement.message}</p>
+            <button className="dismiss-announcement-btn" onClick={dismissAnnouncement}>Dismiss</button>
+          </div>
+        </div>
+      )}
       <div className="profile-header">
         <div className="profile-avatar">
           <Avatar 

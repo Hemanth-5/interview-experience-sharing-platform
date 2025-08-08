@@ -137,7 +137,6 @@ const NotificationBell = () => {
     if (!window.confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
       return;
     }
-    
     try {
       const response = await fetch(createApiUrl('/api/users/notifications/clear-all'), {
         method: 'DELETE',
@@ -146,15 +145,21 @@ const NotificationBell = () => {
           'Content-Type': 'application/json',
         }
       });
-      
       const data = await response.json();
-      
       if (data.success) {
-        // Clear local state
         setNotifications([]);
         setUnreadCount(0);
+        setShowDropdown(false); // Close dropdown after clearing
+      } else {
+        // Fallback: forcibly clear state even if backend fails
+        setNotifications([]);
+        setUnreadCount(0);
+        setShowDropdown(false);
       }
     } catch (error) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setShowDropdown(false);
       console.error('Error clearing all notifications:', error);
     }
   };
@@ -200,8 +205,28 @@ const NotificationBell = () => {
         return `Your interview experience for ${notification.relatedExperience?.companyInfo?.companyName || 'a company'} has been approved.`;
       case 'experience_unpublished':
         return `Your interview experience for ${notification.relatedExperience?.companyInfo?.companyName || 'a company'} has been unpublished.`;
+      case 'admin_message': {
+        // Show the title and a truncated message
+        const maxLen = 120;
+        let msg = notification.message || '';
+        if (msg.length > maxLen) {
+          msg = msg.substring(0, maxLen) + '...';
+        }
+        return (
+          <>
+            <span style={{ fontWeight: 600, display: 'block', marginBottom: 2 }}>{notification.title}</span>
+            {/* <span>{msg}</span> */}
+          </>
+        );
+      }
       default:
-        return notification.message;
+        // Truncate long messages for other types
+        const maxLen = 120;
+        let msg = notification.message || '';
+        if (msg.length > maxLen) {
+          msg = msg.substring(0, maxLen) + '...';
+        }
+        return msg;
     }
   };
 
@@ -268,7 +293,7 @@ const NotificationBell = () => {
                   <i className="fas fa-check"></i>
                 </button>
               )}
-              {/* {notifications.length > 0 && (
+              {notifications.length > 0 && (
                 <button 
                   className="clear-all-btn"
                   onClick={clearAllNotifications}
@@ -276,7 +301,7 @@ const NotificationBell = () => {
                 >
                   <i className="fas fa-trash"></i>
                 </button>
-              )} */}
+              )}
             </div>
           </div>
 

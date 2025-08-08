@@ -14,11 +14,12 @@ const AdminLayout = () => {
 
 
   const adminMenuItems = [
-    { path: '/admin', label: 'Dashboard',exact: true },
-    { path: '/admin/experiences', label: 'Experiences'},
+    { path: '/admin', label: 'Dashboard', exact: true },
+    { path: '/admin/experiences', label: 'Experiences' },
     { path: '/admin/users', label: 'Users' },
-    { path: '/admin/companies', label: 'Companies'},
-    { path: '/admin/reports', label: 'Reports' }
+    { path: '/admin/companies', label: 'Companies' },
+    { path: '/admin/reports', label: 'Reports' },
+    { path: '/admin/announcement', label: 'Announcements' }
   ];
 
   const isActiveRoute = (path, exact = false) => {

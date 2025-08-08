@@ -80,6 +80,11 @@ const notificationSchema = new mongoose.Schema({
   metadata: {
     type: mongoose.Schema.Types.Mixed, // Additional data specific to notification type
     default: null
+  },
+  // Mark if this notification is an announcement/news
+  announcement: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

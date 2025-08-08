@@ -203,6 +203,15 @@ const Notifications = () => {
         return `Your interview experience for ${notification.relatedExperience?.companyInfo?.companyName || 'a company'} has been approved.`;
       case 'experience_unpublished':
         return `Your interview experience for ${notification.relatedExperience?.companyInfo?.companyName || 'a company'} has been unpublished.`;
+      case 'admin_message': {
+        // Format with title and preserve line breaks, allow rich formatting
+        return (
+          <div style={{ whiteSpace: 'pre-line' }}>
+            <span style={{ fontWeight: 700, color: '#3730a3', display: 'block', marginBottom: 4, fontSize: '1.08em' }}>{notification.title}</span>
+            {notification.message}
+          </div>
+        );
+      }
       default:
         return notification.message;
     }

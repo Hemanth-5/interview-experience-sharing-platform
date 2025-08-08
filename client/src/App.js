@@ -20,6 +20,7 @@ import AdminLayout from './admin/components/AdminLayout';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminUsers from './admin/pages/AdminUsers';
 import AdminExperiences from './admin/pages/AdminExperiences';
+import AdminAnnouncement from "./admin/pages/AdminAnnouncement";
 import './App.css';
 
 function AppContent() {
@@ -85,6 +86,7 @@ function AppContent() {
             <Route path="analytics" element={<AdminDashboard />} />
             <Route path="reports" element={<AdminDashboard />} />
             <Route path="settings" element={<AdminDashboard />} />
+            <Route path="announcement" element={<AdminAnnouncement />} />
           </Route>
         </Routes>
       </main>
