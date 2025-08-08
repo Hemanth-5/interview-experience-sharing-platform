@@ -24,12 +24,18 @@
 }
 
 .bell-icon i {
-  color: white;
+  color: #374151;
   transition: color 0.2s ease;
 }
 
 .notification-bell-button:hover .bell-icon i {
   color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bell-icon i {
+    color: white;
+  }
 }
 
 .notification-count {
@@ -58,7 +64,9 @@
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 400px;
-  max-height: 500px;
+  max-width: 95vw;
+  min-width: 240px;
+  max-height: 70vh;
   z-index: 1000;
   overflow: hidden;
 }
@@ -269,14 +277,23 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .notification-dropdown {
-    width: 350px;
-    max-width: 90vw;
+    width: 98vw;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    max-width: 98vw;
+    min-width: 0;
+    border-radius: 10px;
+    padding-left: 0;
+    padding-right: 0;
   }
-  
+  .notification-header, .notification-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
   .notification-item {
-    padding: 0.75rem;
+    padding: 0.75rem 1rem;
   }
-  
   .notification-text {
     font-size: 0.8rem;
   }
