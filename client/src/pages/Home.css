@@ -527,7 +527,7 @@
 
 .company-details {
   flex: 1;
-  text-align: center;
+  /* text-align: center; */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
