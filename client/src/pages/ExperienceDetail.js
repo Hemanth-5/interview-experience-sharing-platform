@@ -265,7 +265,8 @@ const ExperienceDetail = () => {
             <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
               <button
                 onClick={async () => {
-                  if (!reportReason || (typeof reportReason === 'object' && !reportReason.details)) {
+                  // Validation: must select a reason, and if 'other', must enter details
+                  if (!reportReason.reason || (reportReason.reason === 'other' && !reportReason.details.trim())) {
                     setReportError('Please select or enter a reason.');
                     return;
                   }
@@ -273,7 +274,7 @@ const ExperienceDetail = () => {
                   setReportError('');
                   setReportSuccess('');
                   try {
-                    const reasonToSend = typeof reportReason === 'string' ? reportReason : reportReason.details;
+                    const reasonToSend = reportReason.reason === 'other' ? reportReason.details : reportReason.reason;
                     await axios.post(createApiUrl(`/api/experiences/${id}/report`), { reason: reasonToSend }, { withCredentials: true });
                     setReportSuccess('Report submitted. Thank you!');
                     setTimeout(() => {
