@@ -63,9 +63,9 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  width: 400px;
-  max-width: 95vw;
-  min-width: 240px;
+  width: 320px;
+  max-width: 90vw;
+  min-width: 180px;
   max-height: 70vh;
   z-index: 1000;
   overflow: hidden;
@@ -277,11 +277,11 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .notification-dropdown {
-    width: 98vw;
+    width: 94vw;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%);
-    max-width: 98vw;
+    max-width: 94vw;
     min-width: 0;
     border-radius: 10px;
     padding-left: 0;
