@@ -1,3 +1,6 @@
+/* ===========================
+   NOTIFICATION BELL ICON
+=========================== */
 .notification-bell {
   position: relative;
   display: inline-block;
@@ -15,7 +18,7 @@
 }
 
 .notification-bell-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .bell-icon {
@@ -34,10 +37,13 @@
 
 @media (prefers-color-scheme: dark) {
   .bell-icon i {
-    color: white;
+    color: #ffffff;
   }
 }
 
+/* ===========================
+   NOTIFICATION COUNT BADGE
+=========================== */
 .notification-count {
   position: absolute;
   top: -2px;
@@ -55,6 +61,9 @@
   line-height: 1;
 }
 
+/* ===========================
+   DROPDOWN CONTAINER
+=========================== */
 .notification-dropdown {
   position: absolute;
   top: 100%;
@@ -63,14 +72,29 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  width: 320px;
+  width: 350px;
   max-width: 90vw;
-  min-width: 180px;
   max-height: 70vh;
   z-index: 1000;
   overflow: hidden;
+  animation: dropdownFade 0.25s ease forwards;
 }
 
+/* Smooth open animation */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===========================
+   HEADER
+=========================== */
 .notification-header {
   display: flex;
   justify-content: space-between;
@@ -90,9 +114,9 @@
 .notification-actions {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
 }
 
+/* Action buttons */
 .mark-all-read-btn,
 .clear-all-btn {
   background: none;
@@ -119,6 +143,9 @@
   color: #ef4444;
 }
 
+/* ===========================
+   NOTIFICATION LIST
+=========================== */
 .notification-list {
   max-height: 350px;
   overflow-y: auto;
@@ -145,6 +172,7 @@
   background-color: #dbeafe;
 }
 
+/* Icon */
 .notification-icon {
   flex-shrink: 0;
   margin-right: 0.75rem;
@@ -153,53 +181,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
 }
 
+/* Text content */
 .notification-content {
   flex: 1;
   min-width: 0;
-}
-
-.notification-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 0.5rem;
-}
-
-.clear-notification-btn {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  opacity: 0;
-}
-
-.notification-item:hover .clear-notification-btn {
-  opacity: 1;
-}
-
-.clear-notification-btn:hover {
-  background-color: #fef2f2;
-  color: #ef4444;
-}
-
-.unread-indicator {
-  width: 8px;
-  height: 8px;
-  background-color: #3b82f6;
-  border-radius: 50%;
 }
 
 .notification-text {
@@ -207,31 +194,18 @@
   color: #374151;
   line-height: 1.4;
   margin-bottom: 0.25rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
-.notification-reason {
-  font-size: 0.8rem;
-  color: #dc2626;
-  margin: 0.25rem 0;
-}
-
-.notification-reason strong {
-  font-weight: 600;
-}
-
-.notification-details {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin: 0.25rem 0;
-  font-style: italic;
-}
-
+/* Time */
 .notification-time {
   font-size: 0.75rem;
   color: #9ca3af;
   margin-top: 0.25rem;
 }
 
+/* Unread indicator dot */
 .unread-indicator {
   position: absolute;
   top: 50%;
@@ -243,14 +217,9 @@
   border-radius: 50%;
 }
 
-.notification-loading,
-.no-notifications {
-  padding: 2rem;
-  text-align: center;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
+/* ===========================
+   FOOTER
+=========================== */
 .notification-footer {
   padding: 0.75rem 1rem;
   border-top: 1px solid #e5e7eb;
@@ -274,71 +243,85 @@
   background-color: rgba(59, 130, 246, 0.1);
 }
 
-/* Mobile responsiveness */
+/* ===========================
+   RESPONSIVENESS
+=========================== */
 @media (max-width: 768px) {
   .notification-dropdown {
-    width: 94vw;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%);
-    max-width: 94vw;
-    min-width: 0;
+    position: fixed !important; /* ignore parent position */
+    top: 60px !important;        /* adjust to match navbar height */
+    left: 50% !important;        /* center in screen */
+    transform: translateX(-50%) !important;
+    width: 90vw !important;      /* wide for mobile */
+    max-width: 400px;
     border-radius: 10px;
-    padding-left: 0;
-    padding-right: 0;
+    max-height: 60vh;
+    z-index: 2000 !important;    /* stay above navbar */
   }
-  .notification-header, .notification-footer {
-    padding-left: 1rem;
-    padding-right: 1rem;
+
+  .notification-header,
+  .notification-footer {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
+
   .notification-item {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
   }
+
   .notification-text {
     font-size: 0.8rem;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  .notification-time {
+    font-size: 0.7rem;
   }
 }
 
-/* Dark mode support (if you have it) */
+/* ===========================
+   DARK MODE
+=========================== */
 @media (prefers-color-scheme: dark) {
   .notification-dropdown {
     background: #1f2937;
     border-color: #374151;
   }
-  
+
   .notification-header {
     background-color: #111827;
     border-bottom-color: #374151;
   }
-  
+
   .notification-header h3 {
     color: #f9fafb;
   }
-  
+
   .notification-item {
     border-bottom-color: #374151;
   }
-  
+
   .notification-item:hover {
     background-color: #374151;
   }
-  
+
   .notification-item.unread {
-    background-color: #1e3a8a;
+    background-color: #2b3a67;
   }
-  
+
   .notification-item.unread:hover {
-    background-color: #1e40af;
+    background-color: #3a4b7a;
   }
-  
+
   .notification-text {
     color: #d1d5db;
   }
-  
+
   .notification-time {
     color: #9ca3af;
   }
-  
+
   .notification-footer {
     background-color: #111827;
     border-top-color: #374151;
