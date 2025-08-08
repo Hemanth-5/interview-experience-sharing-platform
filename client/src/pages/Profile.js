@@ -150,10 +150,10 @@ const Profile = () => {
         {/* <Link to={`/experiences/${experience._id}/edit`} className="edit-btn">
           Edit
         </Link> */}
-        <div className="experience-tags">
+        {/* <div className="experience-tags">
           <span className="tag">{experience.companyInfo.internshipType}</span>
           <span className="tag">{experience.companyInfo.location}</span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
