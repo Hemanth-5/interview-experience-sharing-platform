@@ -40,9 +40,9 @@ const Home = () => {
       if (companiesResponse.ok) {
         const companiesData = await companiesResponse.json();
         setTopCompanies(companiesData.data || []);
-        console.log('Top Companies Full Response:', companiesData);
-        console.log('First Company Data:', companiesData.data?.[0]);
-        console.log('First Company Logo:', companiesData.data?.[0]?.logo);
+        // console.log('Top Companies Full Response:', companiesData);
+        // console.log('First Company Data:', companiesData.data?.[0]);
+        // console.log('First Company Logo:', companiesData.data?.[0]?.logo);
       }
 
       if (featuredResponse.ok) {

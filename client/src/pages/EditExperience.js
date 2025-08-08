@@ -78,7 +78,7 @@ const EditExperience = () => {
   const [pendingAppDatabaseCompany, setPendingAppDatabaseCompany] = useState(null); // For application database companies
 
   const handleCompanySelection = (company) => {
-    console.log('Company selected:', company); // Debug log
+    // console.log('Company selected:', company); // Debug log
     setSelectedCompany(company);
     
     if (company?.isPending) {
@@ -100,13 +100,13 @@ const EditExperience = () => {
       setPendingAppDatabaseCompany(null);
       handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
       handleInputChange('companyInfo', 'companyId', company._id);
-      console.log('Set existing company:', {
-        name: company.displayName || company.name,
-        id: company._id
-      });
+      // console.log('Set existing company:', {
+      //   name: company.displayName || company.name,
+      //   id: company._id
+      // });
     } else {
       // Clear selections if no valid company, or treat as new company to be created
-      console.log('Unclear company type, treating as new:', company);
+      // console.log('Unclear company type, treating as new:', company);
       setPendingCompany(company.displayName || company.name);
       setPendingAppDatabaseCompany(null);
       handleInputChange('companyInfo', 'companyName', company.displayName || company.name);
@@ -269,19 +269,19 @@ const EditExperience = () => {
       };
       
       // Pre-submission company creation if pending
-      console.log('Checking company creation needs:', {
-        pendingCompany,
-        pendingAppDatabaseCompany,
-        selectedCompanyId: selectedCompany?._id,
-        formDataCompanyId: submitData.companyInfo.companyId,
-        formDataCompanyName: submitData.companyInfo.companyName
-      });
+      // console.log('Checking company creation needs:', {
+      //   pendingCompany,
+      //   pendingAppDatabaseCompany,
+      //   selectedCompanyId: selectedCompany?._id,
+      //   formDataCompanyId: submitData.companyInfo.companyId,
+      //   formDataCompanyName: submitData.companyInfo.companyName
+      // });
       
       // Only create a company if:
       // 1. There's a pending company name AND no existing company is selected, OR
       // 2. There's a pending app database company
       if ((pendingCompany && !selectedCompany?._id && !submitData.companyInfo.companyId) || pendingAppDatabaseCompany) {
-        console.log('Creating new company...');
+        // console.log('Creating new company...');
         try {
           let companyData;
           
@@ -340,12 +340,12 @@ const EditExperience = () => {
         }
       } else if (selectedCompany?._id) {
         // Use existing selected company
-        console.log('Using existing company:', selectedCompany);
+        // console.log('Using existing company:', selectedCompany);
         submitData.companyInfo.companyId = selectedCompany._id;
         submitData.companyInfo.companyName = selectedCompany.displayName || selectedCompany.name;
       } else {
         // If no company is selected but we have a company name, check if it's already linked
-        console.log('No specific company selected, using form data as-is');
+        // console.log('No specific company selected, using form data as-is');
       }
       
       await experienceAPI.update(id, submitData);

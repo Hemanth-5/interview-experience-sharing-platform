@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     if (data && data.success) {
       setUser(data.user);
     } else if (error) {
-      // console.log('User not authenticated');
+      // // console.log('User not authenticated');
     }
     
     setLoading(false);
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // Function to require authentication - redirects to Google OAuth if not logged in
   const requireAuth = () => {
     if (!user && !loading) {
-      // console.log('Authentication required, redirecting to Google OAuth...');
+      // // console.log('Authentication required, redirecting to Google OAuth...');
       window.location.href = createApiUrl('/auth/google');
       return false;
     }

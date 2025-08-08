@@ -1,7 +1,7 @@
 // Test setup file
 require('dotenv').config({ path: '.env.test' });
 
-// Suppress // console.log during tests
+// Suppress // // console.log during tests
 global.console = {
   ...console,
   log: jest.fn(),

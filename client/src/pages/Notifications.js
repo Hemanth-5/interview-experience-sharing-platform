@@ -9,7 +9,7 @@ const Notifications = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
 
@@ -24,7 +24,7 @@ const Notifications = () => {
       setLoading(true);
       const unreadOnly = filter === 'unread' ? 'true' : 'false';
       const response = await fetch(
-        createApiUrl(`/api/users/notifications?page=${currentPage}&limit=20&unreadOnly=${unreadOnly}`),
+        createApiUrl(`/api/users/notifications?page=${currentPage}&limit=5&unreadOnly=${unreadOnly}`),
         {
           method: 'GET',
           credentials: 'include',
@@ -33,19 +33,19 @@ const Notifications = () => {
           }
         }
       );
-      
       const data = await response.json();
-      
       if (data.success) {
         let filteredNotifications = data.data.notifications;
-        
-        // Apply read filter on frontend if needed
         if (filter === 'read') {
           filteredNotifications = data.data.notifications.filter(notif => notif.read);
         }
-        
         setNotifications(filteredNotifications);
-        setPagination(data.data.pagination);
+        setPagination({
+          page: data.data.pagination?.currentPage || 1,
+          limit: data.data.pagination?.limit || 10,
+          total: data.data.pagination?.totalDocuments || filteredNotifications.length,
+          totalPages: data.data.pagination?.totalPages || 1
+        });
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -137,11 +137,15 @@ const Notifications = () => {
     }
   };
 
-  const clearAllNotifications = async () => {
-    if (!window.confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
-      return;
-    }
-    
+  // Modal state for clear all confirmation
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
+
+  const clearAllNotifications = () => {
+    setShowClearAllModal(true);
+  };
+
+  const handleConfirmClearAll = async () => {
+    setShowClearAllModal(false);
     try {
       const response = await fetch(createApiUrl('/api/users/notifications/clear-all'), {
         method: 'DELETE',
@@ -162,6 +166,10 @@ const Notifications = () => {
     } catch (error) {
       console.error('Error clearing all notifications:', error);
     }
+  };
+
+  const handleCancelClearAll = () => {
+    setShowClearAllModal(false);
   };
 
   const handleNotificationClick = async (notification) => {
@@ -310,6 +318,67 @@ const Notifications = () => {
         </div>
 
         <div className="notifications-content">
+          {/* Clear All Confirmation Modal */}
+          {showClearAllModal && (
+            <div className="modal-overlay" style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.45)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <div className="modal-card" style={{
+                background: 'white',
+                borderRadius: 12,
+                boxShadow: '0 10px 32px rgba(0,0,0,0.18)',
+                maxWidth: 380,
+                width: '90%',
+                padding: '2rem 1.5rem',
+                textAlign: 'center',
+                position: 'relative',
+              }}>
+                <h3 style={{ color: '#dc2626', marginBottom: 12 }}>Clear All Notifications?</h3>
+                <p style={{ color: '#374151', marginBottom: 24 }}>
+                  Are you sure you want to clear all notifications? This action cannot be undone.
+                </p>
+                <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+                  <button
+                    onClick={handleCancelClearAll}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      borderRadius: 6,
+                      border: '1px solid #d1d5db',
+                      background: '#f3f4f6',
+                      color: '#374151',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmClearAll}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: '#dc2626',
+                      color: 'white',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Yes, Clear All
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {loading ? (
             <div className="notifications-loading">
               <div className="loading-spinner"></div>
@@ -380,19 +449,61 @@ const Notifications = () => {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="notifications-pagination">
+                <div className="notifications-pagination" style={{ display: 'flex', justifyContent: 'center', gap: 12, margin: '32px 0 0 0' }}>
                   <button
-                    className="pagination-btn"
+                    className={`pagination-btn${currentPage === 1 ? ' disabled' : ''}`}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: currentPage === 1 ? '#e5e7eb' : '#fff',
+                      color: currentPage === 1 ? '#6b7280' : '#3730a3',
+                      fontWeight: 500,
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s',
+                      minWidth: 48
+                    }}
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                   >
                     Previous
                   </button>
-                  <span className="pagination-info">
-                    Page {currentPage} of {pagination.totalPages}
-                  </span>
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-btn${page === currentPage ? ' active' : ''}`}
+                      style={{
+                        padding: '0.6rem 1.2rem',
+                        borderRadius: 8,
+                        border: 'none',
+                        background: page === currentPage ? '#4338ca' : '#fff',
+                        color: page === currentPage ? '#fff' : '#3730a3',
+                        fontWeight: 600,
+                        cursor: page === currentPage ? 'default' : 'pointer',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                        minWidth: 36
+                      }}
+                      onClick={() => setCurrentPage(page)}
+                      disabled={page === currentPage}
+                    >
+                      {page}
+                    </button>
+                  ))}
                   <button
-                    className="pagination-btn"
+                    className={`pagination-btn${currentPage === pagination.totalPages ? ' disabled' : ''}`}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: currentPage === pagination.totalPages ? '#e5e7eb' : '#fff',
+                      color: currentPage === pagination.totalPages ? '#6b7280' : '#3730a3',
+                      fontWeight: 500,
+                      cursor: currentPage === pagination.totalPages ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s',
+                      minWidth: 48
+                    }}
                     onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
                     disabled={currentPage === pagination.totalPages}
                   >

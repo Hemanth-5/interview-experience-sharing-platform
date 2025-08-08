@@ -79,7 +79,7 @@ router.post('/',
           // Automatically populate company logo and display name
           experienceData.companyInfo.companyLogo = company.logo;
           experienceData.companyInfo.companyName = company.displayName;
-          console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+          // console.log(`🏢 Associated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
         } catch (error) {
           console.warn('Error creating/finding company:', error);
           // Continue without company association if it fails
@@ -365,7 +365,7 @@ router.put('/:id',
   handleValidationErrors,
   async (req, res) => {
     try {
-      // console.log('PUT /api/experiences/:id - Update request body:', JSON.stringify(req.body, null, 2));
+      // // console.log('PUT /api/experiences/:id - Update request body:', JSON.stringify(req.body, null, 2));
       
       const experience = await Experience.findById(req.params.id);
 
@@ -391,7 +391,7 @@ router.put('/:id',
           // Automatically populate company logo and display name
           req.body.companyInfo.companyLogo = company.logo;
           req.body.companyInfo.companyName = company.displayName;
-          console.log(`🏢 Updated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
+          // console.log(`🏢 Updated experience with company: ${company.displayName} (${company.logo ? 'with logo' : 'no logo'})`);
         } catch (error) {
           console.warn('Error creating/finding company during update:', error);
           // Continue without company association if it fails
@@ -428,14 +428,14 @@ router.put('/:id',
             oldCompanyId,
             { $pull: { associatedExperiences: req.params.id } }
           );
-          console.log(`🧹 Removed experience ${req.params.id} from old company ${oldCompanyId}`);
+          // console.log(`🧹 Removed experience ${req.params.id} from old company ${oldCompanyId}`);
           
           // Add experience to new company's associatedExperiences
           await Company.findByIdAndUpdate(
             newCompanyId,
             { $addToSet: { associatedExperiences: req.params.id } }
           );
-          console.log(`🔗 Added experience ${req.params.id} to new company ${newCompanyId}`);
+          // console.log(`🔗 Added experience ${req.params.id} to new company ${newCompanyId}`);
         } catch (error) {
           console.warn('Error updating company associations:', error);
         }
@@ -446,7 +446,7 @@ router.put('/:id',
             newCompanyId,
             { $addToSet: { associatedExperiences: req.params.id } }
           );
-          console.log(`🔗 Added experience ${req.params.id} to company ${newCompanyId}`);
+          // console.log(`🔗 Added experience ${req.params.id} to company ${newCompanyId}`);
         } catch (error) {
           console.warn('Error adding company association:', error);
         }

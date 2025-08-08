@@ -349,7 +349,7 @@ router.get('/experiences', isAdmin, async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    console.log('Admin experiences query params:', req.query); // Debug log
+    // console.log('Admin experiences query params:', req.query); // Debug log
 
     // Build filter object
     const filter = {};

@@ -1,3 +1,46 @@
+/* PSG Notification Popup */
+.psg-notification {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  /* color: var(--text-primary); */
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1.5px 4px rgba(0,0,0,0.07);
+  padding: 16px 24px 16px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 240px;
+  max-width: 350px;
+  margin-bottom: 12px;
+  transition: opacity 0.3s, transform 0.3s;
+  cursor: pointer;
+}
+.psg-notification-success {
+  border-left: 5px solid #4caf50;
+}
+.psg-notification-error {
+  border-left: 5px solid #e53935;
+}
+.psg-notification-info {
+  border-left: 5px solid #1976d2;
+}
+.psg-notification-message {
+  flex: 1;
+  padding-right: 12px;
+}
+.psg-notification-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 0;
+  line-height: 1;
+}
+.psg-notification-close:hover {
+  color: #222;
+}
 /* PSG College Custom Components */
 
 /* PSG Hero Section */

@@ -24,7 +24,7 @@ const AdminDashboard = () => {
         const data = await response.json();
         if (data.success) {
           setStats(data.data);
-          console.log('Dashboard stats:', data.data);
+          // console.log('Dashboard stats:', data.data);
         }
       } else {
         const errorData = await response.json();

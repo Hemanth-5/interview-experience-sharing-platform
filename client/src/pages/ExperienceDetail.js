@@ -207,7 +207,6 @@ const ExperienceDetail = () => {
             >
               {isBookmarked ? '🔖' : '📖'} Bookmark
             </button>
-            {console.log(experience, user)}
             {/* // Show report button only if user is NOT the owner */}
             {user && experience.userId._id !== user.id && (
               !experience.reports?.some(report => report.reportedBy === user.id) ? (

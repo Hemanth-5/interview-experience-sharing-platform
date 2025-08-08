@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createApiUrl } from '../../config/api';
+import PSGNotification from '../../components/PSGNotification';
 import '../styles/admin.css';
 import '../styles/AdminUsers.css';
 
@@ -14,6 +15,7 @@ const AdminUsers = () => {
     limit: 20
   });
   const [pagination, setPagination] = useState({});
+  const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
 
   useEffect(() => {
     fetchUsers();
@@ -61,13 +63,13 @@ const AdminUsers = () => {
           setUsers(users.map(user => 
             user._id === userId ? { ...user, role: newRole } : user
           ));
-          alert('Role updated successfully');
+          setNotification({ open: true, message: 'Role updated successfully', type: 'success' });
         }
       } else {
-        alert('Error updating role');
+        setNotification({ open: true, message: 'Error updating role', type: 'error' });
       }
     } catch (err) {
-      alert('Error updating role');
+      setNotification({ open: true, message: 'Error updating role', type: 'error' });
     }
   };
 
@@ -98,6 +100,12 @@ const AdminUsers = () => {
 
   return (
     <div className="admin-users">
+      <PSGNotification
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, open: false })}
+      />
       <div className="admin-card-header">
         <h2 className="admin-card-title">User Management</h2>
         <button onClick={fetchUsers} className="admin-btn admin-btn-secondary">

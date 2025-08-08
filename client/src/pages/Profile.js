@@ -77,7 +77,7 @@ const Profile = () => {
       setUserExperiences(experiencesResponse.data.data);
       setBookmarkedExperiences(bookmarksResponse.data.data);
       setStats(statsResponse.data.data);
-      console.log(stats);
+      // console.log(stats);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to fetch profile data');
     } finally {

@@ -10,7 +10,7 @@ const AdminLayout = () => {
   const { user, logout } = useAuth();
   const displayName = user?.name ? extractUserName(user.name) : '';
 
-  console.log(user)
+  // console.log(user)
 
 
   const adminMenuItems = [

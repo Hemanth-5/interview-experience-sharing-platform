@@ -133,10 +133,15 @@ const NotificationBell = () => {
     }
   };
 
+  // Modal state for clear all confirmation
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
+
   const clearAllNotifications = async () => {
-    if (!window.confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
-      return;
-    }
+    setShowClearAllModal(true);
+  };
+
+  const handleConfirmClearAll = async () => {
+    setShowClearAllModal(false);
     try {
       const response = await fetch(createApiUrl('/api/users/notifications/clear-all'), {
         method: 'DELETE',
@@ -162,6 +167,10 @@ const NotificationBell = () => {
       setShowDropdown(false);
       console.error('Error clearing all notifications:', error);
     }
+  };
+
+  const handleCancelClearAll = () => {
+    setShowClearAllModal(false);
   };
 
   const handleNotificationClick = async (notification) => {
@@ -293,7 +302,7 @@ const NotificationBell = () => {
                   <i className="fas fa-check"></i>
                 </button>
               )}
-              {notifications.length > 0 && (
+              {/* {notifications.length > 0 && (
                 <button 
                   className="clear-all-btn"
                   onClick={clearAllNotifications}
@@ -301,7 +310,7 @@ const NotificationBell = () => {
                 >
                   <i className="fas fa-trash"></i>
                 </button>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -369,6 +378,67 @@ const NotificationBell = () => {
               </button>
             </div>
           )}
+        </div>
+      )}
+      {/* Clear All Confirmation Modal */}
+      {showClearAllModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.45)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div className="modal-card" style={{
+            background: 'white',
+            borderRadius: 12,
+            boxShadow: '0 10px 32px rgba(0,0,0,0.18)',
+            maxWidth: 380,
+            width: '90%',
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            position: 'relative',
+          }}>
+            <h3 style={{ color: '#dc2626', marginBottom: 12 }}>Clear All Notifications?</h3>
+            <p style={{ color: '#374151', marginBottom: 24 }}>
+              Are you sure you want to clear all notifications? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+              <button
+                onClick={handleCancelClearAll}
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  borderRadius: 6,
+                  border: '1px solid #d1d5db',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmClearAll}
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#dc2626',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Yes, Clear All
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

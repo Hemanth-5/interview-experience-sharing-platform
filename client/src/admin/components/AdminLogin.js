@@ -17,7 +17,7 @@ const AdminLogin = ({ onAuthenticated }) => {
     setLoading(true);
     setError('');
 
-    console.log('Attempting admin login with credentials:', credentials);
+    // console.log('Attempting admin login with credentials:', credentials);
 
     try {
       const response = await fetch(createApiUrl('/api/admin/login'), {

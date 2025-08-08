@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createApiUrl } from '../../config/api';
+import PSGNotification from '../../components/PSGNotification';
 import '../styles/admin.css';
 import '../styles/AdminExperiences.css';
 
@@ -32,6 +33,7 @@ const AdminExperiences = () => {
     totalPages: 1,
     total: 0
   });
+  const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -67,15 +69,15 @@ const AdminExperiences = () => {
       }, {});
       
       const params = new URLSearchParams(cleanFilters).toString();
-      console.log('Fetching with params:', params); // Debug log
-      console.log('Clean filters:', cleanFilters); // Debug log
+      // console.log('Fetching with params:', params); // Debug log
+      // console.log('Clean filters:', cleanFilters); // Debug log
       const response = await fetch(createApiUrl(`/api/admin/experiences?${params}`), {
         credentials: 'include'
       });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('API Response:', data); // Debug log
+        // console.log('API Response:', data); // Debug log
         if (data.success) {
           setExperiences(data.data.experiences || []);
           setPagination({
@@ -127,28 +129,24 @@ const AdminExperiences = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Show success message based on action
           const actionMessages = {
             approve: 'published',
             unpublish: 'unpublished',
             flag: 'flagged',
             unflag: 'unflagged'
           };
-          
-          alert(`Experience ${actionMessages[action] || action}ed successfully`);
-          
+          setNotification({ open: true, message: `Experience ${actionMessages[action] || action}ed successfully`, type: 'success' });
           // Refresh the data after successful moderation
           await fetchExperiences(true);
         } else {
-          alert(data.message || 'Error moderating experience');
+          setNotification({ open: true, message: data.message || 'Error moderating experience', type: 'error' });
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || 'Error moderating experience');
+        setNotification({ open: true, message: errorData.message || 'Error moderating experience', type: 'error' });
       }
     } catch (err) {
-      console.error('Error moderating experience:', err);
-      alert('Error moderating experience. Please try again.');
+      setNotification({ open: true, message: 'Error moderating experience. Please try again.', type: 'error' });
     }
   };
 
@@ -159,7 +157,7 @@ const AdminExperiences = () => {
 
   const submitFlag = async () => {
     if (!flagReason) {
-      alert('Please select a reason for flagging');
+      setNotification({ open: true, message: 'Please select a reason for flagging', type: 'error' });
       return;
     }
     
@@ -206,6 +204,12 @@ const AdminExperiences = () => {
 
   return (
     <div className="admin-experiences">
+      <PSGNotification
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, open: false })}
+      />
       <div className="admin-experiences-header">
         <h1 className="admin-experiences-title">Experience Management</h1>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
