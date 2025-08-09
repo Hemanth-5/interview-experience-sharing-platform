@@ -705,6 +705,7 @@ const CreateExperience = () => {
               onChange={(e) => handleInputChange('rounds', 'tips', e.target.value, roundIndex)}
               placeholder="Share tips and advice for this specific round..."
               rows="3"
+              required
             />
           </div>
 
@@ -762,6 +763,7 @@ const CreateExperience = () => {
             onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
             placeholder="Summarize your overall interview experience in a few sentences..."
             rows="3"
+            required
           />
         </div>
         <div className="psg-create-field">
@@ -778,11 +780,12 @@ const CreateExperience = () => {
           </select>
         </div>
         <div className="psg-create-field">
-          <label className="psg-create-label">Would you recommend this company?</label>
+          <label className="psg-create-label psg-create-label-required">Would you recommend this company?</label>
           <select
             className="psg-create-select"
             value={formData.wouldRecommend}
             onChange={(e) => handleInputChange(null, 'wouldRecommend', e.target.value === 'true')}
+            required
           >
             <option value={true}>Yes</option>
             <option value={false}>No</option>
@@ -849,7 +852,7 @@ const CreateExperience = () => {
           </select>
         </div>
         <div className="psg-create-field">
-          <label className="psg-create-label">CGPA</label>
+          <label className="psg-create-label psg-create-label-required">CGPA</label>
           <input
             type="number"
             className="psg-create-input"
@@ -859,6 +862,7 @@ const CreateExperience = () => {
             value={formData.backgroundInfo.cgpa}
             onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
             placeholder="e.g., 8.5"
+            required
           />
         </div>
         <div className="psg-create-field">

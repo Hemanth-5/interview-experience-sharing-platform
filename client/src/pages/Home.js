@@ -131,6 +131,15 @@ const Home = () => {
                     <h3>{featuredExperience.companyInfo?.role} at {featuredExperience.companyInfo?.companyName}</h3>
                     <p>{featuredExperience.companyInfo?.location} - {featuredExperience.companyInfo?.department}</p>
                   </div>
+                  {featuredExperience.isFlagged && (
+                    <span
+                      className="flagged-badge"
+                      title={Array.isArray(featuredExperience.flagReason) ? featuredExperience.flagReason.join(', ') : featuredExperience.flagReason}
+                      style={{ marginLeft: 8, color: '#ef4444', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      <i className="fas fa-flag"></i> Flagged
+                    </span>
+                  )}
                 </div>
                 <div className="hero-card-content">
                   <p>"{featuredExperience.overallExperience?.substring(0, 80)}..."</p>
@@ -298,6 +307,15 @@ const Home = () => {
                     <span className={`result-badge ${experience.finalResult?.toLowerCase()}`}>
                       {experience.finalResult}
                     </span>
+                    {experience.isFlagged && (
+                      <span
+                        className="flagged-badge"
+                        title={Array.isArray(experience.flagReason) ? experience.flagReason.join(', ') : experience.flagReason}
+                        style={{ marginLeft: 8, color: '#ef4444', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        <i className="fas fa-flag"></i> Flagged
+                      </span>
+                    )}
                   </div>
                   <div className="experience-meta">
                     <div className="experience-details">

@@ -17,18 +17,20 @@ const AdminUsers = () => {
   const [pagination, setPagination] = useState({});
   const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
 
+
+  // Always use the latest filters when fetching users
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(filters);
   }, [filters]);
 
-  const fetchUsers = async () => {
+  // Fetch users with given filters
+  const fetchUsers = async (customFilters = filters) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams(filters).toString();
+      const params = new URLSearchParams(customFilters).toString();
       const response = await fetch(createApiUrl(`/api/admin/users?${params}`), {
         credentials: 'include'
       });
-      
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -45,7 +47,52 @@ const AdminUsers = () => {
     }
   };
 
-  const handleRoleUpdate = async (userId, newRole) => {
+  // Modal state for admin creds
+  const [showAdminCredsModal, setShowAdminCredsModal] = useState(false);
+  const [adminCredsMode, setAdminCredsMode] = useState('new'); // 'new' or 'existing'
+  const [adminCredsUser, setAdminCredsUser] = useState(null); // user object
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [existingCreds, setExistingCreds] = useState([]);
+  const [selectedCredId, setSelectedCredId] = useState('');
+  const [adminCredsLoading, setAdminCredsLoading] = useState(false);
+  const [adminCredsError, setAdminCredsError] = useState('');
+
+  // Intercept role change to Admin for Student
+  const handleRoleUpdate = async (userId, newRole, userObj) => {
+    if (userObj.role === 'Student' && newRole === 'Admin') {
+      // Show modal for admin creds
+      setAdminCredsUser(userObj);
+      setShowAdminCredsModal(true);
+      setAdminCredsMode('new');
+      setAdminUsername('');
+      setAdminPassword('');
+      setAdminCredsError('');
+      setSelectedCredId('');
+      // Fetch existing creds for dropdown
+      try {
+        setAdminCredsLoading(true);
+        // Fetch all available admin creds (for demo, you may need to adjust endpoint)
+        const res = await fetch(createApiUrl('/api/admin/auth/all'), {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'x-admin-token': localStorage.getItem('adminToken')
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setExistingCreds(data.data || []);
+        } else {
+          setExistingCreds([]);
+        }
+      } catch (e) {
+        setExistingCreds([]);
+      } finally {
+        setAdminCredsLoading(false);
+      }
+      return;
+    }
+    // Normal role update
     try {
       const response = await fetch(createApiUrl(`/api/admin/users/${userId}/role`), {
         method: 'PUT',
@@ -55,11 +102,9 @@ const AdminUsers = () => {
         credentials: 'include',
         body: JSON.stringify({ role: newRole })
       });
-      
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Update user in local state
           setUsers(users.map(user => 
             user._id === userId ? { ...user, role: newRole } : user
           ));
@@ -70,6 +115,63 @@ const AdminUsers = () => {
       }
     } catch (err) {
       setNotification({ open: true, message: 'Error updating role', type: 'error' });
+    }
+  };
+
+  // Handle admin creds modal submit
+  const handleAdminCredsSubmit = async (e) => {
+    e.preventDefault();
+    setAdminCredsLoading(true);
+    setAdminCredsError('');
+    try {
+      let result;
+      if (adminCredsMode === 'new') {
+        // Create new admin creds using /bootstrap
+        const res = await fetch(createApiUrl('/api/admin/auth/bootstrap'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: adminCredsUser._id,
+            adminUsername,
+            adminPassword
+          })
+        });
+        result = await res.json();
+        if (!result.success) throw new Error(result.message || 'Failed to create admin credentials');
+      } else {
+        // Assign existing creds (you may need to implement this endpoint in backend)
+        result = await fetch(createApiUrl(`/api/admin/auth/assign`), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'x-admin-token': localStorage.getItem('adminToken')
+          },
+          body: JSON.stringify({ userId: adminCredsUser._id, adminCredId: selectedCredId })
+        });
+        result = await result.json();
+        if (!result.success) throw new Error(result.message || 'Failed to assign admin creds');
+      }
+      // Now update user role
+      await fetch(createApiUrl(`/api/admin/users/${adminCredsUser._id}/role`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ role: 'Admin' })
+      });
+      setUsers(users.map(user => 
+        user._id === adminCredsUser._id ? { ...user, role: 'Admin' } : user
+      ));
+      setNotification({ open: true, message: 'Admin credentials assigned and role updated!', type: 'success' });
+      setShowAdminCredsModal(false);
+    } catch (err) {
+      setAdminCredsError(err.message || 'Failed to assign admin credentials');
+    } finally {
+      setAdminCredsLoading(false);
     }
   };
 
@@ -106,32 +208,39 @@ const AdminUsers = () => {
         type={notification.type}
         onClose={() => setNotification({ ...notification, open: false })}
       />
-      <div className="admin-card-header">
-        <h2 className="admin-card-title">User Management</h2>
-        <button onClick={fetchUsers} className="admin-btn admin-btn-secondary">
-          Refresh
+      <div className="admin-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
+        <h2 className="admin-card-title" style={{ margin: 0 }}>User Management</h2>
+        <button
+          onClick={() => fetchUsers()}
+          className="admin-btn admin-btn-secondary"
+          style={{ minWidth: 110 }}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
       {/* Filters */}
-      <div className="admin-filters">
-        <div className="admin-filters-row">
-          <div className="admin-filter-group">
-            <label>Search Users</label>
+      <div className="admin-filters" style={{ marginBottom: 20 }}>
+        <div className="admin-filters-row" style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div className="admin-filter-group" style={{ minWidth: 220 }}>
+            <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Search Users</label>
             <input
               type="text"
               className="form-control"
               placeholder="Search by name or email..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
             />
           </div>
-          <div className="admin-filter-group">
-            <label>Filter by Role</label>
+          <div className="admin-filter-group" style={{ minWidth: 180 }}>
+            <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Filter by Role</label>
             <select
               className="form-control"
               value={filters.role}
               onChange={(e) => handleFilterChange('role', e.target.value)}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
             >
               <option value="">All Roles</option>
               <option value="Student">Student</option>
@@ -149,31 +258,31 @@ const AdminUsers = () => {
       )}
 
       {/* Users Table */}
-      <div className="admin-card">
+      <div className="admin-card" style={{ marginTop: 12 }}>
         <div className="admin-card-content">
           {users.length > 0 ? (
             <div className="admin-table-container">
-              <table className="admin-table">
+              <table className="admin-table" style={{ minWidth: 900, borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Joined</th>
-                    <th>Experiences</th>
-                    <th>Actions</th>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>User</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>Email</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>Role</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>Joined</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>Experiences</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 700, fontSize: 15 }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user._id}>
-                      <td>
+                    <tr key={user._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '10px 8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           {user.avatar ? (
                             <img
                               src={user.avatar}
                               alt={user.name}
-                              style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #e5e7eb' }}
                             />
                           ) : (
                             <div
@@ -181,45 +290,46 @@ const AdminUsers = () => {
                                 width: '32px',
                                 height: '32px',
                                 borderRadius: '50%',
-                                background: 'var(--primary-color)',
+                                background: 'var(--primary-color, #6366f1)',
                                 color: 'white',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '14px',
-                                fontWeight: '600'
+                                fontWeight: '600',
+                                border: '1.5px solid #e5e7eb'
                               }}
                             >
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div>
-                            <strong>{user.name}</strong>
+                            <strong style={{ fontSize: 15 }}>{user.name}</strong>
                             {user.university && (
-                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                              <div style={{ fontSize: '12px', color: '#6b7280' }}>
                                 {user.university}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`admin-status-badge ${getRoleBadgeClass(user.role)}`}>
+                      <td style={{ padding: '10px 8px', fontSize: 15 }}>{user.email}</td>
+                      <td style={{ padding: '10px 8px' }}>
+                        <span className={`admin-status-badge ${getRoleBadgeClass(user.role)}`} style={{ fontSize: 14, padding: '4px 12px', borderRadius: 6 }}>
                           {user.role}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ padding: '10px 8px', fontSize: 15 }}>
                         {new Date(user.joinedAt || user.createdAt).toLocaleDateString()}
                       </td>
-                      <td>{user.stats?.experiencesShared || 0}</td>
-                      <td>
+                      <td style={{ padding: '10px 8px', fontSize: 15 }}>{user.stats?.experiencesShared || 0}</td>
+                      <td style={{ padding: '10px 8px' }}>
                         <div className="admin-actions">
                           <select
                             value={user.role}
-                            onChange={(e) => handleRoleUpdate(user._id, e.target.value)}
+                            onChange={(e) => handleRoleUpdate(user._id, e.target.value, user)}
                             className="form-control"
-                            style={{ minWidth: '120px' }}
+                            style={{ minWidth: '120px', padding: '6px 10px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
                           >
                             <option value="Student">Student</option>
                             <option value="Moderator">Moderator</option>
@@ -233,7 +343,7 @@ const AdminUsers = () => {
               </table>
             </div>
           ) : (
-            <div className="empty-state">
+            <div className="empty-state" style={{ padding: '2rem 0', textAlign: 'center', color: '#6b7280' }}>
               <p>No users found.</p>
             </div>
           )}
@@ -242,13 +352,17 @@ const AdminUsers = () => {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="admin-card">
+        // <div className="admin-card">
           <div className="admin-card-content">
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
               <button
                 className="admin-btn admin-btn-secondary"
-                disabled={pagination.currentPage <= 1}
-                onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
+                disabled={loading || pagination.currentPage <= 1}
+                onClick={() => {
+                  if (!loading && pagination.currentPage > 1) {
+                    setFilters(prev => ({ ...prev, page: pagination.currentPage - 1 }));
+                  }
+                }}
               >
                 Previous
               </button>
@@ -257,12 +371,147 @@ const AdminUsers = () => {
               </span>
               <button
                 className="admin-btn admin-btn-secondary"
-                disabled={pagination.currentPage >= pagination.totalPages}
-                onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
+                disabled={loading || pagination.currentPage >= pagination.totalPages}
+                onClick={() => {
+                  if (!loading && pagination.currentPage < pagination.totalPages) {
+                    setFilters(prev => ({ ...prev, page: pagination.currentPage + 1 }));
+                  }
+                }}
               >
                 Next
               </button>
             </div>
+          </div>
+        // </div>
+      )}
+      {/* Admin Creds Modal */}
+      {showAdminCredsModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.45)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div className="modal-card" style={{
+            background: 'white',
+            borderRadius: 12,
+            boxShadow: '0 10px 32px rgba(0,0,0,0.18)',
+            maxWidth: 420,
+            width: '95%',
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            position: 'relative',
+          }}>
+            <h3 style={{ color: '#4f46e5', marginBottom: 12 }}>Assign Admin Credentials</h3>
+            <p style={{ color: '#374151', marginBottom: 18 }}>
+              Assign credentials for <b>{adminCredsUser?.name}</b> to become an Admin.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 18 }}>
+              <button
+                onClick={() => setAdminCredsMode('new')}
+                style={{
+                  padding: '0.5rem 1.2rem',
+                  borderRadius: 6,
+                  border: adminCredsMode === 'new' ? '2px solid #4f46e5' : '1px solid #d1d5db',
+                  background: adminCredsMode === 'new' ? '#eef2ff' : '#f3f4f6',
+                  color: '#374151',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >Create New</button>
+              <button
+                onClick={() => setAdminCredsMode('existing')}
+                style={{
+                  padding: '0.5rem 1.2rem',
+                  borderRadius: 6,
+                  border: adminCredsMode === 'existing' ? '2px solid #4f46e5' : '1px solid #d1d5db',
+                  background: adminCredsMode === 'existing' ? '#eef2ff' : '#f3f4f6',
+                  color: '#374151',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >Select Existing</button>
+            </div>
+            <form onSubmit={handleAdminCredsSubmit}>
+              {adminCredsMode === 'new' ? (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Admin Username"
+                    value={adminUsername}
+                    onChange={e => setAdminUsername(e.target.value)}
+                    required
+                    minLength={3}
+                    maxLength={50}
+                    style={{ width: '100%', marginBottom: 12, padding: '10px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Admin Password"
+                    value={adminPassword}
+                    onChange={e => setAdminPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    style={{ width: '100%', marginBottom: 12, padding: '10px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  />
+                </>
+              ) : (
+                <>
+                  {adminCredsLoading ? (
+                    <div style={{ marginBottom: 12 }}>Loading credentials...</div>
+                  ) : (
+                    <select
+                      value={selectedCredId}
+                      onChange={e => setSelectedCredId(e.target.value)}
+                      required
+                      style={{ width: '100%', marginBottom: 12, padding: '10px', borderRadius: 6, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                    >
+                      <option value="">Select existing admin credentials</option>
+                      {/* {console.log(existingCreds)} */}
+                      {existingCreds.map(cred => (
+                        <option key={cred._id} value={cred._id}>{cred.adminUsername}</option>
+                      ))}
+                    </select>
+                  )}
+                </>
+              )}
+              {adminCredsError && <div style={{ color: '#dc2626', marginBottom: 10 }}>{adminCredsError}</div>}
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAdminCredsModal(false)}
+                  style={{
+                    padding: '0.6rem 1.5rem',
+                    borderRadius: 6,
+                    border: '1px solid #d1d5db',
+                    background: '#f3f4f6',
+                    color: '#374151',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                  disabled={adminCredsLoading}
+                >Cancel</button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '0.6rem 1.5rem',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#4f46e5',
+                    color: 'white',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  disabled={adminCredsLoading || (adminCredsMode === 'existing' && !selectedCredId)}
+                >{adminCredsLoading ? 'Assigning...' : 'Assign'}</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

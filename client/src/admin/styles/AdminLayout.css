@@ -1,3 +1,15 @@
+/* Remove default table borders for admin tables */
+.admin-table {
+  border: none !important;
+  border-collapse: separate !important;
+  background: transparent;
+}
+
+.admin-table th,
+.admin-table td {
+  border: none !important;
+  background: transparent;
+}
 /* AdminLayout Component Styles */
 .admin-layout {
   min-height: 100vh;
@@ -202,7 +214,7 @@
 
 .admin-main {
   flex: 1;
-  padding: var(--admin-spacing-xl);
+  /* padding: var(--admin-spacing-xl); */
   background: transparent;
   margin-left: 280px;
   width: calc(100% - 280px);

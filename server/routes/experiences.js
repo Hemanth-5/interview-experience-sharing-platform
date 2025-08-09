@@ -718,21 +718,24 @@ router.post(
       });
 
       // Check if we should auto-flag based on report threshold
-      const reportThreshold = experience.autoFlagThreshold || 5;
+      const reportThreshold = experience.autoFlagThreshold;
       if (experience.reports.length >= reportThreshold && !experience.flagged) {
         experience.flagged = true;
         experience.flaggedBy = 'system';
-        experience.flagReason = 'Multiple reports received';
+        experience.flagReason = 'multiple_reports';
         experience.flaggedAt = new Date();
 
         // Create notification for experience owner
         await Notification.create({
-          user: experience.userId,
+          recipient: experience.userId,
           type: 'experience_flagged',
+          title: 'Experience Flagged',
           message: 'Your experience has been flagged due to multiple reports',
-          reason: 'Multiple reports received',
-          details: `Your experience has been automatically flagged after receiving ${experience.reports.length} reports.`,
-          relatedExperience: experienceId
+          flagReason: experience.flagReason,
+          flagReasonDetails: `Your experience has been automatically flagged after receiving ${experience.reports.length} reports.`,
+          relatedExperience: experienceId,
+          actionUrl: `/experiences/${experienceId}`,
+          priority: 'high',
         });
       }
 

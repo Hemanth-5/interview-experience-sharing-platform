@@ -352,13 +352,13 @@ const NotificationBell = () => {
                     {!notification.read && (
                       <div className="unread-indicator"></div>
                     )}
-                    <button
+                    {/* <button
                       className="clear-notification-btn"
                       onClick={(e) => clearNotification(notification._id, e)}
                       title="Clear notification"
                     >
                       <i className="fas fa-times"></i>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ))

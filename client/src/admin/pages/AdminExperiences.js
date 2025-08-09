@@ -15,6 +15,7 @@ const AdminExperiences = () => {
   const [selectedExperience, setSelectedExperience] = useState(null);
   const [flagReason, setFlagReason] = useState('');
   const [flagReasonDetails, setFlagReasonDetails] = useState('');
+  const [expIdInput, setExpIdInput] = useState('');
   const [stats, setStats] = useState({
     total: 0,
     published: 0,
@@ -68,6 +69,10 @@ const AdminExperiences = () => {
         return acc;
       }, {});
       
+      // If expIdInput is present, override filters to search by _id
+      if (expIdInput && expIdInput.trim() !== '') {
+        cleanFilters._id = expIdInput.trim();
+      }
       const params = new URLSearchParams(cleanFilters).toString();
       // console.log('Fetching with params:', params); // Debug log
       // console.log('Clean filters:', cleanFilters); // Debug log
@@ -104,7 +109,7 @@ const AdminExperiences = () => {
         setError(errorData.message || 'Failed to fetch experiences');
       }
     } catch (err) {
-      console.error('Error fetching experiences:', err);
+      // console.error('Error fetching experiences:', err);
       setError('Failed to fetch experiences. Please try again.');
     } finally {
       if (isRefresh) {
@@ -259,7 +264,7 @@ const AdminExperiences = () => {
       </div> */}
 
       {/* Filters */}
-      <div className="admin-filters">
+  <div className="admin-filters">
         {/* {(userSearchInput || companySearchInput || filters.status) && (
           <div style={{ 
             marginBottom: '1rem', 
@@ -276,6 +281,37 @@ const AdminExperiences = () => {
           </div>
         )} */}
         <div className="admin-filters-grid">
+          <div className="admin-filter-group">
+            <label className="admin-filter-label">Search by Experience ID</label>
+            <div style={{ position: 'relative', minWidth: 220 }}>
+              <input
+                type="text"
+                className="admin-filter-input"
+                placeholder="Enter Experience ID..."
+                value={expIdInput}
+                onChange={e => setExpIdInput(e.target.value)}
+                style={{ width: '100%' }}
+              />
+              {expIdInput && (
+                <button
+                  onClick={() => setExpIdInput('')}
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: '#6b7280'
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
           <div className="admin-filter-group">
             <label className="admin-filter-label">Search Users</label>
             <div style={{ position: 'relative' }}>

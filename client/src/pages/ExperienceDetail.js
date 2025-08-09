@@ -151,8 +151,84 @@ const ExperienceDetail = () => {
     setReportError('');
   }
 
+  // Show popup if owner is viewing and experience is flagged
+  const showFlaggedOwnerPopup = experience.flagged && user && experience.userId && (experience.userId._id === user.id);
+
   return (
     <div className="experience-detail">
+      {showFlaggedOwnerPopup && (
+        <div className="flagged-owner-popup" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.4)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#fff',
+            padding: '32px 24px',
+            borderRadius: 12,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.15)',
+            maxWidth: 400,
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 36, color: '#ef4444', marginBottom: 12 }}>
+              <i className="fas fa-flag"></i>
+            </div>
+            <h2 style={{ color: '#ef4444', marginBottom: 8 }}>Experience Flagged</h2>
+            <p style={{ marginBottom: 12 }}>
+              Your experience has been flagged for review.<br/>
+              Please contact the system administrator for more information.
+            </p>
+            {experience.flagReason && (
+              <div style={{ color: '#b91c1c', fontSize: 14, marginBottom: 8 }}>
+                <strong>Reason:</strong> {Array.isArray(experience.flagReason) ? experience.flagReason.join(', ') : experience.flagReason}
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                title='Back to Experiences'
+                style={{
+                  padding: '8px 20px',
+                  background: '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+                onClick={() => navigate("/experiences")}
+              >
+                Dismiss
+              </button>
+              <button
+                title='Contact System Administrator'
+                style={{
+                  padding: '8px 20px',
+                  background: '#2563eb',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+                onClick={() => {
+                  const subject = encodeURIComponent('Flagged Experience Assistance Needed');
+                  const body = encodeURIComponent(`Hello,\n\nMy interview experience (ID: ${experience._id}, Company: ${experience.companyInfo.companyName}) has been flagged.\n\nFlag Reason: ${Array.isArray(experience.flagReason) ? experience.flagReason.join(', ') : experience.flagReason || 'N/A'}\n\nI would like to understand the reason and resolve any issues. Please assist.\n\nThank you.`);
+                  window.location.href = `/about?prefill_subject=${subject}&prefill_body=${body}`;
+                }}
+              >
+                Contact System Administrator
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="experience-header">
         <div className="experience-company-info">
           <h1>{experience.companyInfo.companyName}</h1>

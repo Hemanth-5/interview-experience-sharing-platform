@@ -887,7 +887,7 @@ const EditExperience = () => {
                   </div>
 
                   <div className="psg-edit-field psg-edit-grid-full">
-                    <label className="psg-edit-label">
+                    <label className="psg-edit-label psg-edit-label-required">
                       Tips for this round
                     </label>
                     <textarea
@@ -896,6 +896,7 @@ const EditExperience = () => {
                       onChange={(e) => handleInputChange('rounds', 'tips', e.target.value, roundIndex)}
                       placeholder="Share tips and advice for this specific round..."
                       rows="3"
+                      required
                     />
                   </div>
 
@@ -1148,7 +1149,7 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Overall Experience Summary
                 </label>
                 <textarea
@@ -1157,6 +1158,7 @@ const EditExperience = () => {
                   onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
                   placeholder="Summarize your overall interview experience in a few sentences..."
                   rows="3"
+                  required
                 />
               </div>
 
@@ -1177,13 +1179,14 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   Would you recommend this company?
                 </label>
                 <select
                   className="psg-edit-select"
                   value={formData.wouldRecommend}
                   onChange={(e) => handleInputChange(null, 'wouldRecommend', e.target.value === 'true')}
+                  required
                 >
                   <option value={true}>Yes</option>
                   <option value={false}>No</option>
@@ -1264,7 +1267,7 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field">
-                <label className="psg-edit-label">
+                <label className="psg-edit-label psg-edit-label-required">
                   CGPA
                 </label>
                 <input
@@ -1276,6 +1279,7 @@ const EditExperience = () => {
                   value={formData.backgroundInfo.cgpa}
                   onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
                   placeholder="e.g., 8.5"
+                  required
                 />
               </div>
 

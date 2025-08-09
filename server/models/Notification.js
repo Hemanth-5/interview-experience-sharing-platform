@@ -51,6 +51,7 @@ const notificationSchema = new mongoose.Schema({
       'personal_attacks',
       'off_topic',
       'duplicate_content',
+      'multiple_reports',
       'other'
     ],
     default: null

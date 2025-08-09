@@ -1,20 +1,39 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import PSGNotification from '../components/PSGNotification';
 import { useAuth } from '../contexts/AuthContext';
 import './About.css';
 
 const About = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [message, setMessage] = useState('');
+  const [subject, setSubject] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
+  const contactFormRef = useRef(null);
   // const navigate = useNavigate();
 
-  // Scroll to top when component mounts
+  // Scroll to top when component mounts, and handle prefill
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-  }, []);
+    // Prefill subject and message from query params
+    const params = new URLSearchParams(location.search);
+    const prefillSubject = params.get('prefill_subject');
+    const prefillBody = params.get('prefill_body');
+    if (prefillBody) {
+      setMessage(decodeURIComponent(prefillBody));
+      // Scroll to contact form after short delay to ensure render
+      setTimeout(() => {
+        if (contactFormRef.current) {
+          contactFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+    if (prefillSubject) {
+      setSubject(decodeURIComponent(prefillSubject));
+    }
+  }, [location.search]);
 
   const handleInputChange = (e) => {
     setMessage(e.target.value);
@@ -34,16 +53,15 @@ const About = () => {
     }
 
     // Create simple message content
-    const subject = `PSG Tech Interview Experience Platform - Message from ${user.name}`;
-    const emailBody = `Hello,
-
+  const emailSubject = subject || `PSG Tech Interview Experience Platform - Message from ${user.name}`;
+  const emailBody = `
 ${message}
 
 Best regards,
 ${user.name}`;
 
     // Open Gmail with the message
-    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=22z225@psgtech.ac.in&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=22z225@psgtech.ac.in&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
     window.open(gmailLink, '_blank');
 
     // Clear the form and show success message
@@ -306,13 +324,25 @@ ${user.name}`;
                 </div>
               </div>
             </div>
-            <div className="contact-form">
+            <div className="contact-form" ref={contactFormRef}>
               <h3>Send us a Message</h3>
+              {subject && (
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="subject"
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                    placeholder="Subject"
+                    style={{ width: '100%', marginBottom: 8 }}
+                  />
+                </div>
+              )}
               {user ? (
                 <>
-                  <div className="user-info-display">
+                  {/* <div className="user-info-display">
                     <p><strong>Logged in as:</strong> {user.name} ({user.email})</p>
-                  </div>
+                  </div> */}
                   <form onSubmit={handleSubmit}>
                     <div className="form-group">
                       <textarea 

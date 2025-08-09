@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { Link, useSearchParams } from 'react-router-dom';
 import { createApiUrl } from '../config/api';
 import axios from 'axios';
@@ -131,43 +132,67 @@ const Experiences = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  const renderExperienceCard = (experience) => (
-    <Link 
-      key={experience._id} 
-      to={`/experiences/${experience._id}`}
-      className="exp-experience-card"
-    >
-      <div className="exp-experience-header">
-        <div className="exp-company-info">
-          <div className="exp-company-logo-container">
-            <CompanyLogo 
-              companyName={experience.companyInfo?.companyName || 'Unknown Company'} 
-              companyLogo={experience.companyInfo?.companyLogo}
-              size={40}
-            />
+  const { user } = useAuth();
+  const [flaggedPopup, setFlaggedPopup] = useState(null);
+
+  const renderExperienceCard = (experience) => {
+    const isOwner = user && experience.userId && (experience.userId._id === user.id);
+    const isFlagged = experience.flagged;
+    const handleClick = (e) => {
+      if (isFlagged && !isOwner) {
+        e.preventDefault();
+        setFlaggedPopup(Array.isArray(experience.flagReason) ? experience.flagReason.join(', ') : (experience.flagReason || 'This content is flagged and cannot be opened.'));
+      }
+    };
+    return (
+      <Link
+        key={experience._id}
+        to={isFlagged && !isOwner ? '#' : `/experiences/${experience._id}`}
+        className="exp-experience-card"
+        onClick={handleClick}
+        style={isFlagged && !isOwner ? { cursor: 'not-allowed', pointerEvents: 'auto', opacity: 0.7 } : {}}
+        tabIndex={0}
+      >
+        <div className="exp-experience-header">
+          <div className="exp-company-info">
+            <div className="exp-company-logo-container">
+              <CompanyLogo
+                companyName={experience.companyInfo?.companyName || 'Unknown Company'}
+                companyLogo={experience.companyInfo?.companyLogo}
+                size={40}
+              />
+            </div>
+            <div className="exp-company-details">
+              <h3 className="exp-company-name">{experience.companyInfo?.companyName || 'Unknown Company'}</h3>
+              <p className="exp-role">{experience.companyInfo?.role || 'Unknown Role'}</p>
+            </div>
           </div>
-          <div className="exp-company-details">
-            <h3 className="exp-company-name">{experience.companyInfo?.companyName || 'Unknown Company'}</h3>
-            <p className="exp-role">{experience.companyInfo?.role || 'Unknown Role'}</p>
+          <span className={`exp-result-badge ${experience.finalResult?.toLowerCase() || 'pending'}`}>
+            {experience.finalResult || 'Pending'}
+          </span>
+          {isFlagged && (
+            <span
+              className="exp-flagged-badge"
+              title={Array.isArray(experience.flagReason) ? experience.flagReason.join(', ') : (experience.flagReason || 'Flagged content: Be aware of potential issues')}
+              style={{ marginLeft: 8, color: '#ef4444', fontWeight: 600, cursor: 'pointer' }}
+            >
+              <i className="fas fa-flag"></i> Flagged
+            </span>
+          )}
+        </div>
+        <div className="exp-experience-meta">
+          <div className="exp-experience-details">
+            <span className="exp-department">{experience.companyInfo?.department || 'N/A'}</span>
+            <span className="exp-location">{experience.companyInfo?.location || 'N/A'}</span>
+          </div>
+          <div className="exp-experience-stats">
+            <span className="exp-rating">⭐ {experience.overallRating || 0}/5</span>
+            <span className="exp-rounds">{experience.rounds?.length || 0} rounds</span>
           </div>
         </div>
-        <span className={`exp-result-badge ${experience.finalResult?.toLowerCase() || 'pending'}`}>
-          {experience.finalResult || 'Pending'}
-        </span>
-      </div>
-      
-      <div className="exp-experience-meta">
-        <div className="exp-experience-details">
-          <span className="exp-department">{experience.companyInfo?.department || 'N/A'}</span>
-          <span className="exp-location">{experience.companyInfo?.location || 'N/A'}</span>
-        </div>
-        <div className="exp-experience-stats">
-          <span className="exp-rating">⭐ {experience.overallRating || 0}/5</span>
-          <span className="exp-rounds">{experience.rounds?.length || 0} rounds</span>
-        </div>
-      </div>
-    </Link>
-  );
+      </Link>
+    );
+  };
 
   const renderPagination = () => {
     if (pagination.totalPages <= 1) return null;
@@ -244,6 +269,53 @@ const Experiences = () => {
 
   return (
     <div className="exp-experiences">
+      {flaggedPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.4)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#fff',
+            padding: '32px 24px',
+            borderRadius: 12,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.15)',
+            maxWidth: 400,
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 36, color: '#ef4444', marginBottom: 12 }}>
+              <i className="fas fa-flag"></i>
+            </div>
+            <h2 style={{ color: '#ef4444', marginBottom: 8 }}>Flagged Content</h2>
+            <p style={{ marginBottom: 12 }}>
+              This experience has been flagged and cannot be opened.<br/>
+              {/* <span style={{ color: '#b91c1c', fontSize: 14 }}><strong>Reason:</strong> {flaggedPopup}</span> */}
+            </p>
+            <button
+              style={{
+                marginTop: 8,
+                padding: '8px 20px',
+                background: '#ef4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+              onClick={() => setFlaggedPopup(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header Section */}
       <section className="exp-experiences-header">
         <div className="exp-header-content">

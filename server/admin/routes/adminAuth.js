@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const AdminAuth = require('../models/AdminAuth');
+const Notification = require('../../models/Notification');
 const User = require('../../models/User');
 const { isAdmin } = require('../../middleware/auth');
 const logger = require('../../utils/logger');
@@ -102,11 +103,11 @@ router.post('/login', adminLoginLimiter, adminLoginValidation, async (req, res) 
       });
     }
 
-    // Find admin auth record
-    const adminAuth = await AdminAuth.findOne({ 
-      userId,
+    // Find admin auth record (user must be in users array)
+    const adminAuth = await AdminAuth.findOne({
+      users: userId,
       adminUsername,
-      isActive: true 
+      isActive: true
     });
 
     if (!adminAuth) {
@@ -218,7 +219,7 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
     }
 
     // Check if admin auth already exists for this user
-    const existingAuth = await AdminAuth.findOne({ userId });
+    const existingAuth = await AdminAuth.findOne({ users: userId });
     if (existingAuth) {
       return res.status(400).json({
         success: false,
@@ -237,7 +238,7 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
 
     // Create new admin auth record
     const adminAuth = new AdminAuth({
-      userId,
+      users: [userId],
       adminUsername,
       adminPassword,
       createdBy: req.user.userId
@@ -256,7 +257,7 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
       message: 'Admin authentication created successfully',
       adminAuth: {
         adminId: adminAuth._id,
-        userId: adminAuth.userId,
+        users: adminAuth.users,
         adminUsername: adminAuth.adminUsername,
         isActive: adminAuth.isActive
       }
@@ -337,7 +338,7 @@ router.get('/verify', async (req, res) => {
         adminUser: {
           adminId: adminAuth._id,
           adminUsername: adminAuth.adminUsername,
-          userId: adminAuth.userId,
+          users: adminAuth.users,
           lastLogin: adminAuth.lastLogin
         }
       });
@@ -354,6 +355,25 @@ router.get('/verify', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error during admin verification'
+    });
+  }
+});
+
+// @route GET /api/admin/auth/all
+// @desc    Get all admin credentials
+// @access  Private (Admin)
+router.get('/all', async (req, res) => {
+  try {
+    const adminAuths = await AdminAuth.find();
+    res.json({
+      success: true,
+      data: adminAuths
+    });
+  } catch (error) {
+    logger.error('Get all admin auth error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during fetching all admin auth'
     });
   }
 });
@@ -417,14 +437,13 @@ router.post('/bootstrap', [
       });
     }
 
-    // Create first admin auth record
+    // Create first admin auth record with users array
     const adminAuth = new AdminAuth({
-      userId,
+      users: [userId],
       adminUsername,
       adminPassword,
       createdBy: userId // Self-created for bootstrap
     });
-
     await adminAuth.save();
 
     logger.info(`Bootstrap admin auth created`, {
@@ -434,6 +453,19 @@ router.post('/bootstrap', [
       ip: req.ip,
       userAgent: req.get('User-Agent')
     });
+
+    // Send notification to user
+    try {
+      await Notification.createNotification({
+        recipient: userId,
+        type: 'admin_message',
+        title: 'You are now an Admin!',
+        message: 'Congratulations! You have been granted admin privileges. You can now access the admin panel and perform admin actions.',
+        priority: 'high',
+      });
+    } catch (notifyErr) {
+      logger.error('Failed to send admin notification (bootstrap):', notifyErr);
+    }
 
     res.status(201).json({
       success: true,
@@ -450,6 +482,78 @@ router.post('/bootstrap', [
     res.status(500).json({
       success: false,
       message: 'Internal server error during bootstrap admin creation'
+    });
+  }
+});
+
+// @route POST /api/admin/auth/assign
+// @desc Assign existing admin credentials to a user
+// @access Private
+router.post('/assign', [
+  body('userId')
+    .isMongoId()
+    .withMessage('Valid user ID required'),
+  body('adminCredId')
+    .isMongoId()
+    .withMessage('Valid admin credential ID required')
+], async (req, res) => {
+  try {
+    const { userId, adminCredId } = req.body;
+
+    // Verify admin credentials exist
+    const adminAuth = await AdminAuth.findById(adminCredId);
+    if (!adminAuth) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin credentials not found'
+      });
+    }
+
+    // Assign admin credentials to user (multi-user support)
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Add user to adminAuth.users array if not already present
+    if (!adminAuth.users.includes(userId)) {
+      adminAuth.users.push(userId);
+      await adminAuth.save();
+    }
+
+    user.adminAuth = adminAuth._id;
+    await user.save();
+
+    // Send notification to user
+    try {
+      await Notification.createNotification({
+        recipient: user._id,
+        type: 'admin_message',
+        title: 'You are now an Admin!',
+        message: 'Congratulations! You have been granted admin privileges. You can now access the admin panel and perform admin actions.',
+        priority: 'high',
+      });
+    } catch (notifyErr) {
+      logger.error('Failed to send admin notification (assign):', notifyErr);
+    }
+
+    res.json({
+      success: true,
+      message: 'Admin credentials assigned successfully',
+      data: {
+        userId: user._id,
+        adminUsername: adminAuth.adminUsername
+      }
+    });
+
+  } catch (error) {
+    logger.error('Admin auth assignment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during admin auth assignment'
     });
   }
 });

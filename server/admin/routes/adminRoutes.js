@@ -53,8 +53,8 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Check if this admin auth belongs to the current user
-    if (adminAuth.userId.toString() !== req.user._id.toString()) {
+    // Check if this admin auth belongs to the current user (multi-user support)
+    if (!adminAuth.users.map(id => id.toString()).includes(req.user._id.toString())) {
       return res.status(403).json({
         success: false,
         message: 'Admin credentials do not match current user'
@@ -318,6 +318,20 @@ router.put('/users/:userId/role', isAdmin, async (req, res) => {
       });
     }
 
+
+    // Send notification to user about role change
+    try {
+      await Notification.create({
+        recipient: user._id,
+        type: 'admin_message',
+        title: 'Your Role Has Changed',
+        message: `Your role has been updated to ${role}.`,
+        priority: role === 'Admin' ? 'high' : 'medium',
+      });
+    } catch (notifyErr) {
+      console.error('Failed to send role update notification:', notifyErr);
+    }
+
     res.json({
       success: true,
       data: user,
@@ -346,21 +360,30 @@ router.get('/experiences', isAdmin, async (req, res) => {
       userSearch,
       companySearch,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      _id
     } = req.query;
 
-    // console.log('Admin experiences query params:', req.query); // Debug log
-
     // Build filter object
-    const filter = {};
-    if (status === 'published') {
-      filter.isPublished = true;
-      filter.flagged = { $ne: true };
-    } else if (status === 'draft') {
-      filter.isPublished = false;
-      filter.flagged = { $ne: true };
-    } else if (status === 'flagged') {
-      filter.flagged = true;
+    let filter = {};
+    if (_id && _id.trim() !== '') {
+      // Validate ObjectId
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(_id.trim())) {
+        filter = { _id: new mongoose.Types.ObjectId(_id.trim()) };
+      } else {
+        return res.status(400).json({ success: false, message: 'Invalid experience ID' });
+      }
+    } else {
+      if (status === 'published') {
+        filter.isPublished = true;
+        filter.flagged = { $ne: true };
+      } else if (status === 'draft') {
+        filter.isPublished = false;
+        filter.flagged = { $ne: true };
+      } else if (status === 'flagged') {
+        filter.flagged = true;
+      }
     }
 
     // Build aggregation pipeline for user and company search
@@ -399,7 +422,7 @@ router.get('/experiences', isAdmin, async (req, res) => {
       });
     }
 
-    // Add status filter
+    // Add status/_id filter
     if (Object.keys(filter).length > 0) {
       pipeline.push({ $match: filter });
     }

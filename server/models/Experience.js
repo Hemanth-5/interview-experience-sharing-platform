@@ -377,9 +377,20 @@ const experienceSchema = new mongoose.Schema({
     default: null
   },
   flaggedBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed, // Can be ObjectId or string
     ref: 'User',
-    default: null
+    default: null,
+    validate: {
+      validator: function(v) {
+        // Allow ObjectId or the string 'system'
+        return (
+          v === null ||
+          (typeof v === 'string' && v === 'system') ||
+          (typeof v === 'object' && v instanceof mongoose.Types.ObjectId)
+        );
+      },
+      message: 'flaggedBy must be a User ObjectId or the string "system".'
+    }
   },
   flagReason: {
     type: String,
@@ -392,6 +403,7 @@ const experienceSchema = new mongoose.Schema({
       'personal_attacks',
       'off_topic',
       'duplicate_content',
+      'multiple_reports',
       'other'
     ],
     default: null

@@ -796,9 +796,9 @@
 }
 
 /* Force all text to be black - Global Override */
-.exp-experiences * {
+/* .exp-experiences * {
   color: #000000 !important;
-}
+} */
 
 /* Exception for white text on colored backgrounds */
 .exp-experiences-header,
