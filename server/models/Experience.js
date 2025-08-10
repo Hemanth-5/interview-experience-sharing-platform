@@ -364,7 +364,7 @@ const experienceSchema = new mongoose.Schema({
   // Moderation and Flagging
   isPublished: {
     type: Boolean,
-    default: false,
+    default: true,
     index: true
   },
   flagged: {
