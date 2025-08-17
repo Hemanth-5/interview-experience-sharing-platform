@@ -188,7 +188,7 @@ const companyInfoSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD'
+    default: 'INR'
   },
   applicationDate: {
     type: Date,
@@ -250,7 +250,7 @@ const experienceSchema = new mongoose.Schema({
   },
   overallExperience: {
     type: String,
-    required: false,
+    required: true,
     default: ''
   },
   finalResult: {

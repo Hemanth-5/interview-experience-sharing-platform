@@ -203,7 +203,7 @@ const adminApiService = {
 
     updateRole: async (userId, role) => {
       try {
-        const response = await fetch(`${api.baseURL}/users/${userId}/role`, {
+        const response = await fetch(createApiUrl(`/users/${userId}/role`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ const adminApiService = {
 
     deactivate: async (userId) => {
       try {
-        const response = await fetch(`${api.baseURL}/users/${userId}/deactivate`, {
+        const response = await fetch(createApiUrl(`/users/${userId}/deactivate`), {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -251,7 +251,7 @@ const adminApiService = {
     getAll: async (params = {}) => {
       try {
         const queryString = new URLSearchParams(params).toString();
-        const response = await fetch(`${api.baseURL}/experiences/admin/all?${queryString}`, {
+        const response = await fetch(createApiUrl(`/experiences/admin/all?${queryString}`), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'x-admin-token': localStorage.getItem('adminToken')
@@ -271,7 +271,7 @@ const adminApiService = {
 
     moderate: async (experienceId, action) => {
       try {
-        const response = await fetch(`${api.baseURL}/experiences/admin/${experienceId}/moderate`, {
+        const response = await fetch(createApiUrl(`/experiences/admin/${experienceId}/moderate`), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -294,7 +294,7 @@ const adminApiService = {
 
     delete: async (experienceId) => {
       try {
-        const response = await fetch(`${api.baseURL}/experiences/${experienceId}`, {
+        const response = await fetch(createApiUrl(`/experiences/${experienceId}`), {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -319,7 +319,7 @@ const adminApiService = {
     getAll: async (params = {}) => {
       try {
         const queryString = new URLSearchParams(params).toString();
-        const response = await fetch(`${api.baseURL}/companies?${queryString}`, {
+        const response = await fetch(createApiUrl(`/companies?${queryString}`), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'x-admin-token': localStorage.getItem('adminToken')
@@ -339,7 +339,7 @@ const adminApiService = {
 
     update: async (companyId, companyData) => {
       try {
-        const response = await fetch(`${api.baseURL}/companies/${companyId}`, {
+        const response = await fetch(createApiUrl(`/companies/${companyId}`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -369,10 +369,38 @@ export const isAdminAuthenticated = () => {
   return !!(adminToken && adminUser);
 };
 
+
 // Helper function to get admin user info
 export const getAdminUser = () => {
   const adminUser = localStorage.getItem('adminUser');
   return adminUser ? JSON.parse(adminUser) : null;
+};
+
+// Admin Companies APIs
+export const getAllCompanies = async () => {
+  const adminToken = localStorage.getItem('adminToken');
+  const response = await fetch(createApiUrl('/admin/companies'), {
+    headers: {
+      'Authorization': `Bearer ${adminToken}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch companies');
+  }
+  return await response.json();
+};
+
+export const deleteCompany = async (id) => {
+  const adminToken = localStorage.getItem('adminToken');
+  const response = await fetch(createApiUrl(`/admin/companies/${id}`), {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${adminToken}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete company');
+  }
 };
 
 export default adminApiService;

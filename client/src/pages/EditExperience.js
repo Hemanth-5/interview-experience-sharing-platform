@@ -1267,7 +1267,7 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field">
-                <label className="psg-edit-label psg-edit-label-required">
+                <label className="psg-edit-label">
                   CGPA
                 </label>
                 <input
@@ -1279,7 +1279,6 @@ const EditExperience = () => {
                   value={formData.backgroundInfo.cgpa}
                   onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
                   placeholder="e.g., 8.5"
-                  required
                 />
               </div>
 

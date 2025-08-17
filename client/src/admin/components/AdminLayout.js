@@ -19,7 +19,8 @@ const AdminLayout = () => {
     { path: '/admin/users', label: 'Users' },
     { path: '/admin/companies', label: 'Companies' },
     { path: '/admin/reports', label: 'Reports' },
-    { path: '/admin/announcement', label: 'Announcements' }
+    { path: '/admin/announcement', label: 'Announcements' },
+    { path: '/admin/pdf', label: 'Parse PDF' }
   ];
 
   const isActiveRoute = (path, exact = false) => {
