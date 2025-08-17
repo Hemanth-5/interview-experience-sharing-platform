@@ -21,6 +21,8 @@ import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminUsers from './admin/pages/AdminUsers';
 import AdminExperiences from './admin/pages/AdminExperiences';
 import AdminAnnouncement from "./admin/pages/AdminAnnouncement";
+import AdminCompanies from './admin/pages/AdminCompanies';
+import AdminParsePdfPage from './admin/pages/AdminParsePdfPage';
 import './App.css';
 
 function AppContent() {
@@ -35,7 +37,14 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/experiences" element={<Experiences />} />
-          <Route path="/experiences/:id" element={<ExperienceDetail />} />
+          <Route 
+            path="/experiences/:id" 
+            element={
+              <PrivateRoute>
+                <ExperienceDetail />
+              </PrivateRoute>
+            } 
+          />
           <Route 
             path="/experiences/:id/edit" 
             element={
@@ -85,8 +94,9 @@ function AppContent() {
             <Route path="experiences" element={<AdminExperiences />} />
             <Route path="analytics" element={<AdminDashboard />} />
             <Route path="reports" element={<AdminDashboard />} />
-            <Route path="settings" element={<AdminDashboard />} />
+            <Route path="companies" element={<AdminCompanies />} />
             <Route path="announcement" element={<AdminAnnouncement />} />
+            <Route path="pdf" element={<AdminParsePdfPage />} />
           </Route>
         </Routes>
       </main>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 // import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
@@ -8,6 +8,7 @@ import './CreateExperience.css';
 
 const CreateExperience = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   // const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -81,6 +82,45 @@ const CreateExperience = () => {
     },
     isAnonymous: false
   });
+
+  // Prefill logic from ?prefill param
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const prefill = params.get('prefill');
+    if (prefill) {
+      try {
+        // Decode base64-encoded, URI-encoded JSON
+        const decoded = JSON.parse(
+          decodeURIComponent(
+            escape(window.atob(decodeURIComponent(prefill)))
+          )
+        );
+        // Defensive: Only update fields that exist in our formData
+        setFormData(prev => ({
+          ...prev,
+          ...decoded,
+          companyInfo: {
+            ...prev.companyInfo,
+            ...decoded.companyInfo
+          },
+          backgroundInfo: {
+            ...prev.backgroundInfo,
+            ...(decoded.backgroundInfo || {})
+          },
+          rounds: Array.isArray(decoded.rounds) && decoded.rounds.length > 0
+            ? decoded.rounds.map((r, i) => ({
+                ...prev.rounds[0],
+                ...r,
+                roundNumber: i + 1
+              }))
+            : prev.rounds
+        }));
+      } catch (e) {
+        // Ignore prefill errors
+      }
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [pendingCompany, setPendingCompany] = useState(null); // For companies to be created
@@ -288,7 +328,10 @@ const CreateExperience = () => {
         navigate(`/experiences/${response.data.data._id}`);
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create experience');
+      // setError(error.response?.data?.message || 'Failed to create experience');
+      // The error may contains multiple errors in "data.errors" so join all errors.message
+      const errorMessage = error.response?.data?.errors ? error.response?.data?.errors.map(err => err.message).join(', ') || 'Failed to create experience' : error.response?.data?.error || 'Failed to create experience';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -852,7 +895,7 @@ const CreateExperience = () => {
           </select>
         </div>
         <div className="psg-create-field">
-          <label className="psg-create-label psg-create-label-required">CGPA</label>
+          <label className="psg-create-label">CGPA</label>
           <input
             type="number"
             className="psg-create-input"
@@ -862,7 +905,6 @@ const CreateExperience = () => {
             value={formData.backgroundInfo.cgpa}
             onChange={(e) => handleInputChange('backgroundInfo', 'cgpa', e.target.value ? parseFloat(e.target.value) : '')}
             placeholder="e.g., 8.5"
-            required
           />
         </div>
         <div className="psg-create-field">

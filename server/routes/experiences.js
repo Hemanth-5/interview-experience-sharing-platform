@@ -8,6 +8,9 @@ const Notification = require('../models/Notification');
 const { isAuthenticated, isOwnerOrAdmin } = require('../middleware/auth');
 const handleValidationErrors = require('../middleware/validation');
 const router = express.Router();
+// const multer = require("multer");
+// const pdfParse = require('pdf-parse')
+// const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Validation rules for creating experiences
 const experienceValidation = [
@@ -760,5 +763,108 @@ router.post(
     }
   }
 );
+
+// // // @route   POST /api/experiences/parse-pdf
+// // @desc    Parse PDF and create experience using LLM
+// // @access  Private
+
+// const upload = multer({ storage: multer.memoryStorage() });
+
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// router.post(
+//   '/parse-pdf',
+//   isAuthenticated,
+//   upload.single('pdf'),
+//   async (req, res) => {
+//     try {
+//       if (!req.file) {
+//         return res.status(400).json({ success: false, message: 'No PDF uploaded' });
+//       }
+
+//       // 1. Extract text from PDF
+//       const pdfData = await pdfParse(req.file.buffer);
+//       const pdfText = pdfData.text;
+
+//       // 2. Prepare prompt for Gemini
+//       const prompt = `
+// You are an expert at extracting structured data from interview experience PDFs for a job portal.
+// Return a JSON object strictly matching this schema (fill missing fields with null/empty):
+
+// {
+//   "companyInfo": {
+//     "companyName": "",
+//     "role": "",
+//     "department": "",
+//     "internshipType": "",
+//     "duration": "",
+//     "location": "",
+//     "applicationDate": "",
+//     "city": null,
+//     "country": null
+//   },
+//   "rounds": [
+//     {
+//       "roundType": "",
+//       "duration": 0,
+//       "platform": null,
+//       "technicalQuestions": [],
+//       "behavioralQuestions": [],
+//       "mcqSection": null,
+//       "interviewerDetails": [],
+//       "roundResult": "",
+//       "feedback": null,
+//       "tips": "",
+//       "overallExperience": 3
+//     }
+//   ],
+//   "overallRating": 3,
+//   "overallExperience": "",
+//   "finalResult": "",
+//   "wouldRecommend": true,
+//   "preparationTime": 0,
+//   "keyTips": "",
+//   "mistakesToAvoid": "",
+//   "backgroundInfo": {
+//     "cgpa": null,
+//     "previousInternships": 0,
+//     "relevantProjects": [],
+//     "skills": [],
+//     "yearOfStudy": ""
+//   }
+// }
+
+// PDF TEXT:
+// ${pdfText}
+// `;
+
+//       // 3. Call Gemini API
+//       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+//       const result = await model.generateContent(prompt);
+//       const output = result.response.text();
+
+//       // 4. Parse Gemini output
+//       let experienceData;
+//       try {
+//         experienceData = JSON.parse(output);
+//       } catch (e) {
+//         return res.status(500).json({ success: false, message: 'Failed to parse Gemini output', error: e.message, raw: output });
+//       }
+
+//       // 5. Attach userId
+//       experienceData.userId = req.user._id;
+
+//       // 6. Call your existing creation logic
+//       // req.body = experienceData;
+
+//       console.log(experienceData);
+//       // Forward to your existing POST /api/experiences handler
+//       return router.handle(req, res, () => {});
+
+//     } catch (error) {
+//       res.status(500).json({ success: false, message: 'Error parsing PDF', error: error.message });
+//     }
+//   }
+// );
 
 module.exports = router;

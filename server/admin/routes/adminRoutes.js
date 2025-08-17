@@ -12,6 +12,10 @@ const AdminAuth = require('../models/AdminAuth');
 const adminAuthRoutes = require('./adminAuth');
 router.use('/auth', adminAuthRoutes);
 
+// Admin PDF parse controller
+const parsePdfController = require('../controllers/parsePdfController');
+parsePdfController(router);
+
 // @route   POST /api/admin/login
 // @desc    Admin dual authentication
 // @access  Admin (requires existing user session)
@@ -684,6 +688,86 @@ router.put('/notifications/:notificationId/read', isAdminWithDualAuth, async (re
         console.error('Error marking notification as read:', error);
         res.status(500).json({ message: 'Error marking notification as read' });
     }
+});
+
+// =====================
+// Admin Companies CRUD
+// =====================
+
+// @route   GET /api/admin/companies
+// @desc    Get all companies
+// @access  Admin
+router.get('/companies', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const companies = await Company.find().sort({ displayName: 1 });
+    res.json(companies);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch companies', error: error.message });
+  }
+});
+
+// @route   POST /api/admin/companies
+// @desc    Add a new company
+// @access  Admin
+router.post('/companies', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { displayName, logo, website, linkedinUrl, industry, size, aliases, isVerified } = req.body;
+    if (!displayName) return res.status(400).json({ success: false, message: 'Display name is required' });
+    const name = displayName.toLowerCase().trim();
+    const company = new Company({
+      name,
+      displayName: displayName.trim(),
+      logo: logo || '',
+      website: website || '',
+      linkedinUrl: linkedinUrl || '',
+      industry: industry || '',
+      size: size || '',
+      aliases: Array.isArray(aliases) ? aliases : (typeof aliases === 'string' ? aliases.split(',').map(a => a.trim()).filter(Boolean) : []),
+      isVerified: !!isVerified
+    });
+    await company.save();
+    res.status(201).json(company);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to add company', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/companies/:id
+// @desc    Edit a company
+// @access  Admin
+router.put('/companies/:id', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { displayName, logo, website, linkedinUrl, industry, size, aliases, isVerified } = req.body;
+    const update = {
+      displayName: displayName?.trim(),
+      logo: logo || '',
+      website: website || '',
+      linkedinUrl: linkedinUrl || '',
+      industry: industry || '',
+      size: size || '',
+      aliases: Array.isArray(aliases) ? aliases : (typeof aliases === 'string' ? aliases.split(',').map(a => a.trim()).filter(Boolean) : []),
+      isVerified: !!isVerified
+    };
+    if (displayName) update.name = displayName.toLowerCase().trim();
+    const company = await Company.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!company) return res.status(404).json({ success: false, message: 'Company not found' });
+    res.json(company);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update company', error: error.message });
+  }
+});
+
+// @route   DELETE /api/admin/companies/:id
+// @desc    Delete a company
+// @access  Admin
+router.delete('/companies/:id', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const company = await Company.findByIdAndDelete(req.params.id);
+    if (!company) return res.status(404).json({ success: false, message: 'Company not found' });
+    res.json({ success: true, message: 'Company deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete company', error: error.message });
+  }
 });
 
 // Announcement/news route
