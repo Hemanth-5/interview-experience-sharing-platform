@@ -44,7 +44,7 @@ const Header = () => {
   const navLinks = [
     { path: '/', label: 'Home', icon: 'fas fa-home' },
     { path: '/experiences', label: 'Experiences', icon: 'fas fa-briefcase' },
-    { path: '/leaderboard', label: 'Leaderboard', icon: 'fas fa-trophy' },
+    // { path: '/leaderboard', label: 'Leaderboard', icon: 'fas fa-trophy' },
     { path: '/about', label: 'About', icon: 'fas fa-info-circle' },
   ];
 
