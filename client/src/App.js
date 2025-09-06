@@ -24,6 +24,7 @@ import AdminUsers from './admin/pages/AdminUsers';
 import AdminExperiences from './admin/pages/AdminExperiences';
 import AdminAnnouncement from "./admin/pages/AdminAnnouncement";
 import AdminCompanies from './admin/pages/AdminCompanies';
+import AdminCompanyRequests from './admin/pages/AdminCompanyRequests';
 import AdminParsePdfPage from './admin/pages/AdminParsePdfPage';
 import './App.css';
 
@@ -107,6 +108,7 @@ function AppContent() {
             <Route path="reports" element={<AdminDashboard />} />
             <Route path="companies" element={<AdminCompanies />} />
             <Route path="announcement" element={<AdminAnnouncement />} />
+            <Route path="company-requests" element={<AdminCompanyRequests />} />
             <Route path="pdf" element={<AdminParsePdfPage />} />
           </Route>
         </Routes>
