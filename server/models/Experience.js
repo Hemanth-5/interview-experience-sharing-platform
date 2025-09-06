@@ -538,22 +538,31 @@ experienceSchema.pre('findOneAndUpdate', function(next) {
 });
 
 // Methods
+// Use atomic updates for view tracking to avoid triggering full-document
+// validation (some older documents may be missing newly-required fields).
 experienceSchema.methods.incrementViews = function() {
-  this.views += 1;
-  return this.save();
+  // Increment views directly in the DB without calling save()
+  return this.constructor.findByIdAndUpdate(
+    this._id,
+    { $inc: { views: 1 } },
+    { new: true }
+  ).exec();
 };
 
 experienceSchema.methods.addUniqueView = function(userId) {
-  const existingView = this.uniqueViews.find(view => 
-    view.userId.toString() === userId.toString()
-  );
-  
-  if (!existingView) {
-    this.uniqueViews.push({ userId });
-    this.views += 1;
-    return this.save();
-  }
-  return Promise.resolve(this);
+  // Add a unique view only if the user hasn't viewed before, and increment
+  // views atomically. This avoids loading/saving the document and any
+  // validation that would be triggered by save().
+  return this.constructor.findOneAndUpdate(
+    { _id: this._id, 'uniqueViews.userId': { $ne: userId } },
+    { $inc: { views: 1 }, $push: { uniqueViews: { userId } } },
+    { new: true }
+  ).exec().then(result => {
+    // If result is null, the user already had a unique view; resolve with
+    // the current document context to preserve previous behavior.
+    if (!result) return Promise.resolve(this);
+    return result;
+  });
 };
 
 experienceSchema.methods.toggleVote = function(userId, voteType) {
