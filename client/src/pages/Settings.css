@@ -35,13 +35,13 @@
 
 .settings-message.success {
   background: linear-gradient(135deg, rgba(5, 150, 105, 0.04) 0%, rgba(16, 185, 129, 0.04) 100%);
-  color: var(--text-primary);
+  /* color: var(--text-primary); */
   border: 1px solid rgba(5, 150, 105, 0.08);
 }
 
 .settings-message.error {
   background: linear-gradient(135deg, rgba(220, 38, 38, 0.04) 0%, rgba(239, 68, 68, 0.04) 100%);
-  color: var(--text-primary);
+  /* color: var(--text-primary); */
   border: 1px solid rgba(220, 38, 38, 0.08);
 }
 

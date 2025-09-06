@@ -448,13 +448,13 @@ const Settings = () => {
               <i className="fas fa-user"></i>
               Profile
             </button>
-            <button
+            {/* <button
               className={`settings-nav-item ${activeSection === 'notifications' ? 'active' : ''}`}
               onClick={() => setActiveSection('notifications')}
             >
               <i className="fas fa-bell"></i>
               Notifications
-            </button>
+            </button> */}
             <button
               className={`settings-nav-item ${activeSection === 'privacy' ? 'active' : ''}`}
               onClick={() => setActiveSection('privacy')}
@@ -474,7 +474,7 @@ const Settings = () => {
 
         <div className="settings-main">
           {activeSection === 'profile' && renderProfileSettings()}
-          {activeSection === 'notifications' && renderNotificationSettings()}
+          {/* {activeSection === 'notifications' && renderNotificationSettings()} */}
           {activeSection === 'privacy' && renderPrivacySettings()}
           {activeSection === 'account' && renderAccountSettings()}
         </div>
