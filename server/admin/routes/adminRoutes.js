@@ -770,6 +770,349 @@ router.delete('/companies/:id', isAdminWithDualAuth, async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/company-requests
+// @desc    Get company creation requests based on status
+// @access  Admin
+router.get('/company-requests', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { status = 'pending' } = req.query; // pending, approved, rejected, all
+    
+    let filter = { type: 'company_creation_request' };
+    
+    // Filter based on status
+    if (status === 'pending') {
+      filter.read = false;
+    } else if (status === 'approved') {
+      filter.read = true;
+      filter['metadata.status'] = 'approved';
+    } else if (status === 'rejected') {
+      filter.read = true;
+      filter['metadata.status'] = 'rejected';
+    }
+    // For 'all', we don't add additional filters
+
+    const requests = await Notification.find(filter)
+      .populate('recipient', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(100); // Limit to prevent too many results
+
+    const formattedRequests = requests.map(request => ({
+      _id: request._id,
+      companyName: request.metadata?.companyName,
+      requestedBy: request.metadata?.requestedByName,
+      requestedByEmail: request.metadata?.requestedByEmail,
+      requestedById: request.metadata?.requestedBy,
+      createdAt: request.createdAt,
+      message: request.message,
+      status: request.read ? (request.metadata?.status || 'processed') : 'pending',
+      processedAt: request.readAt,
+      processedBy: request.metadata?.processedBy,
+      rejectionReason: request.metadata?.rejectionReason,
+      companyId: request.metadata?.companyId
+    }));
+
+    res.json({ 
+      success: true, 
+      data: formattedRequests,
+      meta: {
+        status,
+        count: formattedRequests.length
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching company requests:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch company requests' 
+    });
+  }
+});
+
+// @route   POST /api/admin/company-requests/:requestId/approve
+// @desc    Approve a company creation request and create the company
+// @access  Admin
+router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { companyData } = req.body; // Optional: allow admin to modify company data
+
+    // Find the request notification
+    const request = await Notification.findById(requestId);
+    if (!request || request.type !== 'company_creation_request') {
+      return res.status(404).json({
+        success: false,
+        message: 'Company creation request not found'
+      });
+    }
+
+    const companyName = request.metadata?.companyName;
+    const requestedBy = request.metadata?.requestedBy;
+
+    if (!companyName || !requestedBy) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request data'
+      });
+    }
+
+    // Check if company already exists
+    const existingCompany = await Company.findOne({
+      $or: [
+        { name: { $regex: `^${companyName}$`, $options: 'i' } },
+        { displayName: { $regex: `^${companyName}$`, $options: 'i' } }
+      ]
+    });
+
+    if (existingCompany) {
+    // Mark the request as read and store metadata
+    request.metadata = {
+      ...request.metadata,
+      status: 'approved',
+      processedBy: req.user._id,
+      processedAt: new Date()
+    };
+    await request.markAsRead();
+
+    // Notify the requesting user
+    await Notification.createNotification({
+      recipient: requestedBy,
+      type: 'company_creation_approved',
+      title: 'Company Already Available',
+      message: `Good news! The company "${companyName}" already exists in our database.`,
+      metadata: {
+        companyId: existingCompany._id,
+        companyName: existingCompany.displayName,
+        approvedBy: req.user._id
+      },
+      actionUrl: `/companies/${existingCompany._id}`
+    });      return res.json({
+        success: true,
+        message: 'Company already exists',
+        data: existingCompany
+      });
+    }
+
+    // Create the new company
+    const newCompany = new Company({
+      name: companyName,
+      displayName: companyData?.displayName || companyName,
+      logo: companyData?.logo || '',
+      website: companyData?.website || '',
+      industry: companyData?.industry || '',
+      size: companyData?.size || '',
+      linkedinUrl: companyData?.linkedinUrl || '',
+      isVerified: companyData?.isVerified || false,
+      aliases: companyData?.aliases || []
+    });
+
+    await newCompany.save();
+
+    // Mark the request as read and store metadata
+    request.metadata = {
+      ...request.metadata,
+      status: 'approved',
+      processedBy: req.user._id,
+      processedAt: new Date(),
+      companyId: newCompany._id
+    };
+    await request.markAsRead();
+
+    // Notify the requesting user
+    await Notification.createNotification({
+      recipient: requestedBy,
+      type: 'company_creation_approved',
+      title: 'Company Created Successfully',
+      message: `Your requested company "${companyName}" has been created by an admin.`,
+      metadata: {
+        companyId: newCompany._id,
+        companyName: newCompany.displayName,
+        approvedBy: req.user._id
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Company created and user notified',
+      data: newCompany
+    });
+
+  } catch (error) {
+    console.error('Error approving company request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to approve company request'
+    });
+  }
+});
+
+// @route   POST /api/admin/company-requests/:requestId/reject
+// @desc    Reject a company creation request
+// @access  Admin
+router.post('/company-requests/:requestId/reject', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { reason } = req.body;
+
+    // Find the request notification
+    const request = await Notification.findById(requestId);
+    if (!request || request.type !== 'company_creation_request') {
+      return res.status(404).json({
+        success: false,
+        message: 'Company creation request not found'
+      });
+    }
+
+    const companyName = request.metadata?.companyName;
+    const requestedBy = request.metadata?.requestedBy;
+
+    // Mark the request as read and store metadata
+    request.metadata = {
+      ...request.metadata,
+      status: 'rejected',
+      processedBy: req.user._id,
+      processedAt: new Date(),
+      rejectionReason: reason || 'No reason provided'
+    };
+    await request.markAsRead();
+
+    // Notify the requesting user
+    await Notification.createNotification({
+      recipient: requestedBy,
+      type: 'company_creation_rejected',
+      title: 'Company Request Rejected',
+      message: `Your request to create company "${companyName}" has been rejected. ${reason ? `Reason: ${reason}` : ''}`,
+      metadata: {
+        companyName: companyName,
+        rejectedBy: req.user._id,
+        rejectionReason: reason || 'No reason provided'
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Company request rejected and user notified'
+    });
+
+  } catch (error) {
+    console.error('Error rejecting company request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject company request'
+    });
+  }
+});
+
+// @route   PUT /api/admin/company-requests/:requestId/change-status
+// @desc    Change the status of a previously processed company request
+// @access  Admin
+router.put('/company-requests/:requestId/change-status', isAdminWithDualAuth, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { newStatus, reason } = req.body; // newStatus: 'pending', 'approved', 'rejected'
+
+    // Find the request notification
+    const request = await Notification.findById(requestId);
+    if (!request || request.type !== 'company_creation_request') {
+      return res.status(404).json({
+        success: false,
+        message: 'Company creation request not found'
+      });
+    }
+
+    const companyName = request.metadata?.companyName;
+    const requestedBy = request.metadata?.requestedBy;
+
+    if (!companyName || !requestedBy) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request data'
+      });
+    }
+
+    // Update the request status
+    if (newStatus === 'pending') {
+      // Revert to pending status
+      request.read = false;
+      request.readAt = null;
+      request.metadata = {
+        ...request.metadata,
+        status: undefined,
+        processedBy: undefined,
+        processedAt: undefined,
+        rejectionReason: undefined
+      };
+    } else if (newStatus === 'approved') {
+      // Change to approved (or re-approve)
+      request.read = true;
+      request.readAt = new Date();
+      request.metadata = {
+        ...request.metadata,
+        status: 'approved',
+        processedBy: req.user._id,
+        processedAt: new Date(),
+        rejectionReason: undefined
+      };
+    } else if (newStatus === 'rejected') {
+      // Change to rejected
+      request.read = true;
+      request.readAt = new Date();
+      request.metadata = {
+        ...request.metadata,
+        status: 'rejected',
+        processedBy: req.user._id,
+        processedAt: new Date(),
+        rejectionReason: reason || 'Status changed by admin'
+      };
+    }
+
+    await request.save();
+
+    // Notify the requesting user about the status change
+    let notificationTitle, notificationMessage;
+    
+    if (newStatus === 'pending') {
+      notificationTitle = 'Company Request Reopened';
+      notificationMessage = `Your company creation request for "${companyName}" has been reopened and is being reviewed again.`;
+    } else if (newStatus === 'approved') {
+      notificationTitle = 'Company Request Approved';
+      notificationMessage = `Your company creation request for "${companyName}" has been approved.`;
+    } else if (newStatus === 'rejected') {
+      notificationTitle = 'Company Request Status Changed';
+      notificationMessage = `Your company creation request for "${companyName}" status has been updated. ${reason ? `Reason: ${reason}` : ''}`;
+    }
+
+    await Notification.createNotification({
+      recipient: requestedBy,
+      type: newStatus === 'approved' ? 'company_creation_approved' : 'company_creation_rejected',
+      title: notificationTitle,
+      message: notificationMessage,
+      metadata: {
+        companyName: companyName,
+        statusChangedBy: req.user._id,
+        newStatus: newStatus,
+        reason: reason || ''
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Request status changed to ${newStatus} and user notified`,
+      data: {
+        requestId,
+        newStatus,
+        companyName
+      }
+    });
+
+  } catch (error) {
+    console.error('Error changing request status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change request status'
+    });
+  }
+});
+
 // Announcement/news route
 const adminAnnounceRoutes = require('./admin_announce');
 router.use(adminAnnounceRoutes);

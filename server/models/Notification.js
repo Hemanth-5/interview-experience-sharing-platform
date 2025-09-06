@@ -16,7 +16,10 @@ const notificationSchema = new mongoose.Schema({
       'experience_rejected',
       'comment_on_experience',
       'upvote_milestone',
-      'admin_message'
+      'admin_message',
+      'company_creation_request',
+      'company_creation_approved',
+      'company_creation_rejected'
     ],
     required: true
   },
@@ -117,9 +120,32 @@ notificationSchema.methods.markAsRead = function() {
 // Static method to create notification
 notificationSchema.statics.createNotification = async function(notificationData) {
   try {
-    const notification = new this(notificationData);
-    await notification.save();
-    return notification;
+    // Check user's notification preferences before creating
+    const User = require('./User');
+    const recipient = await User.findById(notificationData.recipient);
+    
+    if (!recipient) {
+      throw new Error('Recipient not found');
+    }
+
+    // Check if user has browser notifications enabled
+    const browserNotificationsEnabled = recipient.preferences?.notifications?.browser !== false;
+    
+    // Only create notification if user has browser notifications enabled
+    if (browserNotificationsEnabled) {
+      const notification = new this(notificationData);
+      await notification.save();
+      
+      // TODO: Add email notification logic here if email notifications are enabled
+      // const emailNotificationsEnabled = recipient.preferences?.notifications?.email !== false;
+      // if (emailNotificationsEnabled) {
+      //   // Send email notification
+      // }
+      
+      return notification;
+    }
+    
+    return null; // No notification created due to user preferences
   } catch (error) {
     console.error('Error creating notification:', error);
     throw error;

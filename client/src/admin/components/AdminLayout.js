@@ -19,6 +19,7 @@ const AdminLayout = () => {
     { path: '/admin/users', label: 'Users' },
     { path: '/admin/companies', label: 'Companies' },
     { path: '/admin/reports', label: 'Reports' },
+    { path: '/admin/company-requests', label: 'Company Requests' },
     { path: '/admin/announcement', label: 'Announcements' },
     { path: '/admin/pdf', label: 'Parse PDF' }
   ];

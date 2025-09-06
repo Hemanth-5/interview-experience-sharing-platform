@@ -598,8 +598,23 @@
 
 .author-name {
   font-weight: 600;
-  color: #333;
-  margin-bottom: 0.2rem;
+  color: #1e293b;
+  margin: 0;
+  font-size: 0.95em;
+}
+
+.author-name-link {
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  font-size: 0.95em;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.author-name-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
 }
 
 .author-university {

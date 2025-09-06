@@ -274,7 +274,9 @@ router.get('/:id/public-profile',
       const publicProfile = {
         name: user.name,
         avatar: user.avatar,
+        email: user.preferences?.privacy?.showEmail === true ? user.email : null,
         university: user.preferences?.privacy?.showUniversity !== false ? user.university : null,
+        graduationYear: user.graduationYear,
         level: user.level,
         badges: user.badges,
         joinedAt: user.joinedAt,
@@ -593,5 +595,83 @@ router.delete('/notifications/:notificationId', isAuthenticated, async (req, res
     });
   }
 });
+
+// @route   POST /api/users/request-company-creation
+// @desc    Request admin to create a new company
+// @access  Private
+router.post('/request-company-creation',
+  isAuthenticated,
+  [
+    body('companyName').trim().isLength({ min: 2 }).withMessage('Company name must be at least 2 characters')
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { companyName } = req.body;
+      const userId = req.user._id;
+
+      // Check if there's already a pending request for this company from this user
+      const existingRequest = await Notification.findOne({
+        type: 'company_creation_request',
+        'metadata.companyName': companyName,
+        'metadata.requestedBy': userId,
+        read: false
+      });
+
+      if (existingRequest) {
+        return res.status(400).json({
+          success: false,
+          message: 'You already have a pending request for this company'
+        });
+      }
+
+      // Get all admin users
+      const adminUsers = await User.find({ role: 'Admin' }).select('_id');
+      
+      if (adminUsers.length === 0) {
+        return res.status(500).json({
+          success: false,
+          message: 'No admin users found to process your request'
+        });
+      }
+
+      // Create notifications for all admins
+      const notifications = [];
+      for (const admin of adminUsers) {
+        const notification = await Notification.createNotification({
+          recipient: admin._id,
+          type: 'company_creation_request',
+          title: 'New Company Creation Request',
+          message: `${req.user.name} has requested creation of company: ${companyName}`,
+          priority: 'medium',
+          metadata: {
+            companyName: companyName,
+            requestedBy: userId,
+            requestedByName: req.user.name,
+            requestedByEmail: req.user.email
+          },
+          actionUrl: `/admin/companies/requests`
+        });
+        notifications.push(notification);
+      }
+
+      res.json({
+        success: true,
+        message: 'Company creation request sent to admins successfully',
+        data: {
+          companyName,
+          requestId: notifications[0]._id // Use first notification as reference
+        }
+      });
+
+    } catch (error) {
+      console.error('Error creating company request:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error sending company creation request'
+      });
+    }
+  }
+);
 
 module.exports = router;

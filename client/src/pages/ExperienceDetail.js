@@ -520,8 +520,15 @@ const ExperienceDetail = () => {
                   className="author-avatar"
                 />
                 <div>
-                  <p className="author-name">{extractUserName(experience.userId.name) || experience.userId.name}</p>
-                  <p className="author-university">{experience.userId.university}</p>
+                  <Link 
+                    to={`/users/${experience.userId._id}`}
+                    className="author-name-link"
+                  >
+                    {`${extractUserName(experience.userId.name) || experience.userId.name}🔗`}
+                  </Link>
+                  {experience.userId.university && (
+                    <p className="author-university">{experience.userId.university}</p>
+                  )}
                 </div>
               </div>
             )}

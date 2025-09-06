@@ -930,7 +930,7 @@ a:focus {
 .form-select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: var(--bg-tertiary);
+  /* background-color: var(--bg-tertiary); */
 }
 
 /* Form Error & Help Text */

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { createApiUrl } from '../../config/api';
 import { fetchWithAdminAuth } from '../utils/adminAuth';
 import '../styles/AdminCompanies.css';
 
@@ -98,8 +97,8 @@ const AdminCompanies = () => {
     try {
       const method = editingCompany ? 'PUT' : 'POST';
       const url = editingCompany
-        ? createApiUrl(`/api/admin/companies/${editingCompany._id}`)
-        : createApiUrl('/api/admin/companies');
+        ? `/api/admin/companies/${editingCompany._id}`
+        : '/api/admin/companies';
       const body = {
         ...form,
         aliases: form.aliases.split(',').map(a => a.trim()).filter(Boolean)

@@ -111,6 +111,10 @@ const Header = () => {
                         <i className="fas fa-user"></i>
                         Profile
                       </Link>
+                      <Link to="/settings" className="dropdown-item">
+                        <i className="fas fa-cog"></i>
+                        Settings
+                      </Link>
                       {user?.role === 'Admin' && (
                         <Link to="/admin" className="dropdown-item admin-link">
                           <i className="fas fa-shield-alt"></i>

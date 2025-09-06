@@ -374,7 +374,15 @@ const Profile = () => {
         </div>
         <div className="profile-info">
           <h1>{extractUserName(user.name) || user.name}</h1>
-          <p className="profile-email">{user.email}</p>
+          {user?.preferences?.privacy?.showEmail && (
+            <p className="profile-email">{user.email}</p>
+          )}
+          {user?.preferences?.privacy?.showUniversity !== false && user?.university && (
+            <p className="profile-university">{user.university}</p>
+          )}
+          {user?.graduationYear && (
+            <p className="profile-grad-year">Class of {user.graduationYear}</p>
+          )}
           <div className="profile-badges">
             {stats.totalExperiences >= 5 && <span className="badge storyteller">Storyteller</span>}
             {stats.totalUpvotes >= 10 && <span className="badge helpful">Helpful</span>}
@@ -384,6 +392,10 @@ const Profile = () => {
         <div className="profile-actions">
           <Link to="/create" className="create-btn">
             Share New Experience
+          </Link>
+          <Link to="/settings" className="settings-btn">
+            <i className="fas fa-cog"></i>
+            Settings
           </Link>
         </div>
       </div>

@@ -99,10 +99,24 @@
 }
 
 .profile-email {
-  color: #667eea;
-  font-size: 1.2em;
+  color: #64748b;
+  font-size: 1.1em;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 500;
+}
+
+.profile-university {
+  color: #64748b;
+  font-size: 1.0em;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.profile-grad-year {
+  color: #64748b;
+  font-size: 0.95em;
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 
 .profile-joined {
@@ -148,35 +162,56 @@
 }
 
 .profile-actions {
-  margin-left: 30px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 15px;
+  align-items: flex-end;
 }
 
 .create-btn {
-  background: #667eea;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
   text-decoration: none;
-  padding: 18px 28px;
-  border-radius: 14px;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  font-weight: 600;
+  font-size: 1em;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 16px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .create-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
   color: white;
+}
+
+.settings-btn {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
   text-decoration: none;
-  background: #5a67d8;
+  font-weight: 500;
+  font-size: 0.9em;
+  box-shadow: 0 2px 10px rgba(107, 114, 128, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.settings-btn:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+  color: white;
 }
 
 /* Profile Content */

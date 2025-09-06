@@ -10,6 +10,8 @@ import ExperienceDetail from './pages/ExperienceDetail';
 import CreateExperience from './pages/CreateExperience';
 import EditExperience from './pages/EditExperience';
 import Profile from './pages/Profile';
+import UserPublicProfile from './pages/UserPublicProfile';
+import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import Leaderboard from './pages/Leaderboard';
 import About from './pages/About';
@@ -71,6 +73,15 @@ function AppContent() {
               </PrivateRoute>
             } 
           />
+          <Route 
+            path="/settings" 
+            element={
+              <PrivateRoute>
+                <Settings />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="/users/:userId" element={<UserPublicProfile />} />
           <Route 
             path="/notifications" 
             element={

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
+import PSGNotification from './PSGNotification';
 import './CompanySearch.css';
 
 const CompanySearch = ({ 
@@ -20,6 +21,7 @@ const CompanySearch = ({
   const [pendingCompanyName, setPendingCompanyName] = useState(null); // For companies to be created later
   const [showAppValidation, setShowAppValidation] = useState(false);
   const [appValidationMessage, setAppValidationMessage] = useState('');
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const searchTimeoutRef = useRef(null);
   const modalRef = useRef(null);
 
@@ -97,39 +99,48 @@ const CompanySearch = ({
       setLoading(true);
       setShowAppValidation(true);
       
-      // Validate against LinkedIn
-      const validationResponse = await axios.post(createApiUrl('/api/companies/validate-linkedin'), {
+      // Send request to admin to create company
+      const requestResponse = await axios.post(createApiUrl('/api/users/request-company-creation'), {
         companyName: companyName
       }, {
         withCredentials: true
       });
       
-      if (validationResponse.data.success && !validationResponse.data.isValid) {
-        // Company not found on LinkedIn, show suggestions
-        const suggestions = validationResponse.data.suggestions || [];
+      if (requestResponse.data.success) {
+        // Close the modal
+        setShowModal(false);
+        setSearchQuery('');
+        setSuggestions([]);
+        setAppDatabaseSuggestions([]);
+        setShowAppValidation(false);
+        setAppValidationMessage('');
         
-        if (suggestions.length > 0) {
-          setAppValidationMessage(
-            `"${companyName}" not found in application database. Please select from database companies below or click "Proceed anyway" to create without database verification.`
-          );
-          setAppDatabaseSuggestions(suggestions);
-          return;
-        } else {
-          setAppValidationMessage(
-            `"${companyName}" not found in application database. Click "Proceed anyway" to create without database verification.`
-          );
-          return;
-        }
+        // Show success notification
+        setShowSuccessNotification(true);
+        
+        // Redirect to home after a short delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+        
+        return;
+      } else {
+        setAppValidationMessage(
+          `Failed to send request: ${requestResponse.data.message}`
+        );
       }
       
-      // Company found on LinkedIn or validation failed, proceed
-      proceedWithCompanyCreation(companyName);
-      
     } catch (error) {
-      console.error('Application database validation error:', error);
-      setAppValidationMessage(
-        'Application database validation service unavailable. You can proceed to create the company.'
-      );
+      console.error('Company creation request error:', error);
+      if (error.response?.status === 400 && error.response?.data?.message?.includes('pending request')) {
+        setAppValidationMessage(
+          `You already have a pending request for "${companyName}". Please wait for admin approval or check your notifications.`
+        );
+      } else {
+        setAppValidationMessage(
+          'Failed to send company creation request. Please try again later.'
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -330,19 +341,13 @@ const CompanySearch = ({
                     )}
                     <div className="validation-actions">
                       <button 
-                        className="btn-proceed-anyway"
-                        onClick={() => proceedWithCompanyCreation(searchQuery.trim())}
-                      >
-                        Proceed Anyway (No LinkedIn Verification)
-                      </button>
-                      <button 
                         className="btn-cancel-validation"
                         onClick={() => {
                           setShowAppValidation(false);
                           setAppValidationMessage('');
                         }}
                       >
-                        Cancel
+                        Close
                       </button>
                     </div>
                   </div>
@@ -447,7 +452,7 @@ const CompanySearch = ({
                             Select "{searchQuery.trim()}"
                           </span>
                           <span className="company-result-industry">
-                            Will validate with LinkedIn first
+                            Will send request to admin for creation
                           </span>
                         </div>
                       </div>
@@ -471,6 +476,15 @@ const CompanySearch = ({
           </div>
         </div>
       )}
+
+      {/* Success Notification */}
+      <PSGNotification
+        message="Company request sent successfully! You will be redirected to the home page shortly."
+        type="success"
+        open={showSuccessNotification}
+        onClose={() => setShowSuccessNotification(false)}
+        duration={2000}
+      />
     </>
   );
 };
