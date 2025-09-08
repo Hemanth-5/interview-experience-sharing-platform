@@ -7,12 +7,18 @@ const Company = require('../../models/Company');
 const pdfService = require('../../services/pdfService');
 const path = require('path');
 const fs = require('fs');
+const { Readable } = require('stream');
 const { body, query, validationResult } = require('express-validator');
 
 // Ensure downloads directory exists
 const DOWNLOADS_DIR = path.join(__dirname, '../../downloads');
 if (!fs.existsSync(DOWNLOADS_DIR)) {
   fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
+}
+
+// Helper function to create a readable stream from buffer
+function bufferToStream(buffer) {
+  return Readable.from(buffer);
 }
 
 // @route   GET /api/admin/download/experiences
@@ -169,25 +175,17 @@ router.post('/experiences/single',
       // Generate unique filename
       const timestamp = Date.now();
       const fileName = `DLExp_${experience.companyInfo.companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${experienceId}_${timestamp}.pdf`;
-      const filePath = path.join(DOWNLOADS_DIR, fileName);
 
-      // Generate PDF
-      await pdfService.generateExperiencePdf(experience, filePath);
+      // Generate PDF buffer instead of writing to disk
+      const pdfBuffer = await pdfService.generateExperiencePdfBuffer(experience);
 
       // Set headers for download
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
 
-      // Stream the file
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
-
-      // Clean up file after streaming
-      fileStream.on('end', () => {
-        setTimeout(() => {
-          pdfService.cleanupFiles([filePath]);
-        }, 5000); // Clean up after 5 seconds
-      });
+      // Stream the buffer directly
+      const stream = bufferToStream(pdfBuffer);
+      stream.pipe(res);
 
     } catch (error) {
       console.error('Error downloading single experience:', error);
@@ -243,15 +241,8 @@ router.post('/experiences/bulk',
         });
       }
 
-      // Create temporary directory for this download
-      const timestamp = Date.now();
-      const tempDir = path.join(DOWNLOADS_DIR, `bulk_${timestamp}`);
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      // Generate PDFs
-      const generatedFiles = await pdfService.generateMultipleExperiencesPdf(experiences, tempDir);
+      // Generate PDFs as buffers
+      const generatedFiles = await pdfService.generateMultipleExperiencesPdfBuffers(experiences);
 
       if (generatedFiles.length === 0) {
         return res.status(500).json({
@@ -260,35 +251,18 @@ router.post('/experiences/bulk',
         });
       }
 
-      // Create ZIP file
+      // Create ZIP buffer
+      const timestamp = Date.now();
       const zipFileName = `DLExp_Bulk_${timestamp}.zip`;
-      const zipPath = path.join(DOWNLOADS_DIR, zipFileName);
-      await pdfService.createZipArchive(generatedFiles, zipPath);
+      const zipBuffer = await pdfService.createZipFromBuffers(generatedFiles);
 
       // Set headers for download
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
 
-      // Stream the ZIP file
-      const fileStream = fs.createReadStream(zipPath);
-      fileStream.pipe(res);
-
-      // Clean up files after streaming
-      fileStream.on('end', () => {
-        setTimeout(() => {
-          // Clean up individual PDFs
-          const filesToCleanup = generatedFiles.map(f => f.path);
-          filesToCleanup.push(zipPath);
-          pdfService.cleanupFiles(filesToCleanup);
-          
-          // Remove temporary directory
-          try {
-            fs.rmSync(tempDir, { recursive: true, force: true });
-          } catch (err) {
-            console.error('Error removing temp directory:', err);
-          }
-        }, 10000); // Clean up after 10 seconds
-      });
+      // Stream the ZIP buffer
+      const stream = bufferToStream(zipBuffer);
+      stream.pipe(res);
 
     } catch (error) {
       console.error('Error downloading bulk experiences:', error);
@@ -383,68 +357,41 @@ router.post('/experiences/filtered',
         });
       }
 
-      // Create temporary directory for this download
       const timestamp = Date.now();
-      const tempDir = path.join(DOWNLOADS_DIR, `filtered_${timestamp}`);
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
 
-      // Generate PDFs
-      const generatedFiles = await pdfService.generateMultipleExperiencesPdf(experiences, tempDir);
-
-      if (generatedFiles.length === 0) {
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to generate any PDFs'
-        });
-      }
-
-      let responseFilePath;
-      let responseFileName;
-      let contentType;
-
-      // If only one file, send PDF directly
-      if (generatedFiles.length === 1) {
-        responseFilePath = generatedFiles[0].path;
-        responseFileName = generatedFiles[0].originalName;
-        contentType = 'application/pdf';
-      } else {
-        // Create ZIP file for multiple experiences
-        const zipFileName = `DLExp_Filtered_${timestamp}.zip`;
-        responseFilePath = path.join(DOWNLOADS_DIR, zipFileName);
-        responseFileName = zipFileName;
-        contentType = 'application/zip';
+      // If only one experience, send PDF directly
+      if (experiences.length === 1) {
+        const experience = experiences[0];
+        const fileName = `DLExp_${experience.companyInfo.companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${experience._id}_${timestamp}.pdf`;
         
-        await pdfService.createZipArchive(generatedFiles, responseFilePath);
+        const pdfBuffer = await pdfService.generateExperiencePdfBuffer(experience);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+        const stream = bufferToStream(pdfBuffer);
+        stream.pipe(res);
+      } else {
+        // Generate multiple PDFs as buffers and create ZIP
+        const generatedFiles = await pdfService.generateMultipleExperiencesPdfBuffers(experiences);
+
+        if (generatedFiles.length === 0) {
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to generate any PDFs'
+          });
+        }
+
+        // Create ZIP buffer
+        const zipFileName = `DLExp_Filtered_${timestamp}.zip`;
+        const zipBuffer = await pdfService.createZipFromBuffers(generatedFiles);
+
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+
+        const stream = bufferToStream(zipBuffer);
+        stream.pipe(res);
       }
-
-      // Set headers for download
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${responseFileName}"`);
-
-      // Stream the file
-      const fileStream = fs.createReadStream(responseFilePath);
-      fileStream.pipe(res);
-
-      // Clean up files after streaming
-      fileStream.on('end', () => {
-        setTimeout(() => {
-          // Clean up generated files
-          const filesToCleanup = generatedFiles.map(f => f.path);
-          if (generatedFiles.length > 1) {
-            filesToCleanup.push(responseFilePath); // Add ZIP file
-          }
-          pdfService.cleanupFiles(filesToCleanup);
-          
-          // Remove temporary directory
-          try {
-            fs.rmSync(tempDir, { recursive: true, force: true });
-          } catch (err) {
-            console.error('Error removing temp directory:', err);
-          }
-        }, 10000); // Clean up after 10 seconds
-      });
 
     } catch (error) {
       console.error('Error downloading filtered experiences:', error);
