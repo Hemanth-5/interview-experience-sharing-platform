@@ -166,7 +166,6 @@
   border-right: 1px solid rgba(148, 163, 184, 0.2);
   padding: var(--admin-spacing-xl) 0;
   position: relative;
-  overflow-y: auto;
 }
 
 .admin-sidebar::before {
@@ -250,7 +249,6 @@
 /* Admin Main Content */
 .admin-main {
   background: transparent;
-  overflow-x: auto;
   padding: 0;
   position: relative;
 }

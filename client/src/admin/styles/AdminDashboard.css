@@ -190,7 +190,6 @@
 
 /* Table Styles */
 .admin-table-container {
-  overflow-x: hidden;
   border-radius: var(--admin-radius-md);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }

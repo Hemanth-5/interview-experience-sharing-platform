@@ -45,18 +45,31 @@ const AdminDownloadExperiences = () => {
   });
 
   const [activeTab, setActiveTab] = useState('browse'); // browse, bulk, filtered
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    fetchExperiences();
-    fetchStats();
-  }, [filters.page, filters.sortBy, filters.sortOrder]);
+    if (isInitialLoad) {
+      fetchExperiences();
+      fetchStats();
+      setIsInitialLoad(false);
+    }
+  }, [isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+      fetchExperiences();
+    }
+  }, [filters.page, filters.sortBy, filters.sortOrder, filters.limit]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      if (filters.page === 1) {
-        fetchExperiences();
-      } else {
-        setFilters(prev => ({ ...prev, page: 1 }));
+      if (!isInitialLoad) {
+        if (filters.page === 1) {
+          fetchExperiences();
+        } else {
+          // Reset to page 1 when filters change
+          setFilters(prev => ({ ...prev, page: 1 }));
+        }
       }
     }, 500);
 
@@ -70,8 +83,12 @@ const AdminDownloadExperiences = () => {
     try {
       const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) queryParams.append(key, value);
+        if (value !== '' && value !== null && value !== undefined) {
+          queryParams.append(key, value);
+        }
       });
+
+      // console.log('Fetching experiences with params:', Object.fromEntries(queryParams));
 
       const response = await fetchWithAdminAuth(`/api/admin/download/experiences?${queryParams}`);
       
@@ -81,6 +98,7 @@ const AdminDownloadExperiences = () => {
           setExperiences(data.data.experiences);
           setPagination(data.data.pagination);
           setFilterOptions(data.data.filterOptions);
+          // console.log('Pagination data:', data.data.pagination);
         }
       } else {
         const errorData = await response.json();
@@ -112,10 +130,15 @@ const AdminDownloadExperiences = () => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
-      page: 1
+      // Reset to page 1 when changing filters (except for page itself)
+      page: key === 'page' ? value : 1
     }));
-    setSelectedExperiences(new Set());
-    setSelectAll(false);
+    
+    // Clear selections when filters change (except for page, sortBy, sortOrder, limit)
+    if (!['page', 'sortBy', 'sortOrder', 'limit'].includes(key)) {
+      setSelectedExperiences(new Set());
+      setSelectAll(false);
+    }
   };
 
   const handleSelectExperience = (experienceId) => {
@@ -451,6 +474,16 @@ const AdminDownloadExperiences = () => {
 
         <div className="dlexp-sort-controls">
           <select
+            value={filters.limit}
+            onChange={(e) => handleFilterChange('limit', e.target.value)}
+            className="dlexp-sort-select"
+          >
+            <option value="10">10 per page</option>
+            <option value="20">20 per page</option>
+            <option value="50">50 per page</option>
+            <option value="100">100 per page</option>
+          </select>
+          <select
             value={filters.sortBy}
             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
             className="dlexp-sort-select"
@@ -548,21 +581,22 @@ const AdminDownloadExperiences = () => {
           {/* Pagination */}
           <div className="dlexp-pagination">
             <button
-              onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
-              disabled={!pagination.hasPrev}
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={!pagination.hasPrev || loading}
               className="dlexp-btn dlexp-btn-secondary"
             >
               ← Previous
             </button>
             
-            <span className="dlexp-pagination-info">
-              Page {pagination.currentPage} of {pagination.totalPages} 
-              ({pagination.totalExperiences} total)
-            </span>
+            <div className="dlexp-pagination-info">
+              <span>
+                Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalExperiences} total)
+              </span>
+            </div>
             
             <button
-              onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
-              disabled={!pagination.hasNext}
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={!pagination.hasNext || loading}
               className="dlexp-btn dlexp-btn-secondary"
             >
               Next →

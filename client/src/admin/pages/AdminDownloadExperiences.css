@@ -388,6 +388,26 @@
 .dlexp-pagination-info {
   color: #6c757d;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dlexp-page-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background-color: white;
+}
+
+.dlexp-page-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Button Styles */
