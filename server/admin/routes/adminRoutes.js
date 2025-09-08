@@ -928,6 +928,7 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
         companyName: newCompany.displayName,
         approvedBy: req.user._id
       },
+      actionUrl: `/companies/${newCompany._id}`
     });
 
     res.json({
@@ -1116,5 +1117,9 @@ router.put('/company-requests/:requestId/change-status', isAdminWithDualAuth, as
 // Announcement/news route
 const adminAnnounceRoutes = require('./admin_announce');
 router.use(adminAnnounceRoutes);
+
+// Download experiences route
+const downloadExperiencesRoutes = require('./downloadExperiences');
+router.use('/download', downloadExperiencesRoutes);
 
 module.exports = router;

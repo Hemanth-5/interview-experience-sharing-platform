@@ -24,8 +24,8 @@ import AdminUsers from './admin/pages/AdminUsers';
 import AdminExperiences from './admin/pages/AdminExperiences';
 import AdminAnnouncement from "./admin/pages/AdminAnnouncement";
 import AdminCompanies from './admin/pages/AdminCompanies';
-import AdminCompanyRequests from './admin/pages/AdminCompanyRequests';
 import AdminParsePdfPage from './admin/pages/AdminParsePdfPage';
+import AdminDownloadExperiences from './admin/pages/AdminDownloadExperiences';
 import './App.css';
 
 function AppContent() {
@@ -104,11 +104,11 @@ function AppContent() {
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="experiences" element={<AdminExperiences />} />
+            <Route path="download-experiences" element={<AdminDownloadExperiences />} />
             <Route path="analytics" element={<AdminDashboard />} />
             <Route path="reports" element={<AdminDashboard />} />
             <Route path="companies" element={<AdminCompanies />} />
             <Route path="announcement" element={<AdminAnnouncement />} />
-            <Route path="company-requests" element={<AdminCompanyRequests />} />
             <Route path="pdf" element={<AdminParsePdfPage />} />
           </Route>
         </Routes>

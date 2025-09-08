@@ -1,0 +1,7 @@
+# This directory is used for temporary PDF downloads
+# Files here are automatically cleaned up after download
+*.pdf
+*.zip
+temp_*
+bulk_*
+filtered_*
