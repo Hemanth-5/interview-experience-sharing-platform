@@ -387,23 +387,19 @@ const Settings = () => {
           <div className="info-label">Account Type</div>
           <div className="info-value">{user?.role || 'Student'}</div>
         </div>
-        <div className="info-item">
+        {/* <div className="info-item">
           <div className="info-label">Member Since</div>
           <div className="info-value">
-            {user?.joinedAt ? new Date(user.joinedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }) : 'Unknown'}
+            {user?.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A'}
           </div>
-        </div>
+        </div> */}
         <div className="info-item">
           <div className="info-label">Total Experiences</div>
           <div className="info-value">{user?.stats?.experiencesShared || 0}</div>
         </div>
       </div>
 
-      <div className="danger-zone">
+      {/* <div className="danger-zone">
         <h3>Danger Zone</h3>
         <p>Once you delete your account, there is no going back. Please be certain.</p>
         <button 
@@ -413,7 +409,7 @@ const Settings = () => {
         >
           {loading ? 'Deleting...' : 'Delete Account'}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 
