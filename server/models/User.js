@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
   university: {
     type: String,
-    default: null
+    default: "PSG College of Technology"
   },
   graduationYear: {
     type: Number,

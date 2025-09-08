@@ -23,7 +23,7 @@ const Footer = () => {
             <div className="footer-links-simple">
               <a href="/experiences" className="footer-link">Browse Experiences</a>
               <a href="/create" className="footer-link">Share Experience</a>
-              <a href="/leaderboard" className="footer-link">Leaderboard</a>
+              {/* <a href="/leaderboard" className="footer-link">Leaderboard</a> */}
               <a href="/about" className="footer-link">About</a>
             </div>
           </div>
