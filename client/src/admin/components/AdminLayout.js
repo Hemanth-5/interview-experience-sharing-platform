@@ -18,6 +18,7 @@ const AdminLayout = () => {
     { path: '/admin/experiences', label: 'Experiences' },
     { path: '/admin/users', label: 'Users' },
     { path: '/admin/companies', label: 'Companies' },
+    { path: '/admin/company-requests', label: 'Company Requests'},
     { path: '/admin/download-experiences', label: 'Download Experiences' },
     { path: '/admin/reports', label: 'Reports' },
     { path: '/admin/announcement', label: 'Announcements' },
