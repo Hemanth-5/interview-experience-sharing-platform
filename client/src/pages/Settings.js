@@ -328,7 +328,7 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="preference-item">
+          {/* <div className="preference-item">
             <div className="preference-info">
               <label htmlFor="showUniversity" className="preference-label">
                 Show University
@@ -348,7 +348,7 @@ const Settings = () => {
                 <span className="toggle-slider"></span>
               </label>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="privacy-notice">
@@ -471,7 +471,7 @@ const Settings = () => {
         <div className="settings-main">
           {activeSection === 'profile' && renderProfileSettings()}
           {/* {activeSection === 'notifications' && renderNotificationSettings()} */}
-          {activeSection === 'privacy' && renderPrivacySettings()}
+          {/* {activeSection === 'privacy' && renderPrivacySettings()} */}
           {activeSection === 'account' && renderAccountSettings()}
         </div>
       </div>

@@ -804,7 +804,7 @@ router.get('/company-requests', isAdminWithDualAuth, async (req, res) => {
       requestedById: request.metadata?.requestedBy,
       createdAt: request.createdAt,
       message: request.message,
-      status: request.read ? (request.metadata?.status || 'processed') : 'pending',
+      status: request.read ? (request.metadata?.status || 'pending') : 'pending',
       processedAt: request.readAt,
       processedBy: request.metadata?.processedBy,
       rejectionReason: request.metadata?.rejectionReason,

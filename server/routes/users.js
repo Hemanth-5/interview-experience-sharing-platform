@@ -637,30 +637,48 @@ router.post('/request-company-creation',
 
       // Create notifications for all admins
       const notifications = [];
+      let successfulNotifications = 0;
+      
       for (const admin of adminUsers) {
-        const notification = await Notification.createNotification({
-          recipient: admin._id,
-          type: 'company_creation_request',
-          title: 'New Company Creation Request',
-          message: `${req.user.name} has requested creation of company: ${companyName}`,
-          priority: 'medium',
-          metadata: {
-            companyName: companyName,
-            requestedBy: userId,
-            requestedByName: req.user.name,
-            requestedByEmail: req.user.email
-          },
-          actionUrl: `/admin/companies/requests`
+        try {
+          const notification = await Notification.createNotification({
+            recipient: admin._id,
+            type: 'company_creation_request',
+            title: 'New Company Creation Request',
+            message: `${req.user.name} has requested creation of company: ${companyName}`,
+            priority: 'medium',
+            metadata: {
+              companyName: companyName,
+              requestedBy: userId,
+              requestedByName: req.user.name,
+              requestedByEmail: req.user.email
+            },
+            actionUrl: `/admin/company-requests`
+          });
+          
+          if (notification) {
+            notifications.push(notification);
+            successfulNotifications++;
+          }
+        } catch (error) {
+          console.error(`Error creating notification for admin ${admin._id}:`, error);
+        }
+      }
+
+      if (successfulNotifications === 0) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send notifications to any admin. Please contact support.'
         });
-        notifications.push(notification);
       }
 
       res.json({
         success: true,
-        message: 'Company creation request sent to admins successfully',
+        message: `Company creation request sent to ${successfulNotifications} admin(s) successfully`,
         data: {
           companyName,
-          requestId: notifications[0]._id // Use first notification as reference
+          requestId: notifications[0]._id, // Use first successful notification as reference
+          notificationsSent: successfulNotifications
         }
       });
 
