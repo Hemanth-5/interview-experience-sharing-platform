@@ -781,12 +781,13 @@ router.get('/company-requests', isAdminWithDualAuth, async (req, res) => {
     
     // Filter based on status
     if (status === 'pending') {
-      filter.read = false;
+      filter.$or = [
+        { 'metadata.status': 'pending' },
+        { 'metadata.status': { $exists: false }, read: false }
+      ];
     } else if (status === 'approved') {
-      filter.read = true;
       filter['metadata.status'] = 'approved';
     } else if (status === 'rejected') {
-      filter.read = true;
       filter['metadata.status'] = 'rejected';
     }
     // For 'all', we don't add additional filters
@@ -804,7 +805,7 @@ router.get('/company-requests', isAdminWithDualAuth, async (req, res) => {
       requestedById: request.metadata?.requestedBy,
       createdAt: request.createdAt,
       message: request.message,
-      status: request.read ? (request.metadata?.status || 'pending') : 'pending',
+      status: request.metadata?.status || (request.read ? 'processed' : 'pending'),
       processedAt: request.readAt,
       processedBy: request.metadata?.processedBy,
       rejectionReason: request.metadata?.rejectionReason,
