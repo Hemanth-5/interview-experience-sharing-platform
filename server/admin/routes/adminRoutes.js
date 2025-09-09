@@ -867,32 +867,34 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
     });
 
     if (existingCompany) {
-    // Mark the request as read and store metadata
-    request.metadata = {
-      ...request.metadata,
-      status: 'approved',
-      processedBy: req.user._id,
-      processedAt: new Date()
-    };
-    await request.markAsRead();
+      // Mark the request as read and store metadata
+      request.metadata = {
+        ...request.metadata,
+        status: 'approved',
+        processedBy: req.user._id,
+        processedAt: new Date()
+      };
+      request.read = true;
+      request.readAt = new Date();
+      await request.save();
 
-    // Notify the requesting user
-    await Notification.createNotification({
-      recipient: requestedBy,
-      type: 'company_creation_approved',
-      title: 'Company Already Available',
-      message: `Good news! The company "${companyName}" already exists in our database.`,
-      metadata: {
-        companyId: existingCompany._id,
-        companyName: existingCompany.displayName,
-        approvedBy: req.user._id
-      },
-      actionUrl: `/companies/${existingCompany._id}`
-    });      return res.json({
-        success: true,
-        message: 'Company already exists',
-        data: existingCompany
-      });
+      // Notify the requesting user
+      await Notification.createNotification({
+        recipient: requestedBy,
+        type: 'company_creation_approved',
+        title: 'Company Already Available',
+        message: `Good news! The company "${companyName}" already exists in our database.`,
+        metadata: {
+          companyId: existingCompany._id,
+          companyName: existingCompany.displayName,
+          approvedBy: req.user._id
+        },
+        actionUrl: `/companies/${existingCompany._id}`
+      });      return res.json({
+          success: true,
+          message: 'Company already exists',
+          data: existingCompany
+        });
     }
 
     // Create the new company
@@ -918,7 +920,9 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
       processedAt: new Date(),
       companyId: newCompany._id
     };
-    await request.markAsRead();
+    request.read = true;
+    request.readAt = new Date();
+    await request.save();
 
     // Notify the requesting user
     await Notification.createNotification({
@@ -977,7 +981,9 @@ router.post('/company-requests/:requestId/reject', isAdminWithDualAuth, async (r
       processedAt: new Date(),
       rejectionReason: reason || 'No reason provided'
     };
-    await request.markAsRead();
+    request.read = true;
+    request.readAt = new Date();
+    await request.save();
 
     // Notify the requesting user
     await Notification.createNotification({
