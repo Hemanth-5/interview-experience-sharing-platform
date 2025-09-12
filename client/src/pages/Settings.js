@@ -451,13 +451,13 @@ const Settings = () => {
               <i className="fas fa-bell"></i>
               Notifications
             </button> */}
-            <button
+            {/* <button
               className={`settings-nav-item ${activeSection === 'privacy' ? 'active' : ''}`}
               onClick={() => setActiveSection('privacy')}
             >
               <i className="fas fa-shield-alt"></i>
               Privacy
-            </button>
+            </button> */}
             <button
               className={`settings-nav-item ${activeSection === 'account' ? 'active' : ''}`}
               onClick={() => setActiveSection('account')}
