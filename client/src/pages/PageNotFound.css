@@ -164,7 +164,7 @@
   z-index: 2;
 }
 
-.action-buttons {
+.page-not-found-action-buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

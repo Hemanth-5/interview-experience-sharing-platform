@@ -71,7 +71,7 @@ const PageNotFound = () => {
         It seems the page you are looking for has been moved, deleted, or never existed
       </p>
 
-      <div className="action-buttons">
+      <div className="page-not-found-action-buttons">
         <Link to="/" className="back-to-home primary">
           <HomeIcon />
           Back to Home
