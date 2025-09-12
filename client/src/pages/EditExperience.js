@@ -1149,7 +1149,7 @@ const EditExperience = () => {
               </div>
 
               <div className="psg-edit-field psg-edit-grid-full">
-                <label className="psg-edit-label psg-edit-label-required">
+                <label className="psg-edit-label">
                   Overall Experience Summary
                 </label>
                 <textarea
@@ -1158,7 +1158,6 @@ const EditExperience = () => {
                   onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
                   placeholder="Summarize your overall interview experience in a few sentences..."
                   rows="3"
-                  required
                 />
               </div>
 

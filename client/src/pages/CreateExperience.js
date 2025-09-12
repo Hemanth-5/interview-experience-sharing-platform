@@ -492,6 +492,7 @@ const CreateExperience = () => {
             className="psg-create-input"
             value={formData.companyInfo.applicationDate}
             onChange={(e) => handleInputChange('companyInfo', 'applicationDate', e.target.value)}
+            required
           />
         </div>
         <div className="psg-create-field">
@@ -512,215 +513,286 @@ const CreateExperience = () => {
       <div className="psg-create-section-header">
         <h2 className="psg-create-section-title">Interview Rounds</h2>
         <div className="psg-create-section-divider"></div>
-        <button type="button" onClick={addRound} className="psg-create-btn psg-create-btn-primary psg-create-btn-sm">
+        {/* <button type="button" onClick={addRound} className="psg-create-btn psg-create-btn-primary psg-create-btn-sm">
           Add Round
-        </button>
+        </button> */}
       </div>
       
       {formData.rounds.map((round, roundIndex) => (
-        <div key={roundIndex} className="psg-create-round-card">
-          <div className="psg-create-round-header">
-            <h3 className="psg-create-round-title">
-              Round {round.roundNumber}
-            </h3>
-            {formData.rounds.length > 1 && (
-              <button 
-                type="button" 
-                onClick={() => removeRound(roundIndex)}
-                className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
-              >
-                ✕ Remove
-              </button>
-            )}
-          </div>
+        <div key={roundIndex}>
+          <div className="psg-create-round-card">
+            <div className="psg-create-round-header">
+              <h3 className="psg-create-round-title">
+                Round {round.roundNumber}
+              </h3>
+              {formData.rounds.length > 1 && (
+                <button 
+                  type="button" 
+                  onClick={() => removeRound(roundIndex)}
+                  className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
+                >
+                  ✕ Remove
+                </button>
+              )}
+            </div>
 
-          <div className="psg-create-grid">
-            <div className="psg-create-field">
-              <label className="psg-create-label">Round Type</label>
-              <select
-                className="psg-create-select"
-                value={round.roundType}
-                onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
-              >
-                <option value="Online Assessment">Online Assessment</option>
-                <option value="Technical">Technical</option>
-                <option value="HR">HR</option>
-                <option value="Group Discussion">Group Discussion</option>
-                <option value="Presentation">Presentation</option>
-                <option value="Case Study">Case Study</option>
-                <option value="Coding Round">Coding Round</option>
-                <option value="System Design">System Design</option>
-              </select>
+            <div className="psg-create-grid">
+              <div className="psg-create-field">
+                <label className="psg-create-label">Round Type</label>
+                <select
+                  className="psg-create-select"
+                  value={round.roundType}
+                  onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
+                >
+                  <option value="Online Assessment">Online Assessment</option>
+                  <option value="Technical">Technical</option>
+                  <option value="HR">HR</option>
+                  <option value="Group Discussion">Group Discussion</option>
+                  <option value="Presentation">Presentation</option>
+                  <option value="Case Study">Case Study</option>
+                  <option value="Coding Round">Coding Round</option>
+                  <option value="System Design">System Design</option>
+                </select>
+              </div>
+              <div className="psg-create-field">
+                <label className="psg-create-label psg-create-label-required">Duration (minutes)</label>
+                <input
+                  type="number"
+                  className="psg-create-input"
+                  value={round.duration}
+                  onChange={(e) => handleInputChange('rounds', 'duration', e.target.value ? parseInt(e.target.value) : '', roundIndex)}
+                  required
+                />
+              </div>
+              <div className="psg-create-field">
+                <label className="psg-create-label">Platform</label>
+                <input
+                  type="text"
+                  className="psg-create-input"
+                  value={round.platform}
+                  onChange={(e) => handleInputChange('rounds', 'platform', e.target.value, roundIndex)}
+                  placeholder="e.g., Zoom, Teams, In-person"
+                />
+              </div>
+              <div className="psg-create-field">
+                <label className="psg-create-label">Round Result</label>
+                <select
+                  className="psg-create-select"
+                  value={round.roundResult}
+                  onChange={(e) => handleInputChange('rounds', 'roundResult', e.target.value, roundIndex)}
+                >
+                  <option value="Selected">Selected</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Waitlisted">Waitlisted</option>
+                </select>
+              </div>
             </div>
-            <div className="psg-create-field">
-              <label className="psg-create-label psg-create-label-required">Duration (minutes)</label>
-              <input
-                type="number"
-                className="psg-create-input"
-                value={round.duration}
-                onChange={(e) => handleInputChange('rounds', 'duration', e.target.value ? parseInt(e.target.value) : '', roundIndex)}
-                required
-              />
-            </div>
-            <div className="psg-create-field">
-              <label className="psg-create-label">Platform</label>
-              <input
-                type="text"
-                className="psg-create-input"
-                value={round.platform}
-                onChange={(e) => handleInputChange('rounds', 'platform', e.target.value, roundIndex)}
-                placeholder="e.g., Zoom, Teams, In-person"
-              />
-            </div>
-            <div className="psg-create-field">
-              <label className="psg-create-label">Round Result</label>
-              <select
-                className="psg-create-select"
-                value={round.roundResult}
-                onChange={(e) => handleInputChange('rounds', 'roundResult', e.target.value, roundIndex)}
-              >
-                <option value="Selected">Selected</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Pending">Pending</option>
-                <option value="Waitlisted">Waitlisted</option>
-              </select>
-            </div>
-          </div>
 
-          {/* Technical Questions */}
-          <div className="psg-create-question-section">
-            <div className="psg-create-question-header">
-              <h4 className="psg-create-question-title">Technical Questions</h4>
-              <button 
-                type="button" 
-                onClick={() => addQuestion(roundIndex, 'technical')}
-                className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
-              >
-                Add Question
-              </button>
-            </div>
-            {round.technicalQuestions.map((question, qIndex) => (
-              <div key={qIndex} className="psg-create-question-card">
-                <div className="psg-create-question-meta">
-                  <span className="psg-create-question-number">Q{qIndex + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeQuestion(roundIndex, qIndex, 'technical')}
-                    className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
+            {/* Technical Questions */}
+            <div className="psg-create-question-section">
+              <div className="psg-create-question-header">
+                <h4 className="psg-create-question-title">Technical Questions</h4>
+                {/* <button 
+                  type="button" 
+                  onClick={() => addQuestion(roundIndex, 'technical')}
+                  className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
+                >
+                  Add Question
+                </button> */}
+              </div>
+              {round.technicalQuestions.map((question, qIndex) => (
+                <div key={qIndex}>
+                  <div className="psg-create-question-card">
+                    <div className="psg-create-question-meta">
+                      <span className="psg-create-question-number">Q{qIndex + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(roundIndex, qIndex, 'technical')}
+                        className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="psg-create-grid">
+                      <div className="psg-create-field psg-create-grid-full">
+                        <label className="psg-create-label">Question</label>
+                        <textarea
+                          className="psg-create-textarea"
+                          value={question.question}
+                          onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'technical')}
+                          placeholder="Describe the technical question asked..."
+                          rows="3"
+                        />
+                      </div>
+                      <div className="psg-create-field">
+                        <label className="psg-create-label">Difficulty</label>
+                        <select
+                          className="psg-create-select"
+                          value={question.difficulty}
+                          onChange={(e) => updateQuestion(roundIndex, qIndex, 'difficulty', e.target.value, 'technical')}
+                        >
+                          <option value="Easy">Easy</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Hard">Hard</option>
+                        </select>
+                      </div>
+                      <div className="psg-create-field">
+                        <label className="psg-create-label">Topics (comma separated)</label>
+                        <input
+                          type="text"
+                          className="psg-create-input"
+                          value={Array.isArray(question.topics) ? question.topics.join(', ') : (question.topics || '')}
+                          onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value, 'technical')}
+                          onBlur={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
+                          placeholder="Arrays, Dynamic Programming, etc."
+                        />
+                      </div>
+                      <div className="psg-create-field psg-create-grid-full">
+                        <label className="psg-create-label">Solution Approach</label>
+                        <textarea
+                          className="psg-create-textarea"
+                          value={question.solution}
+                          onChange={(e) => updateQuestion(roundIndex, qIndex, 'solution', e.target.value, 'technical')}
+                          placeholder="Describe your approach to solving this question..."
+                          rows="3"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Add Question button after each technical question */}
+                  <div style={{ textAlign: 'center', margin: '15px 0' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => addQuestion(roundIndex, 'technical')} 
+                      className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
+                      style={{ 
+                        padding: '8px 16px',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      + Add Technical Question
+                    </button>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Add Question button when no questions exist */}
+              {round.technicalQuestions.length === 0 && (
+                <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => addQuestion(roundIndex, 'technical')} 
+                    className="psg-create-btn psg-create-btn-primary"
+                    style={{ 
+                      padding: '12px 24px',
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }}
                   >
-                    ✕
+                    + Add First Technical Question
                   </button>
                 </div>
-                <div className="psg-create-grid">
-                  <div className="psg-create-field psg-create-grid-full">
-                    <label className="psg-create-label">Question</label>
-                    <textarea
-                      className="psg-create-textarea"
-                      value={question.question}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'technical')}
-                      placeholder="Describe the technical question asked..."
-                      rows="3"
-                    />
-                  </div>
-                  <div className="psg-create-field">
-                    <label className="psg-create-label">Difficulty</label>
-                    <select
-                      className="psg-create-select"
-                      value={question.difficulty}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'difficulty', e.target.value, 'technical')}
-                    >
-                      <option value="Easy">Easy</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Hard">Hard</option>
-                    </select>
-                  </div>
-                  <div className="psg-create-field">
-                    <label className="psg-create-label">Topics (comma separated)</label>
-                    <input
-                      type="text"
-                      className="psg-create-input"
-                      value={Array.isArray(question.topics) ? question.topics.join(', ') : (question.topics || '')}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value, 'technical')}
-                      onBlur={(e) => updateQuestion(roundIndex, qIndex, 'topics', e.target.value.split(',').map(t => t.trim()).filter(t => t), 'technical')}
-                      placeholder="Arrays, Dynamic Programming, etc."
-                    />
-                  </div>
-                  <div className="psg-create-field psg-create-grid-full">
-                    <label className="psg-create-label">Solution Approach</label>
-                    <textarea
-                      className="psg-create-textarea"
-                      value={question.solution}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'solution', e.target.value, 'technical')}
-                      placeholder="Describe your approach to solving this question..."
-                      rows="3"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Behavioral Questions */}
+              )}
+            </div>          {/* Behavioral Questions */}
           <div className="psg-create-question-section">
             <div className="psg-create-question-header">
               <h4 className="psg-create-question-title">Behavioral Questions</h4>
-              <button 
+              {/* <button 
                 type="button" 
                 onClick={() => addQuestion(roundIndex, 'behavioral')}
                 className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
               >
                 Add Question
-              </button>
+              </button> */}
             </div>
             {round.behavioralQuestions.map((question, qIndex) => (
-              <div key={qIndex} className="psg-create-question-card">
-                <div className="psg-create-question-meta">
-                  <span className="psg-create-question-number">Q{qIndex + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeQuestion(roundIndex, qIndex, 'behavioral')}
-                    className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="psg-create-grid">
-                  <div className="psg-create-field psg-create-grid-full">
-                    <label className="psg-create-label">Question</label>
-                    <textarea
-                      className="psg-create-textarea"
-                      value={question.question}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'behavioral')}
-                      placeholder="Describe the behavioral question asked..."
-                      rows="2"
-                    />
-                  </div>
-                  <div className="psg-create-field">
-                    <label className="psg-create-label">Category</label>
-                    <select
-                      className="psg-create-select"
-                      value={question.category}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'category', e.target.value, 'behavioral')}
+              <div key={qIndex}>
+                <div className="psg-create-question-card">
+                  <div className="psg-create-question-meta">
+                    <span className="psg-create-question-number">Q{qIndex + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeQuestion(roundIndex, qIndex, 'behavioral')}
+                      className="psg-create-btn psg-create-btn-danger psg-create-btn-sm"
                     >
-                      <option value="Personal">Personal</option>
-                      <option value="Behavioral">Behavioral</option>
-                      <option value="Situational">Situational</option>
-                      <option value="Company-specific">Company-specific</option>
-                    </select>
+                      ✕
+                    </button>
                   </div>
-                  <div className="psg-create-field psg-create-grid-full">
-                    <label className="psg-create-label">Your Answer</label>
-                    <textarea
-                      className="psg-create-textarea"
-                      value={question.yourAnswer}
-                      onChange={(e) => updateQuestion(roundIndex, qIndex, 'yourAnswer', e.target.value, 'behavioral')}
-                      placeholder="How did you answer this question?"
-                      rows="3"
-                    />
+                  <div className="psg-create-grid">
+                    <div className="psg-create-field psg-create-grid-full">
+                      <label className="psg-create-label">Question</label>
+                      <textarea
+                        className="psg-create-textarea"
+                        value={question.question}
+                        onChange={(e) => updateQuestion(roundIndex, qIndex, 'question', e.target.value, 'behavioral')}
+                        placeholder="Describe the behavioral question asked..."
+                        rows="2"
+                      />
+                    </div>
+                    <div className="psg-create-field">
+                      <label className="psg-create-label">Category</label>
+                      <select
+                        className="psg-create-select"
+                        value={question.category}
+                        onChange={(e) => updateQuestion(roundIndex, qIndex, 'category', e.target.value, 'behavioral')}
+                      >
+                        <option value="Personal">Personal</option>
+                        <option value="Behavioral">Behavioral</option>
+                        <option value="Situational">Situational</option>
+                        <option value="Company-specific">Company-specific</option>
+                      </select>
+                    </div>
+                    <div className="psg-create-field psg-create-grid-full">
+                      <label className="psg-create-label">Your Answer</label>
+                      <textarea
+                        className="psg-create-textarea"
+                        value={question.yourAnswer}
+                        onChange={(e) => updateQuestion(roundIndex, qIndex, 'yourAnswer', e.target.value, 'behavioral')}
+                        placeholder="How did you answer this question?"
+                        rows="3"
+                      />
+                    </div>
                   </div>
+                </div>
+                
+                {/* Add Question button after each behavioral question */}
+                <div style={{ textAlign: 'center', margin: '15px 0' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => addQuestion(roundIndex, 'behavioral')} 
+                    className="psg-create-btn psg-create-btn-primary psg-create-btn-sm"
+                    style={{ 
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    + Add Behavioral Question
+                  </button>
                 </div>
               </div>
             ))}
+            
+            {/* Add Question button when no questions exist */}
+            {round.behavioralQuestions.length === 0 && (
+              <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                <button 
+                  type="button" 
+                  onClick={() => addQuestion(roundIndex, 'behavioral')} 
+                  className="psg-create-btn psg-create-btn-primary"
+                  style={{ 
+                    padding: '12px 24px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                >
+                  + Add First Behavioral Question
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="psg-create-grid">
@@ -762,6 +834,23 @@ const CreateExperience = () => {
               rows="2"
             />
           </div>
+          </div>
+          
+          {/* Add Round button after each round */}
+          <div style={{ textAlign: 'center', margin: '20px 0' }}>
+            <button 
+              type="button" 
+              onClick={addRound} 
+              className="psg-create-btn psg-create-btn-primary"
+              style={{ 
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              + Add Another Round
+            </button>
+          </div>
         </div>
       ))}
     </div>
@@ -799,14 +888,13 @@ const CreateExperience = () => {
           </select>
         </div>
         <div className="psg-create-field psg-create-grid-full">
-          <label className="psg-create-label psg-create-label-required">Overall Experience Summary</label>
+          <label className="psg-create-label">Overall Experience Summary</label>
           <textarea
             className="psg-create-textarea"
             value={formData.overallExperience}
             onChange={(e) => handleInputChange(null, 'overallExperience', e.target.value)}
             placeholder="Summarize your overall interview experience in a few sentences..."
             rows="3"
-            required
           />
         </div>
         <div className="psg-create-field">

@@ -1,0 +1,225 @@
+/* ==============================================
+   PAGE NOT FOUND - LIGHT MODE STYLES
+   ============================================== */
+
+/* Main container */
+.page-not-found-placeholder {
+  /* CSS variables are now defined here for light mode */
+  --light-bg: #f0f4f8; /* A very light grey background */
+  --light-dark: #e2e8f0; /* Slightly darker for gradients */
+  --planet-color: #3b82f6; /* Keeping the blue planet */
+  --accent-color: #7c3aed; /* A vibrant purple for primary actions */
+  --text-dark: #2d3748; /* Dark text for readability */
+  --text-medium: #4a5568; /* Slightly lighter dark text */
+  --shadow-color: rgba(124, 58, 237, 0.2); /* Shadow matching accent */
+
+  /* Re-using some of your original variables for consistency */
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-3xl: 48px;
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-size-lg: 1.125rem;
+  --border-radius-lg: 12px;
+  --transition-normal: 0.3s ease;
+
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-3xl);
+  background: radial-gradient(ellipse at bottom, var(--light-bg) 0%, var(--light-dark) 100%); /* Light gradient */
+  position: relative;
+  overflow: hidden;
+  color: var(--text-dark); /* Default text color set to dark */
+}
+
+/* ==============================================
+   ILLUSTRATION & ANIMATION STYLES
+   ============================================== */
+
+.illustration-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Stars background - will appear as small dark dots/texture on light bg */
+.stars {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 
+    -50px 30px 2px #4a5568, 100px 80px 1px #4a5568, 220px 150px 1px #4a5568, /* Darker "stars" */
+    -150px 120px 1px #4a5568, 20px -80px 1px #4a5568, 80px -130px 2px #4a5568,
+    -80px -50px 1px #4a5568, 150px -90px 1px #4a5568, -200px -150px 1px #4a5568;
+  animation: zoomStars 20s linear infinite alternate;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+@keyframes zoomStars {
+  from { transform: scale(1) rotate(0deg); }
+  to { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Planet - remains blue */
+.planet {
+  width: 100px;
+  height: 100px;
+  background: var(--planet-color);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  box-shadow: 
+    inset -15px -15px 30px rgba(0,0,0,0.3),
+    0 0 40px rgba(59, 130, 246, 0.4);
+  transform: translate(var(--move-x-planet, 0), var(--move-y-planet, 0));
+  transition: transform 0.2s ease-out;
+}
+
+/* Astronaut - body to match light theme, visor dark */
+.astronaut {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 100px;
+  animation: float 6s ease-in-out infinite;
+  z-index: 10;
+  transform: translate(calc(-50% + var(--move-x-astronaut, 0)), calc(-50% + var(--move-y-astronaut, 0)));
+  transition: transform 0.2s ease-out;
+}
+
+@keyframes float {
+  0% { transform: translate(calc(-50% + var(--move-x-astronaut, 0)), calc(-50% + var(--move-y-astronaut, 0))) rotate(-5deg); }
+  50% { transform: translate(calc(-45% + var(--move-x-astronaut, 0)), calc(-55% + var(--move-y-astronaut, 0))) rotate(5deg); }
+  100% { transform: translate(calc(-50% + var(--move-x-astronaut, 0)), calc(-50% + var(--move-y-astronaut, 0))) rotate(-5deg); }
+}
+
+.astronaut__body { width: 70px; height: 90px; background: #FFF; border-radius: 35px 35px 20px 20px; position: absolute; bottom: 0; left: 5px; }
+.astronaut__helmet { width: 80px; height: 80px; background: #FFF; border-radius: 50%; position: absolute; top: -20px; left: 0; }
+.astronaut__visor { width: 60px; height: 45px; background: #2d3748; border-radius: 25px; position: absolute; top: 18px; left: 10px; border: 3px solid #6b7280; overflow: hidden; } /* Darker visor */
+.astronaut__visor::after { content: ''; position: absolute; top: 5px; left: 10px; width: 10px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+.astronaut__backpack { width: 50px; height: 60px; background: #cbd5e0; position: absolute; top: 30px; left: 15px; z-index: -1; border-radius: 10px; } /* Lighter backpack */
+.astronaut__tether { width: 10px; height: 50px; background: var(--accent-color); position: absolute; bottom: -40px; left: 35px; transform-origin: top center; border-radius: 5px; animation: swing 3s ease-in-out infinite alternate; }
+
+@keyframes swing {
+  from { transform: rotate(-10deg); }
+  to { transform: rotate(10deg); }
+}
+
+/* 404 Text - subtle dark on light background */
+.text-404 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    font-size: 150px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.1); /* Very subtle dark grey for the numbers */
+    display: flex;
+    gap: 10px;
+    user-select: none;
+}
+.text-404 .char-0 { animation: spin 8s linear infinite; display: inline-block; }
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==============================================
+   CONTENT STYLES
+   ============================================== */
+
+.page-not-found-placeholder h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, var(--text-dark), var(--text-medium)); /* Darker gradient for text */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-lg);
+  animation: fadeInUp 1s ease-out;
+  position: relative;
+  z-index: 2;
+}
+
+.page-not-found-placeholder p {
+  font-size: var(--font-size-lg);
+  color: var(--text-medium); /* Lighter dark text */
+  margin-bottom: var(--spacing-xl);
+  max-width: 550px;
+  line-height: 1.7;
+  animation: fadeInUp 1s ease-out 0.2s both;
+  position: relative;
+  z-index: 2;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  z-index: 2;
+}
+
+.back-to-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  text-decoration: none;
+  border-radius: var(--border-radius-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-normal);
+  animation: fadeInUp 1s ease-out 0.4s both;
+  border: 2px solid transparent;
+  min-width: 200px;
+}
+
+.back-to-home.primary {
+  background: #1e40af; /* Primary blue to match Leaderboard */
+  color: #FFF; /* White text on blue */
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.2);
+}
+.back-to-home.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(30, 64, 175, 0.3);
+  background: #3b82f6; /* Lighter blue on hover */
+}
+
+.back-to-home.secondary {
+  background: transparent;
+  color: #1e40af; /* Primary blue to match Leaderboard */
+  border: 2px solid #1e40af; /* Border in primary blue */
+}
+.back-to-home.secondary:hover {
+  transform: translateY(-3px);
+  background: rgba(30, 64, 175, 0.05); /* Light blue overlay on hover */
+  border-color: #3b82f6; /* Lighter blue border on hover */
+}
+
+.help-text {
+  margin-top: var(--spacing-lg);
+  animation: fadeInUp 1s ease-out 0.6s both;
+  position: relative;
+  z-index: 2;
+}
+.help-text p { font-size: 0.9rem; color: var(--text-medium); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

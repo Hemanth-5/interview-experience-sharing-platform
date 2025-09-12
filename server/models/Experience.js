@@ -250,7 +250,7 @@ const experienceSchema = new mongoose.Schema({
   },
   overallExperience: {
     type: String,
-    required: true,
+    required: false,
     default: ''
   },
   finalResult: {

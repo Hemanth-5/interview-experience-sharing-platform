@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import Leaderboard from './pages/Leaderboard';
 import About from './pages/About';
+import PageNotFound from './pages/PageNotFound';
 import PrivateRoute from './components/PrivateRoute';
 import DesktopModePrompt from './components/DesktopModePrompt';
 import AdminRoute from './admin/components/AdminRoute';
@@ -113,6 +114,7 @@ function AppContent() {
             <Route path="announcement" element={<AdminAnnouncement />} />
             <Route path="pdf" element={<AdminParsePdfPage />} />
           </Route>
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
