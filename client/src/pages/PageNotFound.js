@@ -68,14 +68,13 @@ const PageNotFound = () => {
 
       <h1>Page Not Found</h1>
       <p>
-        It seems the page you are looking for has drifted into a black hole.
-        Let's get you back on solid ground.
+        It seems the page you are looking for has been moved, deleted, or never existed
       </p>
 
       <div className="action-buttons">
         <Link to="/" className="back-to-home primary">
           <HomeIcon />
-          Take Me Home
+          Back to Home
         </Link>
         <Link to="/experiences" className="back-to-home secondary">
           Browse Experiences
