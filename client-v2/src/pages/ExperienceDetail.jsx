@@ -281,6 +281,9 @@ const ExperienceDetail = () => {
     );
   }
 
+  // Check if current user is the author of the experience
+  const isCurrentUser = user && experience && experience.userId && experience.userId._id === user.id;
+
   // Helper function for closing the report modal and resetting state
   function closeReportModal() {
     setIsReportModalOpen(false);
