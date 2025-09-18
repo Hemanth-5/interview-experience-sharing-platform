@@ -400,14 +400,14 @@ const ExperienceDetail = () => {
                           day: 'numeric'
                         })}
                       </span>
-                      {!isMobile && isCurrentUser && (
+                      {/* {!isMobile && isCurrentUser && (
                         <Link
                           to={`/experiences/${experience._id}/edit`}
                           className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
                         >
                           Edit
                         </Link>
-                      )}
+                      )} */}
                       <button 
                         onClick={() => navigate('/experiences')}
                         className="p-2 hover:bg-secondary rounded-lg transition-colors flex-shrink-0"
