@@ -47,6 +47,9 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/(.*)", "destination": "https://interview-share.vercel.app/$1", "permanent": true }
+  ],
   "env": {
     "NODE_ENV": "production"
   }
