@@ -1,0 +1,280 @@
+/* AdminRoute Component Styles */
+.admin-route-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-route-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 119, 255, 0.2) 0%, transparent 50%);
+  animation: backgroundShift 20s ease-in-out infinite;
+}
+
+/* Loading State */
+.loading-container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-2xl);
+  padding: var(--admin-spacing-3xl) var(--admin-spacing-xl);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(79, 70, 229, 0.2);
+  border-top: 4px solid var(--admin-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto var(--admin-spacing-lg);
+}
+
+.loading-container p {
+  color: var(--admin-gray-600);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Access Denied State */
+.access-denied {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--admin-spacing-lg);
+}
+
+.access-denied-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-2xl);
+  padding: var(--admin-spacing-3xl) var(--admin-spacing-xl);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+.access-denied h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--admin-danger);
+  margin-bottom: var(--admin-spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--admin-spacing-md);
+}
+
+.access-denied h2::before {
+  content: '🚫';
+  font-size: 2.5rem;
+}
+
+.access-denied p {
+  color: var(--admin-gray-600);
+  font-size: 1.1rem;
+  margin-bottom: var(--admin-spacing-xl);
+  line-height: 1.5;
+}
+
+.access-denied .btn {
+  background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-accent) 100%);
+  color: white;
+  border: none;
+  padding: var(--admin-spacing-md) var(--admin-spacing-xl);
+  border-radius: var(--admin-radius-md);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--admin-spacing-sm);
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.access-denied .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+/* Authentication in progress state */
+.authenticating-container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-2xl);
+  padding: var(--admin-spacing-3xl) var(--admin-spacing-xl);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+.authenticating-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--admin-spacing-lg);
+  background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-accent) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.authenticating-container h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--admin-gray-800);
+  margin-bottom: var(--admin-spacing-sm);
+}
+
+.authenticating-container p {
+  color: var(--admin-gray-600);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Redirecting state */
+.redirecting-container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-2xl);
+  padding: var(--admin-spacing-3xl) var(--admin-spacing-xl);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+.google-signin-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--admin-spacing-lg);
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 50%, #fbbc05 75%, #ea4335 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-10px) translateY(-10px); }
+  50% { transform: translateX(10px) translateY(10px); }
+  75% { transform: translateX(-5px) translateY(5px); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .admin-route-container {
+    padding: var(--admin-spacing-lg);
+  }
+  
+  .loading-container,
+  .access-denied-content,
+  .authenticating-container,
+  .redirecting-container {
+    padding: var(--admin-spacing-xl) var(--admin-spacing-lg);
+  }
+  
+  .access-denied h2 {
+    font-size: 1.75rem;
+  }
+  
+  .authenticating-icon,
+  .google-signin-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 1.75rem;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+  }
+}
