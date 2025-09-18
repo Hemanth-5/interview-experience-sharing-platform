@@ -66,10 +66,6 @@ const interviewRoundSchema = new mongoose.Schema({
     yourAnswer: {
       type: String,
       default: null
-    },
-    tips: {
-      type: String,
-      default: null
     }
   }],
   // MCQ/Aptitude Section
@@ -96,21 +92,6 @@ const interviewRoundSchema = new mongoose.Schema({
     }
   },
   // Interviewer Details
-  interviewerDetails: [{
-    role: {
-      type: String,
-      default: null
-    },
-    team: {
-      type: String,
-      default: null
-    },
-    experienceLevel: {
-      type: String,
-      enum: ['Junior', 'Senior', 'Lead', 'Manager', 'Director'],
-      default: null
-    }
-  }],
   roundResult: {
     type: String,
     enum: ['Selected', 'Rejected', 'Pending', 'Waitlisted'],
@@ -178,10 +159,6 @@ const companyInfoSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  country: {
-    type: String,
-    default: null
-  },
   stipend: {
     type: Number,
     default: null
@@ -192,35 +169,6 @@ const companyInfoSchema = new mongoose.Schema({
   },
   applicationDate: {
     type: Date,
-    required: true
-  },
-  resultDate: {
-    type: Date,
-    default: null
-  }
-});
-
-const backgroundInfoSchema = new mongoose.Schema({
-  cgpa: {
-    type: Number,
-    min: 0,
-    max: 10,
-    default: null
-  },
-  previousInternships: {
-    type: Number,
-    min: 0,
-    default: 0
-  },
-  relevantProjects: [{
-    type: String
-  }],
-  skills: [{
-    type: String
-  }],
-  yearOfStudy: {
-    type: String,
-    enum: ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate'],
     required: true
   }
 });
@@ -280,17 +228,8 @@ const experienceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  // Background Info
-  backgroundInfo: {
-    type: backgroundInfoSchema,
-    required: true
-  },
   // Metadata
   isAnonymous: {
-    type: Boolean,
-    default: false
-  },
-  isVerified: {
     type: Boolean,
     default: false
   },
@@ -329,29 +268,6 @@ const experienceSchema = new mongoose.Schema({
       ref: 'User'
     },
     viewedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  // Files
-  attachments: [{
-    fileName: {
-      type: String,
-      required: true
-    },
-    fileUrl: {
-      type: String,
-      required: true
-    },
-    fileType: {
-      type: String,
-      required: true
-    },
-    fileSize: {
-      type: Number,
-      required: true
-    },
-    uploadDate: {
       type: Date,
       default: Date.now
     }

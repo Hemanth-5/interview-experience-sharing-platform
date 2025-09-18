@@ -39,7 +39,8 @@ router.put('/profile',
     body('preferences.notifications.email').optional().isBoolean(),
     body('preferences.notifications.browser').optional().isBoolean(),
     body('preferences.privacy.showEmail').optional().isBoolean(),
-    body('preferences.privacy.showUniversity').optional().isBoolean()
+    body('preferences.privacy.showUniversity').optional().isBoolean(),
+    body('backgroundData').optional().isObject()
   ],
   handleValidationErrors,
   async (req, res) => {
@@ -48,7 +49,8 @@ router.put('/profile',
         'name', 
         'university', 
         'graduationYear', 
-        'preferences'
+        'preferences',
+        'backgroundData'
       ];
       
       const updates = {};
@@ -247,7 +249,7 @@ router.get('/:id/public-profile',
   async (req, res) => {
     try {
       const user = await User.findById(req.params.id)
-        .select('name avatar university graduationYear level badges stats joinedAt preferences.privacy');
+        .select('name avatar university graduationYear backgroundData level badges stats joinedAt preferences.privacy');
 
       if (!user) {
         return res.status(404).json({
@@ -261,7 +263,7 @@ router.get('/:id/public-profile',
         userId: req.params.id,
         isPublished: true
       })
-      .select('companyInfo.companyName companyInfo.role overallRating finalResult createdAt views')
+      .select('companyInfo.companyName companyInfo.companyLogo companyInfo.role overallRating finalResult createdAt views')
       .sort({ createdAt: -1 })
       .limit(10);
 
@@ -285,8 +287,11 @@ router.get('/:id/public-profile',
           totalViews,
           averageRating: parseFloat(averageRating.toFixed(2))
         },
+        backgroundData: user.backgroundData || null,
         recentExperiences: experiences
       };
+
+      // console.log(user);
 
       res.json({
         success: true,

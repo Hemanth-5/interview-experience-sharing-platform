@@ -56,10 +56,8 @@ app.use(helmet({
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://localhost:3000',
   process.env.CLIENT_URL,
-  'https://psg-tech-interview-hub.vercel.app', // Add your Vercel domain
-  'https://your-actual-vercel-domain.vercel.app' // Update with your actual Vercel domain
+  'http://localhost:5173'
 ].filter(Boolean);
 
 app.use(cors({

@@ -66,7 +66,8 @@ router.get('/user', (req, res) => {
         level: req.user.level,
         badges: req.user.badges,
         stats: req.user.stats,
-        preferences: req.user.preferences
+        preferences: req.user.preferences,
+        backgroundData: req.user.backgroundData
       }
     });
   } else {

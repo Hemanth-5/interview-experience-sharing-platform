@@ -34,6 +34,68 @@ const userSchema = new mongoose.Schema({
     min: 2020,
     max: 2030
   },
+  // Background Information
+  backgroundData: {
+    branch: {
+      type: String,
+      enum: [
+        "B. E.",
+        "B. Tech.",
+        "B. Sc.",
+        "Other"
+      ],
+      default: null
+    },
+    department: {
+      type: String,
+      enum: [
+        "Automobile Engineering",
+        "Biomedical Engineering",
+        "Civil Engineering",
+        "Computer Science and Engineering",
+        "Computer Science and Engineering (AI and ML)",
+        "Electrical and Electronics Engineering",
+        "Electronics and Communication Engineering",
+        "Instrumentation and Control Engineering",
+        "Mechanical Engineering",
+        "Metallurgical Engineering",
+        "Production Engineering",
+        "Robotics and Automation",
+        "Bio Technology",
+        "Fashion Technology",
+        "Information Technology",
+        "Textile Technology",
+        "Electrical and Electronics Engineering (Sandwich)",
+        "Mechanical Engineering (Sandwich)",
+        "Production Engineering (Sandwich)",
+        "Applied Science",
+        "Computer Systems and Design"
+      ],
+      default: null
+    },
+    cgpa: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: null
+    },
+    previousInternships: {
+      type: Number,
+      min: 0,
+      default: 0
+    },
+    relevantProjects: [{
+      type: String
+    }],
+    skills: [{
+      type: String
+    }],
+    yearOfStudy: {
+      type: String,
+      enum: ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate'],
+      default: null
+    }
+  },
   isEmailVerified: {
     type: Boolean,
     default: false

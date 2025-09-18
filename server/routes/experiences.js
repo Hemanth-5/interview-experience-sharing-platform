@@ -7,6 +7,8 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { isAuthenticated, isOwnerOrAdmin } = require('../middleware/auth');
 const handleValidationErrors = require('../middleware/validation');
+const pdfService = require('../services/pdfService');
+const { Readable } = require('stream');
 const router = express.Router();
 // const multer = require("multer");
 // const pdfParse = require('pdf-parse')
@@ -33,7 +35,7 @@ const experienceValidation = [
   body('preparationTime').isInt({ min: 0 }).withMessage('Preparation time must be non-negative'),
   body('keyTips').trim().notEmpty().withMessage('Key tips are required'),
   body('mistakesToAvoid').trim().notEmpty().withMessage('Mistakes to avoid are required'),
-  body('backgroundInfo.yearOfStudy').isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
+  // body('backgroundInfo.yearOfStudy').isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
 ];
 
 // Validation rules for updating experiences (more flexible)
@@ -57,7 +59,7 @@ const experienceUpdateValidation = [
   body('preparationTime').optional().isInt({ min: 0 }).withMessage('Preparation time must be non-negative'),
   body('keyTips').optional().trim().notEmpty().withMessage('Key tips cannot be empty'),
   body('mistakesToAvoid').optional().trim().notEmpty().withMessage('Mistakes to avoid cannot be empty'),
-  body('backgroundInfo.yearOfStudy').optional().isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
+  // body('backgroundInfo.yearOfStudy').optional().isIn(['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']).withMessage('Invalid year of study')
 ];
 
 // @route   POST /api/experiences
@@ -95,7 +97,7 @@ router.post('/',
         experienceData.companyInfo.role.toLowerCase(),
         experienceData.companyInfo.department.toLowerCase(),
         experienceData.companyInfo.internshipType.toLowerCase(),
-        ...experienceData.backgroundInfo.skills.map(skill => skill.toLowerCase())
+        // ...experienceData.backgroundInfo.skills.map(skill => skill.toLowerCase())
       ];
       experienceData.tags = [...new Set(tags)]; // Remove duplicates
 
@@ -202,8 +204,7 @@ router.get('/',
         rating,
         sortBy = 'recent',
         search,
-        finalResult,
-        yearOfStudy
+        finalResult
       } = req.query;
 
       // Build filter object - show published experiences, including flagged ones
@@ -237,9 +238,9 @@ router.get('/',
         filter.finalResult = finalResult;
       }
 
-      if (yearOfStudy) {
-        filter['backgroundInfo.yearOfStudy'] = yearOfStudy;
-      }
+      // if (yearOfStudy) {
+      //   filter['backgroundInfo.yearOfStudy'] = yearOfStudy;
+      // }
 
       if (search) {
         filter.$or = [
@@ -404,14 +405,14 @@ router.put('/:id',
       // Update tags only if relevant fields are provided
       if (req.body.companyInfo || req.body.backgroundInfo) {
         const companyInfo = req.body.companyInfo || experience.companyInfo;
-        const backgroundInfo = req.body.backgroundInfo || experience.backgroundInfo;
+        // const backgroundInfo = req.body.backgroundInfo || experience.backgroundInfo;
         
         const tags = [
           companyInfo.companyName?.toLowerCase(),
           companyInfo.role?.toLowerCase(),
           companyInfo.department?.toLowerCase(),
           companyInfo.internshipType?.toLowerCase(),
-          ...(backgroundInfo.skills || []).map(skill => skill.toLowerCase())
+          // ...(backgroundInfo.skills || []).map(skill => skill.toLowerCase())
         ].filter(Boolean); // Remove undefined/null values
         
         req.body.tags = [...new Set(tags)];
@@ -866,5 +867,74 @@ router.post(
 //     }
 //   }
 // );
+
+// Helper function to create a readable stream from buffer
+function bufferToStream(buffer) {
+  return Readable.from(buffer);
+}
+
+// @route   GET /api/experiences/:id/download
+// @desc    Download single experience as PDF (for the experience owner or public experiences)
+// @access  Private
+router.get('/:id/download',
+  isAuthenticated,
+  [
+    param('id').isMongoId().withMessage('Valid experience ID required')
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get the experience
+      const experience = await Experience.findById(id)
+        .populate('userId', 'name email university graduationYear level avatar role')
+        .lean();
+
+      if (!experience) {
+        return res.status(404).json({
+          success: false,
+          message: 'Experience not found'
+        });
+      }
+
+      // Check if user can access this experience
+      // Allow access if: experience is published, or user is the owner, or user is admin
+      const canAccess = experience.isPublished || 
+                       experience.userId._id.toString() === req.user.id || 
+                       req.user.role === 'admin';
+
+      if (!canAccess) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied'
+        });
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const companyName = experience.companyInfo.companyName.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Experience_${companyName}_${experience.companyInfo.role.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.pdf`;
+
+      // Generate PDF buffer
+      const pdfBuffer = await pdfService.generateExperiencePdfBuffer(experience);
+
+      // Set headers for download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      // Stream the buffer directly
+      const stream = bufferToStream(pdfBuffer);
+      stream.pipe(res);
+
+    } catch (error) {
+      console.error('Error downloading experience:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to generate PDF'
+      });
+    }
+  }
+);
 
 module.exports = router;

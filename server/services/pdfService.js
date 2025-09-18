@@ -21,6 +21,80 @@ class PdfService {
     this.printer = new PdfPrinter(this.fonts);
   }
 
+  // Convert markdown to PDF-friendly format
+  convertMarkdownToPdfFormat(text) {
+    if (!text) return { text: '', inlines: [] };
+    
+    // Handle basic markdown formatting
+    let processedText = text;
+    const inlines = [];
+    
+    // Convert **bold** text
+    processedText = processedText.replace(/\*\*(.*?)\*\*/g, (match, content) => {
+      return content; // Return just the content, mark as bold later
+    });
+    
+    // Convert *italic* text  
+    processedText = processedText.replace(/\*(.*?)\*/g, (match, content) => {
+      return content; // Return just the content, mark as italic later
+    });
+    
+    // Convert `code` text
+    processedText = processedText.replace(/`(.*?)`/g, (match, content) => {
+      return content; // Return just the content, mark with different font later
+    });
+    
+    // Convert ### headers
+    processedText = processedText.replace(/^### (.*$)/gm, (match, content) => {
+      return `\n${content}\n`; // Add spacing around headers
+    });
+    
+    // Convert lists
+    processedText = processedText.replace(/^[\-\*] (.+)$/gm, (match, content) => {
+      return `• ${content}`;
+    });
+    
+    // Convert numbered lists
+    processedText = processedText.replace(/^\d+\. (.+)$/gm, (match, content, offset, string) => {
+      // Find the number for this item
+      const lines = string.substring(0, offset).split('\n');
+      const listNumber = lines.filter(line => /^\d+\./.test(line)).length + 1;
+      return `${listNumber}. ${content}`;
+    });
+    
+    // Clean up extra whitespace
+    processedText = processedText.replace(/\n{3,}/g, '\n\n');
+    
+    // Split text into paragraphs and apply formatting
+    const paragraphs = processedText.split(/\n\s*\n/);
+    const formattedContent = [];
+    
+    paragraphs.forEach(paragraph => {
+      const trimmed = paragraph.trim();
+      if (!trimmed) return;
+      
+      // Check if it's a header (after our conversion)
+      if (trimmed.startsWith('•') || /^\d+\./.test(trimmed)) {
+        // List item
+        formattedContent.push({
+          text: trimmed,
+          margin: [10, 2, 0, 2],
+          fontSize: 10
+        });
+      } else {
+        // Regular paragraph
+        formattedContent.push({
+          text: trimmed,
+          margin: [0, 3, 0, 3],
+          fontSize: 10,
+          lineHeight: 1.3
+        });
+      }
+    });
+    
+    return formattedContent.length > 0 ? formattedContent : [{ text: processedText, fontSize: 10 }];
+  }
+
   // Method to download image from URL and convert to base64
   async downloadImageAsBase64(imageUrl, timeout = 10000) {
     return new Promise((resolve, reject) => {
@@ -668,10 +742,19 @@ class PdfService {
             }
             
             if (q.solution) {
+              const solutionContent = this.convertMarkdownToPdfFormat(q.solution);
               docDefinition.content.push({ 
-                text: `Solution: ${q.solution}`, 
-                style: "solution" 
+                text: "Solution:", 
+                style: "sectionHeader",
+                margin: [25, 4, 0, 2],
+                fontSize: 10,
+                color: '#059669'
               });
+              docDefinition.content.push(...solutionContent.map(content => ({
+                ...content,
+                margin: [30, 1, 0, 3],
+                color: '#059669'
+              })));
             }
           });
         }
@@ -692,28 +775,113 @@ class PdfService {
               text: `Category: ${q.category}`, 
               style: "questionDetails" 
             });
-            if (q.yourAnswer) docDefinition.content.push({ 
-              text: `Answer: ${q.yourAnswer}`, 
-              style: "solution"
-            });
-            if (q.tips) docDefinition.content.push({ 
-              text: `Tips: ${q.tips}`, 
-              style: "tips" 
-            });
+            if (q.yourAnswer) {
+              const answerContent = this.convertMarkdownToPdfFormat(q.yourAnswer);
+              docDefinition.content.push({ 
+                text: "Sample Answer:", 
+                style: "sectionHeader",
+                margin: [25, 4, 0, 2],
+                fontSize: 10,
+                color: '#2563eb'
+              });
+              docDefinition.content.push(...answerContent.map(content => ({
+                ...content,
+                margin: [30, 1, 0, 3],
+                color: '#2563eb'
+              })));
+            }
+            if (q.tips) {
+              const tipsContent = this.convertMarkdownToPdfFormat(q.tips);
+              docDefinition.content.push({ 
+                text: "Tips:", 
+                style: "sectionHeader",
+                margin: [25, 4, 0, 2],
+                fontSize: 10,
+                color: '#7c3aed'
+              });
+              docDefinition.content.push(...tipsContent.map(content => ({
+                ...content,
+                margin: [30, 1, 0, 3],
+                color: '#7c3aed'
+              })));
+            }
           });
         }
 
-        if (round.feedback) {
+        // MCQ Section
+        if (round.mcqSection && (round.mcqSection.totalQuestions || round.mcqSection.timeLimit || round.mcqSection.topics?.length > 0)) {
           docDefinition.content.push({ 
-            text: `Feedback: ${round.feedback}`, 
-            style: "feedback" 
+            text: "MCQ/Assessment Section", 
+            style: "sectionHeader",
+            margin: [15, 8, 0, 4],
+            color: '#7c3aed'
           });
+
+          const mcqTable = [];
+          if (round.mcqSection.totalQuestions) mcqTable.push([
+            { text: "Total Questions", style: "tableCell" },
+            { text: round.mcqSection.totalQuestions.toString(), style: "tableCell", bold: true }
+          ]);
+          if (round.mcqSection.timeLimit) mcqTable.push([
+            { text: "Time Limit", style: "tableCell" },
+            { text: `${round.mcqSection.timeLimit} minutes`, style: "tableCell" }
+          ]);
+          if (round.mcqSection.difficulty) {
+            const difficultyColor = round.mcqSection.difficulty.toLowerCase() === 'easy' ? '#22c55e' : 
+                                   round.mcqSection.difficulty.toLowerCase() === 'medium' ? '#f59e0b' : '#ef4444';
+            mcqTable.push([
+              { text: "Difficulty", style: "tableCell" },
+              { text: round.mcqSection.difficulty, style: "tableCell", color: difficultyColor, bold: true }
+            ]);
+          }
+          if (round.mcqSection.cutoff) mcqTable.push([
+            { text: "Cutoff", style: "tableCell" },
+            { text: `${round.mcqSection.cutoff}%`, style: "tableCell", color: '#dc2626', bold: true }
+          ]);
+          if (round.mcqSection.topics?.length) mcqTable.push([
+            { text: "Topics", style: "tableCell" },
+            { text: round.mcqSection.topics.join(", "), style: "tableCell", color: '#7c3aed' }
+          ]);
+
+          if (mcqTable.length) {
+            docDefinition.content.push({
+              table: { 
+                headerRows: 0, 
+                widths: ['30%', '70%'], 
+                body: mcqTable 
+              },
+              margin: [20, 0, 0, 8]
+            });
+          }
+        }
+
+        if (round.feedback) {
+          const feedbackContent = this.convertMarkdownToPdfFormat(round.feedback);
+          docDefinition.content.push({ 
+            text: "Round Feedback:", 
+            style: "sectionHeader",
+            margin: [15, 8, 0, 3],
+            color: '#dc2626'
+          });
+          docDefinition.content.push(...feedbackContent.map(content => ({
+            ...content,
+            margin: [20, 1, 0, 3],
+            color: '#dc2626'
+          })));
         }
         if (round.tips) {
+          const tipsContent = this.convertMarkdownToPdfFormat(round.tips);
           docDefinition.content.push({ 
-            text: `Tips: ${round.tips}`, 
-            style: "tips" 
+            text: "Round Tips:", 
+            style: "sectionHeader",
+            margin: [15, 8, 0, 3],
+            color: '#7c3aed'
           });
+          docDefinition.content.push(...tipsContent.map(content => ({
+            ...content,
+            margin: [20, 1, 0, 5],
+            color: '#7c3aed'
+          })));
         }
       });
     }
@@ -770,34 +938,57 @@ class PdfService {
     });
 
     if (experienceDoc.keyTips) {
+      const keyTipsContent = this.convertMarkdownToPdfFormat(experienceDoc.keyTips);
       docDefinition.content.push({ 
         text: "Key Tips", 
         style: "keySection"
       });
-      docDefinition.content.push({ 
-        text: experienceDoc.keyTips, 
-        style: "keyContent" 
-      });
+      docDefinition.content.push(...keyTipsContent.map(content => ({
+        ...content,
+        margin: [10, 2, 0, 5],
+        color: '#22c55e'
+      })));
     }
     if (experienceDoc.mistakesToAvoid) {
+      const mistakesContent = this.convertMarkdownToPdfFormat(experienceDoc.mistakesToAvoid);
       docDefinition.content.push({ 
         text: "Mistakes to Avoid", 
         style: "keySection"
       });
-      docDefinition.content.push({ 
-        text: experienceDoc.mistakesToAvoid, 
-        style: "keyContent" 
-      });
+      docDefinition.content.push(...mistakesContent.map(content => ({
+        ...content,
+        margin: [10, 2, 0, 5],
+        color: '#dc2626'
+      })));
     }
     if (experienceDoc.overallExperience) {
+      const narrativeContent = this.convertMarkdownToPdfFormat(experienceDoc.overallExperience);
       docDefinition.content.push({ 
         text: "Experience Narrative", 
         style: "keySection",
         color: '#059669'
       });
-      docDefinition.content.push({ 
-        text: experienceDoc.overallExperience, 
-        style: "narrative" 
+      docDefinition.content.push(...narrativeContent.map(content => ({
+        ...content,
+        margin: [10, 2, 0, 5],
+        color: '#374151',
+        lineHeight: 1.4
+      })));
+    }
+
+    // Tags Section
+    if (experienceDoc.tags && experienceDoc.tags.length > 0) {
+      docDefinition.content.push({
+        text: "Tags",
+        style: "keySection",
+        color: '#4472c4'
+      });
+      docDefinition.content.push({
+        text: experienceDoc.tags.map(tag => `#${tag}`).join('  '),
+        margin: [10, 2, 0, 8],
+        color: '#4472c4',
+        fontSize: 11,
+        bold: true
       });
     }
 
