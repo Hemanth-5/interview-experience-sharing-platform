@@ -331,9 +331,9 @@ const Notifications = () => {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    {/* <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
                       <Bell className="h-8 w-8 text-white" />
-                    </div> */}
+                    </div>
                     {unreadCount > 0 && (
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ring-4 ring-white dark:ring-gray-800">
                         {unreadCount > 99 ? '99+' : unreadCount}
