@@ -6,7 +6,7 @@ import axios from 'axios';
 import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
 import MarkdownEditor from '../components/MarkdownEditor';
-import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
+// import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
 import { useIsDesktopRequired } from '../utils/deviceDetection';
 import {
   X, 
@@ -415,7 +415,7 @@ const CreateExperience = () => {
   const navigate = useNavigate();
   const location = useLocation();
   // const { user } = useAuth();
-  const isDesktopRequired = useIsDesktopRequired();
+  // const isDesktopRequired = useIsDesktopRequired();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -426,9 +426,9 @@ const CreateExperience = () => {
   const [savedDraft, setSavedDraft] = useState(null);
 
   // Early return for mobile users
-  if (isDesktopRequired) {
-    return <DesktopOnlyPrompt />;
-  }
+  // if (isDesktopRequired) {
+  //   return <DesktopOnlyPrompt />;
+  // }
 
   // Scroll to top when component mounts
   useEffect(() => {

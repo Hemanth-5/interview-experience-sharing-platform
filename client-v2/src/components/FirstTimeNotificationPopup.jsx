@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Bell, X, Info, Eye, AlertTriangle, CheckCircle, XCircle, Star, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '../utils/deviceDetection';
 
 const FirstTimeNotificationPopup = ({ open, onClose, notificationCount, notifications = [] }) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(open);
   const [isAnimating, setIsAnimating] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (open) {
@@ -201,7 +203,9 @@ const FirstTimeNotificationPopup = ({ open, onClose, notificationCount, notifica
     </div>
   );
 
-  return createPortal(notification, document.body);
+  if (!isMobile) {
+    return createPortal(notification, document.body);
+  }
 };
 
 export default FirstTimeNotificationPopup;

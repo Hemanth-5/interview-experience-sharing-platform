@@ -5,7 +5,7 @@ import { experienceAPI } from '../utils/api';
 import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
 import MarkdownEditor from '../components/MarkdownEditor';
-import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
+// import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
 import { useIsDesktopRequired } from '../utils/deviceDetection';
 import {
   X, 
@@ -233,7 +233,7 @@ const EditExperience = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isDesktopRequired = useIsDesktopRequired();
+  // const isDesktopRequired = useIsDesktopRequired();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -241,9 +241,9 @@ const EditExperience = () => {
   const errorRef = useRef(null);
   
   // Early return for mobile users
-  if (isDesktopRequired) {
-    return <DesktopOnlyPrompt />;
-  }
+  // if (isDesktopRequired) {
+  //   return <DesktopOnlyPrompt />;
+  // }
   
   // Scroll to top when component mounts
   useEffect(() => {
