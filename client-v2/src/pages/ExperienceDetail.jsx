@@ -909,30 +909,30 @@ const ExperienceDetail = () => {
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between">
                     <span className="text-xs sm:text-sm text-muted-foreground">Year of Study:</span>
-                    <span className="text-xs sm:text-sm font-medium">{experience.backgroundInfo.yearOfStudy}</span>
+                    <span className="text-xs sm:text-sm font-medium">{experience.userId.backgroundData?.yearOfStudy || 'Not specified'}</span>
                   </div>
-                  {experience.backgroundInfo.cgpa && (
+                  {experience.userId.backgroundData?.cgpa && (
                     <div className="flex justify-between">
                       <span className="text-xs sm:text-sm text-muted-foreground">CGPA:</span>
-                      <span className="text-xs sm:text-sm font-medium">{experience.backgroundInfo.cgpa}</span>
+                      <span className="text-xs sm:text-sm font-medium">{experience.userId.backgroundData.cgpa}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-xs sm:text-sm text-muted-foreground">Previous Internships:</span>
-                    <span className="text-xs sm:text-sm font-medium">{experience.backgroundInfo.previousInternships}</span>
+                    <span className="text-xs sm:text-sm font-medium">{experience.userId.backgroundData?.previousInternships || 0}</span>
                   </div>
-                  {experience.backgroundInfo.skills && experience.backgroundInfo.skills.length > 0 && (
+                  {experience.userId.backgroundData?.skills && experience.userId.backgroundData.skills.length > 0 && (
                     <div>
                       <span className="text-xs sm:text-sm text-muted-foreground block mb-2">Skills:</span>
                       <div className="flex flex-wrap gap-1">
-                        {experience.backgroundInfo.skills.slice(0, isMobile ? 4 : 6).map((skill, index) => (
+                        {experience.userId.backgroundData.skills.slice(0, isMobile ? 4 : 6).map((skill, index) => (
                           <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                             {skill}
                           </span>
                         ))}
-                        {experience.backgroundInfo.skills.length > (isMobile ? 4 : 6) && (
+                        {experience.userId.backgroundData.skills.length > (isMobile ? 4 : 6) && (
                           <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                            +{experience.backgroundInfo.skills.length - (isMobile ? 4 : 6)} more
+                            +{experience.userId.backgroundData.skills.length - (isMobile ? 4 : 6)} more
                           </span>
                         )}
                       </div>

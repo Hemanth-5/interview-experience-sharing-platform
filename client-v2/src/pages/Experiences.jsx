@@ -26,7 +26,9 @@ import {
   Flag,
   Verified,
   IndianRupee,
-  Timer
+  Timer,
+  AlertCircle,
+  Edit
 } from 'lucide-react';
 
 const Experiences = () => {
@@ -36,15 +38,18 @@ const Experiences = () => {
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
+    // Core interview filters (always visible)
     search: searchParams.get('search') || '',
     company: searchParams.get('company') || '',
     role: searchParams.get('role') || '',
-    finalResult: searchParams.get('finalResult') || '',
     internshipType: searchParams.get('internshipType') || '',
     location: searchParams.get('location') || '',
-    rating: searchParams.get('rating') || '',
-    yearOfStudy: searchParams.get('yearOfStudy') || '',
-    sortBy: searchParams.get('sortBy') || 'recent'
+    sortBy: searchParams.get('sortBy') || 'recent',
+
+    // Advanced filters (optional section)
+    branch: searchParams.get('branch') || '',
+    department: searchParams.get('department') || '',
+    graduationYear: searchParams.get('graduationYear') || ''
   });
   const [pagination, setPagination] = useState({
     page: parseInt(searchParams.get('page')) || 1,
@@ -55,8 +60,34 @@ const Experiences = () => {
 
   const internshipTypeOptions = ['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract'];
   const locationOptions = ['Remote', 'On-site', 'Hybrid'];
-  const resultOptions = ['Selected', 'Rejected', 'Withdrawn', 'Pending'];
-  const yearOfStudyOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate'];
+  
+  // Advanced filter options
+  const branchOptions = ['B. E.', 'B. Tech.', 'B. Sc.', 'Other'];
+  const departmentOptions = [
+    'Automobile Engineering',
+    'Biomedical Engineering', 
+    'Civil Engineering',
+    'Computer Science and Engineering',
+    'Computer Science and Engineering (AI and ML)',
+    'Electrical and Electronics Engineering',
+    'Electronics and Communication Engineering',
+    'Instrumentation and Control Engineering',
+    'Mechanical Engineering',
+    'Metallurgical Engineering',
+    'Production Engineering',
+    'Robotics and Automation',
+    'Bio Technology',
+    'Fashion Technology',
+    'Information Technology',
+    'Textile Technology',
+    'Electrical and Electronics Engineering (Sandwich)',
+    'Mechanical Engineering (Sandwich)',
+    'Production Engineering (Sandwich)',
+    'Applied Science',
+    'Computer Systems and Design'
+  ];
+  const graduationYearOptions = Array.from({length: 11}, (_, i) => 2020 + i); // 2020-2030
+  
   const sortOptions = [
     { value: 'recent', label: 'Newest First' },
     { value: 'rating', label: 'Highest Rated' },
@@ -142,21 +173,27 @@ const Experiences = () => {
 
   const clearFilters = () => {
     setFilters({
+      // Core interview filters (always visible)
       search: '',
       company: '',
       role: '',
-      finalResult: '',
       internshipType: '',
       location: '',
-      rating: '',
-      yearOfStudy: '',
-      sortBy: 'recent'
+      sortBy: 'recent',
+
+      // Advanced filters (optional section)
+      branch: '',
+      department: '',
+      graduationYear: ''
     });
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const { user } = useAuth();
   const [flaggedPopup, setFlaggedPopup] = useState(null);
+  
+  // Background data reminder state
+  const [showBackgroundReminder, setShowBackgroundReminder] = useState(false);
 
   const renderExperienceCard = (experience) => {
     const isOwner = user && experience.userId && (experience.userId._id === user.id);
@@ -456,7 +493,7 @@ const Experiences = () => {
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center space-x-2 px-3 sm:px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors text-sm flex-1 sm:flex-none justify-center sm:justify-start"
                 >
-                  {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {showFilters ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
                 </button>
                 {Object.values(filters).some(v => v) && (
@@ -472,129 +509,135 @@ const Experiences = () => {
               </div>
             </div>
 
+            {/* Core Filters - Toggleable */}
             <div className={`transition-all duration-300 ${showFilters ? 'opacity-100 mt-4 sm:mt-6' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-              <div className={`${showFilters ? 'max-h-[30vh] sm:max-h-none overflow-y-auto sm:overflow-visible' : 'max-h-0 overflow-hidden'}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-2">
-                  <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Search</label>
-                <div className="relative mt-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Search</label>
+                  <div className="relative mt-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <input
+                      type="text"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Search companies, roles..."
+                      value={filters.search}
+                      onChange={(e) => handleFilterChange('search', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Company</label>
                   <input
                     type="text"
-                    className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Search companies, roles..."
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Company name"
+                    value={filters.company}
+                    onChange={(e) => handleFilterChange('company', e.target.value)}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Role</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Job title or role"
+                    value={filters.role}
+                    onChange={(e) => handleFilterChange('role', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Internship Type</label>
+                  <select
+                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={filters.internshipType}
+                    onChange={(e) => handleFilterChange('internshipType', e.target.value)}
+                  >
+                    <option value="">All Types</option>
+                    {internshipTypeOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Location</label>
+                  <select
+                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={filters.location}
+                    onChange={(e) => handleFilterChange('location', e.target.value)}
+                  >
+                    <option value="">All Locations</option>
+                    {locationOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Sort By</label>
+                  <select
+                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Company</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Company name"
-                  value={filters.company}
-                  onChange={(e) => handleFilterChange('company', e.target.value)}
-                />
-              </div>
+              {/* Advanced Filters - Student Background */}
+              <div className="border-t border-border pt-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                  <Users className="w-4 h-4 mr-2" />
+                  Student Background Filters
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Branch</label>
+                    <select
+                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={filters.branch}
+                      onChange={(e) => handleFilterChange('branch', e.target.value)}
+                    >
+                      <option value="">All Branches</option>
+                      {branchOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Role</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Job title or role"
-                  value={filters.role}
-                  onChange={(e) => handleFilterChange('role', e.target.value)}
-                />
-              </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Department</label>
+                    <select
+                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={filters.department}
+                      onChange={(e) => handleFilterChange('department', e.target.value)}
+                    >
+                      <option value="">All Departments</option>
+                      {departmentOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Internship Type</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.internshipType}
-                  onChange={(e) => handleFilterChange('internshipType', e.target.value)}
-                >
-                  <option value="">All Types</option>
-                  {internshipTypeOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Location</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.location}
-                  onChange={(e) => handleFilterChange('location', e.target.value)}
-                >
-                  <option value="">All Locations</option>
-                  {locationOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Final Result</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.finalResult}
-                  onChange={(e) => handleFilterChange('finalResult', e.target.value)}
-                >
-                  <option value="">All Results</option>
-                  {resultOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Year of Study</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.yearOfStudy}
-                  onChange={(e) => handleFilterChange('yearOfStudy', e.target.value)}
-                >
-                  <option value="">All Years</option>
-                  {yearOfStudyOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Minimum Rating</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.rating}
-                  onChange={(e) => handleFilterChange('rating', e.target.value)}
-                >
-                  <option value="">All Ratings</option>
-                  <option value="1">1+ Stars</option>
-                  <option value="2">2+ Stars</option>
-                  <option value="3">3+ Stars</option>
-                  <option value="4">4+ Stars</option>
-                  <option value="5">5 Stars</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Sort By</label>
-                <select
-                  className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                >
-                  {sortOptions.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Graduation Year</label>
+                    <select
+                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={filters.graduationYear}
+                      onChange={(e) => handleFilterChange('graduationYear', e.target.value)}
+                    >
+                      <option value="">All Years</option>
+                      {graduationYearOptions.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

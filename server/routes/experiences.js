@@ -201,10 +201,12 @@ router.get('/',
         role,
         internshipType,
         location,
-        rating,
         sortBy = 'recent',
         search,
-        finalResult
+        // Advanced user background filters
+        branch,
+        department,
+        graduationYear
       } = req.query;
 
       // Build filter object - show published experiences, including flagged ones
@@ -230,13 +232,13 @@ router.get('/',
         filter['companyInfo.location'] = location;
       }
 
-      if (rating) {
-        filter.overallRating = { $gte: parseInt(rating) };
-      }
+      // if (rating) {
+      //   filter.overallRating = { $gte: parseInt(rating) };
+      // }
 
-      if (finalResult) {
-        filter.finalResult = finalResult;
-      }
+      // if (finalResult) {
+      //   filter.finalResult = finalResult;
+      // }
 
       // if (yearOfStudy) {
       //   filter['backgroundInfo.yearOfStudy'] = yearOfStudy;
@@ -269,15 +271,95 @@ router.get('/',
 
       const skip = (parseInt(page) - 1) * parseInt(limit);
 
-      // Execute query
-      const [experiences, total] = await Promise.all([
-        Experience.find(filter)
-          .populate('userId', 'name avatar university')
-          .sort(sort)
-          .skip(skip)
-          .limit(parseInt(limit)),
-        Experience.countDocuments(filter)
-      ]);
+      // Build aggregation pipeline for filtering by user background data
+      const pipeline = [
+        // Match basic experience filters first
+        { $match: filter },
+        
+        // Lookup user data
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userDetails'
+          }
+        },
+        
+        // Unwind user details
+        { $unwind: '$userDetails' },
+        
+        // Apply user background filters
+        ...(branch || department || graduationYear ? [{
+          $match: {
+            ...(branch && { 'userDetails.backgroundData.branch': branch }),
+            ...(department && { 'userDetails.backgroundData.department': department }),
+            ...(graduationYear && { 'userDetails.graduationYear': parseInt(graduationYear) })
+          }
+        }] : []),
+        
+        // Add computed fields for sorting
+        {
+          $addFields: {
+            upvoteCount: { $size: { $ifNull: ['$upvotes', []] } },
+            downvoteCount: { $size: { $ifNull: ['$downvotes', []] } }
+          }
+        },
+        
+        // Sort
+        { $sort: sort },
+        
+        // Facet for pagination and total count
+        {
+          $facet: {
+            data: [
+              { $skip: skip },
+              { $limit: parseInt(limit) },
+              // Project final fields
+              {
+                $project: {
+                  _id: 1,
+                  companyInfo: 1,
+                  rounds: 1,
+                  overallRating: 1,
+                  overallExperience: 1,
+                  finalResult: 1,
+                  wouldRecommend: 1,
+                  preparationTime: 1,
+                  resourcesUsed: 1,
+                  keyTips: 1,
+                  mistakesToAvoid: 1,
+                  isAnonymous: 1,
+                  isPublished: 1,
+                  upvotes: 1,
+                  downvotes: 1,
+                  views: 1,
+                  comments: 1,
+                  flagged: 1,
+                  tags: 1,
+                  createdAt: 1,
+                  updatedAt: 1,
+                  upvoteCount: 1,
+                  downvoteCount: 1,
+                  userId: {
+                    _id: '$userDetails._id',
+                    name: '$userDetails.name',
+                    avatar: '$userDetails.avatar',
+                    university: '$userDetails.university',
+                    backgroundData: '$userDetails.backgroundData'
+                  }
+                }
+              }
+            ],
+            totalCount: [{ $count: 'count' }]
+          }
+        }
+      ];
+
+      // Execute aggregation
+      const [result] = await Experience.aggregate(pipeline);
+      const experiences = result.data || [];
+      const total = result.totalCount[0]?.count || 0;
 
       // Calculate pagination info
       const totalPages = Math.ceil(total / parseInt(limit));
@@ -318,7 +400,7 @@ router.get('/:id',
   async (req, res) => {
     try {
       const experience = await Experience.findById(req.params.id)
-        .populate('userId', 'name avatar university role')
+        .populate('userId', 'name avatar university role backgroundData')
         .populate({
           path: 'comments',
           populate: {
