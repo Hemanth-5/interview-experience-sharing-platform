@@ -137,7 +137,8 @@ const companyInfoSchema = new mongoose.Schema({
   },
   department: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   internshipType: {
     type: String,

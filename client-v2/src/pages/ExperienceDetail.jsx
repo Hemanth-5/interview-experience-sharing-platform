@@ -369,10 +369,14 @@ const ExperienceDetail = () => {
                         {experience.companyInfo.role}
                       </p>
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mt-1">
-                        <span className="text-xs sm:text-sm text-muted-foreground truncate">
-                          {experience.companyInfo.department}
-                        </span>
-                        <span className="w-1 h-1 bg-muted-foreground rounded-full hidden sm:block"></span>
+                        {experience.companyInfo.department && (
+                          <>
+                            <span className="text-xs sm:text-sm text-muted-foreground truncate">
+                              {experience.companyInfo.department}
+                            </span>
+                            <span className="w-1 h-1 bg-muted-foreground rounded-full hidden sm:block"></span>
+                          </>
+                        )}
                         <span className="text-xs sm:text-sm text-muted-foreground truncate">
                           {experience.companyInfo.internshipType}
                         </span>

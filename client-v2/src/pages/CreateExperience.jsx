@@ -666,11 +666,10 @@ const CreateExperience = () => {
 
   const validateStep = (step) => {
     switch (step) {
-      case 1: // Company Info - companyName, role, department, internshipType, duration, location, applicationDate are required
+      case 1: // Company Info - companyName, role, internshipType, duration, location, applicationDate are required
         return (
           formData.companyInfo.companyName && 
           formData.companyInfo.role && 
-          formData.companyInfo.department && 
           formData.companyInfo.internshipType && 
           formData.companyInfo.duration && 
           formData.companyInfo.location && 
@@ -878,14 +877,13 @@ const CreateExperience = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Business Department *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Business Unit</label>
           <input
             type="text"
             className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={formData.companyInfo.department}
             onChange={(e) => handleInputChange('companyInfo', 'department', e.target.value)}
-            placeholder="e.g., Engineering"
-            required
+            placeholder="e.g., Engineering, Product, Marketing (optional)"
           />
         </div>
         <div>
@@ -1649,7 +1647,7 @@ What was the outcome..."
           {formData.companyInfo.role}
         </p>
         <p className="text-muted-foreground mb-2">
-          {formData.companyInfo.department} • {formData.companyInfo.internshipType}
+          {formData.companyInfo.department ? `${formData.companyInfo.department} • ` : ''}{formData.companyInfo.internshipType}
         </p>
         <p className="text-muted-foreground mb-4">
           {formData.companyInfo.location}

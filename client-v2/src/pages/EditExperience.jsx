@@ -945,14 +945,13 @@ const EditExperience = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Business Department *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Business Unit</label>
                   <input
                     type="text"
                     className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={formData.companyInfo.department}
                     onChange={(e) => handleInputChange('companyInfo', 'department', e.target.value)}
-                    placeholder="e.g., Engineering"
-                    required
+                    placeholder="e.g., Engineering, Product, Marketing (optional)"
                   />
                 </div>
                 <div>

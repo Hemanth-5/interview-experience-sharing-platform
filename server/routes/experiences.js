@@ -18,7 +18,7 @@ const router = express.Router();
 const experienceValidation = [
   body('companyInfo.companyName').trim().notEmpty().withMessage('Company name is required'),
   body('companyInfo.role').trim().notEmpty().withMessage('Role is required'),
-  body('companyInfo.department').trim().notEmpty().withMessage('Department is required'),
+  // body('companyInfo.department').trim().notEmpty().withMessage('Department is required'),
   body('companyInfo.internshipType').isIn(['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract']).withMessage('Invalid internship type'),
   body('companyInfo.duration').trim().notEmpty().withMessage('Duration is required'),
   body('companyInfo.location').isIn(['Remote', 'On-site', 'Hybrid']).withMessage('Invalid location type'),
@@ -42,7 +42,7 @@ const experienceValidation = [
 const experienceUpdateValidation = [
   body('companyInfo.companyName').optional().trim().notEmpty().withMessage('Company name cannot be empty'),
   body('companyInfo.role').optional().trim().notEmpty().withMessage('Role cannot be empty'),
-  body('companyInfo.department').optional().trim().notEmpty().withMessage('Department cannot be empty'),
+  // body('companyInfo.department').optional().trim().notEmpty().withMessage('Department cannot be empty'),
   body('companyInfo.internshipType').optional().isIn(['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract']).withMessage('Invalid internship type'),
   body('companyInfo.duration').optional().trim().notEmpty().withMessage('Duration cannot be empty'),
   body('companyInfo.location').optional().isIn(['Remote', 'On-site', 'Hybrid']).withMessage('Invalid location type'),
@@ -95,10 +95,10 @@ router.post('/',
       const tags = [
         experienceData.companyInfo.companyName.toLowerCase(),
         experienceData.companyInfo.role.toLowerCase(),
-        experienceData.companyInfo.department.toLowerCase(),
+        experienceData.companyInfo.department && experienceData.companyInfo.department.toLowerCase(),
         experienceData.companyInfo.internshipType.toLowerCase(),
         // ...experienceData.backgroundInfo.skills.map(skill => skill.toLowerCase())
-      ];
+      ].filter(Boolean); // Remove undefined/null/empty values
       experienceData.tags = [...new Set(tags)]; // Remove duplicates
 
       const experience = new Experience(experienceData);
@@ -492,10 +492,10 @@ router.put('/:id',
         const tags = [
           companyInfo.companyName?.toLowerCase(),
           companyInfo.role?.toLowerCase(),
-          companyInfo.department?.toLowerCase(),
+          companyInfo.department && companyInfo.department.toLowerCase(),
           companyInfo.internshipType?.toLowerCase(),
           // ...(backgroundInfo.skills || []).map(skill => skill.toLowerCase())
-        ].filter(Boolean); // Remove undefined/null values
+        ].filter(Boolean); // Remove undefined/null/empty values
         
         req.body.tags = [...new Set(tags)];
       }
