@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminLogin from './AdminLogin.jsx';
 import { checkAdminAuth } from '../utils/adminAuth';
-import '../styles/admin.css';
-import '../styles/AdminRoute.css';
+import { Shield, Home, Loader2 } from 'lucide-react';
 
 const AdminRoute = ({ children }) => {
   const { user, loading, requireAuth } = useAuth();
@@ -46,10 +45,10 @@ const AdminRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="admin-route-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-gray-700/30 text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -58,11 +57,21 @@ const AdminRoute = ({ children }) => {
   if (!user) {
     // Show loading while redirecting to Google OAuth
     return (
-      <div className="admin-route-container">
-        <div className="redirecting-container">
-          <div className="google-signin-icon">🔐</div>
-          <h3>Redirecting to Google Sign-In</h3>
-          <p>Please wait while we redirect you to authentication...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-gray-700/30 text-center max-w-md mx-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Redirecting to Google Sign-In
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            Please wait while we redirect you to authentication...
+          </p>
+          <div className="flex items-center justify-center">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-500 mr-2" />
+            <span className="text-sm text-blue-600 dark:text-blue-400">Redirecting...</span>
+          </div>
         </div>
       </div>
     );
@@ -70,15 +79,24 @@ const AdminRoute = ({ children }) => {
 
   if (user.role !== 'Admin') {
     return (
-      <div className="admin-route-container">
-        <div className="access-denied">
-          <div className="access-denied-content">
-            <h2>Access Denied</h2>
-            <p>You don't have permission to access the admin panel.</p>
-            <button onClick={() => window.location.href = '/'} className="btn btn-primary">
-              Return to Home
-            </button>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-900/20 flex items-center justify-center">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-gray-700/30 text-center max-w-md mx-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-white" />
           </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            You don't have permission to access the admin panel.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/'} 
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Return to Home
+          </button>
         </div>
       </div>
     );
@@ -103,11 +121,21 @@ const AdminRoute = ({ children }) => {
   }
 
   return (
-    <div className="admin-route-container">
-      <div className="authenticating-container">
-        <div className="authenticating-icon">🔐</div>
-        <h3>Authenticating Admin Access</h3>
-        <p>Please wait while we verify your admin credentials...</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-gray-700/30 text-center max-w-md mx-4">
+        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Shield className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          Authenticating Admin Access
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
+          Please wait while we verify your admin credentials...
+        </p>
+        <div className="flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-blue-500 mr-2" />
+          <span className="text-sm text-blue-600 dark:text-blue-400">Verifying...</span>
+        </div>
       </div>
     </div>
   );

@@ -62,7 +62,23 @@ const NotificationBell = () => {
       const data = await response.json();
       
       if (data.success) {
-        setNotifications(data.data.notifications);
+        // Sort notifications by priority and then by creation date
+        const sortedNotifications = data.data.notifications.sort((a, b) => {
+          // Priority order: urgent > high > medium > low
+          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+          const aPriority = priorityOrder[a.priority] || priorityOrder.medium;
+          const bPriority = priorityOrder[b.priority] || priorityOrder.medium;
+          
+          // First sort by priority (descending)
+          if (aPriority !== bPriority) {
+            return bPriority - aPriority;
+          }
+          
+          // Then sort by creation date (newest first)
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        
+        setNotifications(sortedNotifications);
         setUnreadCount(data.data.unreadCount);
       }
     } catch (error) {
@@ -276,8 +292,56 @@ const NotificationBell = () => {
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'experience_unpublished':
         return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'admin_message':
+      case 'admin_announcement':
+        return <Bell className="w-4 h-4 text-blue-500" />;
       default:
         return <Bell className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getPriorityIndicator = (priority) => {
+    switch (priority) {
+      case 'urgent':
+        return {
+          color: 'text-red-600 dark:text-red-400',
+          bg: 'bg-red-100 dark:bg-red-900/20',
+          border: 'border-red-300 dark:border-red-700',
+          icon: '🔴',
+          label: 'Urgent'
+        };
+      case 'high':
+        return {
+          color: 'text-orange-600 dark:text-orange-400',
+          bg: 'bg-orange-100 dark:bg-orange-900/20',
+          border: 'border-orange-300 dark:border-orange-700',
+          icon: '🟠',
+          label: 'High'
+        };
+      case 'medium':
+        return {
+          color: 'text-blue-600 dark:text-blue-400',
+          bg: 'bg-blue-100 dark:bg-blue-900/20',
+          border: 'border-blue-300 dark:border-blue-700',
+          icon: '🔵',
+          label: 'Normal'
+        };
+      case 'low':
+        return {
+          color: 'text-gray-600 dark:text-gray-400',
+          bg: 'bg-gray-100 dark:bg-gray-700',
+          border: 'border-gray-300 dark:border-gray-600',
+          icon: '⚪',
+          label: 'Low'
+        };
+      default:
+        return {
+          color: 'text-blue-600 dark:text-blue-400',
+          bg: 'bg-blue-100 dark:bg-blue-900/20',
+          border: 'border-blue-300 dark:border-blue-700',
+          icon: '🔵',
+          label: 'Normal'
+        };
     }
   };
 
@@ -379,32 +443,55 @@ const NotificationBell = () => {
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {notifications.map((notification, index) => (
+                {notifications.map((notification, index) => {
+                  const priority = getPriorityIndicator(notification.priority || 'medium');
+                  return (
                   <div
                     key={notification._id}
                     className={`group relative p-3 sm:p-4 hover:bg-secondary/30 cursor-pointer transition-all duration-200 ${
                       !notification.read 
-                        ? 'bg-gradient-to-r from-blue-50/80 to-purple-50/40 dark:from-blue-950/40 dark:to-purple-950/20 border-l-4 border-blue-500' 
+                        ? `bg-gradient-to-r from-blue-50/80 to-purple-50/40 dark:from-blue-950/40 dark:to-purple-950/20 border-l-4 ${
+                            notification.priority === 'urgent' ? 'border-red-500' :
+                            notification.priority === 'high' ? 'border-orange-500' :
+                            notification.priority === 'medium' ? 'border-blue-500' :
+                            'border-gray-400'
+                          }` 
                         : 'hover:bg-gray-50/50 dark:hover:bg-gray-800/30'
                     } ${index === 0 ? 'rounded-t-none' : ''} ${index === notifications.length - 1 ? 'rounded-b-2xl' : ''}`}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-start space-x-2 sm:space-x-4">
-                      {/* Icon */}
-                      <div className={`flex-shrink-0 mt-1 p-1.5 sm:p-2 rounded-xl ${
-                        notification.type === 'experience_flagged' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                        notification.type === 'experience_approved' ? 'bg-green-100 dark:bg-green-900/30' :
-                        notification.type === 'experience_unflagged' ? 'bg-green-100 dark:bg-green-900/30' :
-                        notification.type === 'experience_unpublished' ? 'bg-red-100 dark:bg-red-900/30' :
-                        'bg-blue-100 dark:bg-blue-900/30'
-                      }`}>
-                        {getNotificationIcon(notification.type)}
+                      {/* Priority & Icon */}
+                      <div className="flex-shrink-0 mt-1 relative">
+                        <div className={`p-1.5 sm:p-2 rounded-xl ${
+                          notification.type === 'experience_flagged' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                          notification.type === 'experience_approved' ? 'bg-green-100 dark:bg-green-900/30' :
+                          notification.type === 'experience_unflagged' ? 'bg-green-100 dark:bg-green-900/30' :
+                          notification.type === 'experience_unpublished' ? 'bg-red-100 dark:bg-red-900/30' :
+                          'bg-blue-100 dark:bg-blue-900/30'
+                        }`}>
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        {/* Priority indicator */}
+                        {(notification.priority === 'urgent' || notification.priority === 'high') && (
+                          <div className={`absolute -top-1 -right-1 w-4 h-4 ${priority.bg} ${priority.border} border rounded-full flex items-center justify-center text-xs`}>
+                            <span className="text-[8px]">{priority.icon}</span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs sm:text-sm text-foreground leading-relaxed">
-                          {formatNotificationText(notification)}
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="text-xs sm:text-sm text-foreground leading-relaxed flex-1">
+                            {formatNotificationText(notification)}
+                          </div>
+                          {/* Priority badge */}
+                          {(notification.priority === 'urgent' || notification.priority === 'high') && (
+                            <span className={`ml-2 px-2 py-0.5 text-[10px] font-medium rounded-full ${priority.bg} ${priority.color} border ${priority.border}`}>
+                              {priority.label}
+                            </span>
+                          )}
                         </div>
                         
                         {notification.reason && (
@@ -425,6 +512,12 @@ const NotificationBell = () => {
                           <div className="flex items-center space-x-1 sm:space-x-2 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             <span>{getTimeAgo(notification.createdAt)}</span>
+                            {notification.priority && notification.priority !== 'medium' && (
+                              <>
+                                <span>•</span>
+                                <span className={priority.color}>{priority.label}</span>
+                              </>
+                            )}
                           </div>
                           
                           {notification.actionUrl && (
@@ -453,7 +546,8 @@ const NotificationBell = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

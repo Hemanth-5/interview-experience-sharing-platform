@@ -17,6 +17,9 @@ const notificationSchema = new mongoose.Schema({
       'comment_on_experience',
       'upvote_milestone',
       'admin_message',
+      'admin_announcement',
+      'system_update',
+      'maintenance',
       'company_creation_request',
       'company_creation_approved',
       'company_creation_rejected'

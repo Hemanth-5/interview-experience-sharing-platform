@@ -23,7 +23,8 @@ import {
   Star,
   Flag,
   Sparkles,
-  Eye
+  Eye,
+  Info
 } from 'lucide-react';
 
 const Notifications = () => {
@@ -33,16 +34,23 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
   const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read', 'urgent', 'high'
+  const [priorityFilter, setPriorityFilter] = useState('all'); // 'all', 'urgent', 'high', 'medium', 'low'
 
-  // Calculate unread count
+  // Calculate unread count and priority stats
   const unreadCount = notifications.filter(notif => !notif.read).length;
+  const priorityStats = {
+    urgent: notifications.filter(notif => !notif.read && notif.priority === 'urgent').length,
+    high: notifications.filter(notif => !notif.read && notif.priority === 'high').length,
+    medium: notifications.filter(notif => !notif.read && (notif.priority === 'medium' || !notif.priority)).length,
+    low: notifications.filter(notif => !notif.read && notif.priority === 'low').length,
+  };
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
     }
-  }, [user, currentPage, filter]);
+  }, [user, currentPage, filter, priorityFilter]);
 
   const fetchNotifications = async () => {
     try {
@@ -61,9 +69,35 @@ const Notifications = () => {
       const data = await response.json();
       if (data.success) {
         let filteredNotifications = data.data.notifications;
+        
+        // Apply read status filter
         if (filter === 'read') {
           filteredNotifications = data.data.notifications.filter(notif => notif.read);
         }
+        
+        // Apply priority filter
+        if (priorityFilter !== 'all') {
+          filteredNotifications = filteredNotifications.filter(notif => {
+            const priority = notif.priority || 'medium';
+            return priority === priorityFilter;
+          });
+        }
+        
+        // Sort by priority first, then by creation date
+        filteredNotifications.sort((a, b) => {
+          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+          const aPriority = priorityOrder[a.priority || 'medium'];
+          const bPriority = priorityOrder[b.priority || 'medium'];
+          
+          // First sort by priority (descending)
+          if (aPriority !== bPriority) {
+            return bPriority - aPriority;
+          }
+          
+          // Then sort by creation date (newest first)
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        
         setNotifications(filteredNotifications);
         setPagination({
           page: data.data.pagination?.currentPage || 1,
@@ -294,6 +328,86 @@ const Notifications = () => {
     }
   };
 
+  const getPriorityIndicator = (priority) => {
+    switch (priority) {
+      case 'urgent':
+        return {
+          color: 'text-red-600 dark:text-red-400',
+          bg: 'bg-red-100 dark:bg-red-900/20',
+          border: 'border-red-300 dark:border-red-700',
+          icon: AlertCircle,
+          label: 'Urgent',
+          textColor: 'text-red-800 dark:text-red-200',
+          badgeClass: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+          bgClass: 'bg-red-100 dark:bg-red-900/30',
+          textClass: 'text-red-600 dark:text-red-400',
+          borderClass: 'border-red-200 dark:border-red-700/50',
+          hoverBorderClass: 'hover:border-red-300 dark:hover:border-red-600',
+          gradientClass: 'bg-gradient-to-r from-red-500 to-red-600'
+        };
+      case 'high':
+        return {
+          color: 'text-orange-600 dark:text-orange-400',
+          bg: 'bg-orange-100 dark:bg-orange-900/20',
+          border: 'border-orange-300 dark:border-orange-700',
+          icon: AlertTriangle,
+          label: 'High',
+          textColor: 'text-orange-800 dark:text-orange-200',
+          badgeClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+          bgClass: 'bg-orange-100 dark:bg-orange-900/30',
+          textClass: 'text-orange-600 dark:text-orange-400',
+          borderClass: 'border-orange-200 dark:border-orange-700/50',
+          hoverBorderClass: 'hover:border-orange-300 dark:hover:border-orange-600',
+          gradientClass: 'bg-gradient-to-r from-orange-500 to-orange-600'
+        };
+      case 'medium':
+        return {
+          color: 'text-yellow-600 dark:text-yellow-400',
+          bg: 'bg-yellow-100 dark:bg-yellow-900/20',
+          border: 'border-yellow-300 dark:border-yellow-700',
+          icon: Info,
+          label: 'Normal',
+          textColor: 'text-yellow-800 dark:text-yellow-200',
+          badgeClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+          bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textClass: 'text-yellow-600 dark:text-yellow-400',
+          borderClass: 'border-yellow-200 dark:border-yellow-700/50',
+          hoverBorderClass: 'hover:border-yellow-300 dark:hover:border-yellow-600',
+          gradientClass: 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+        };
+      case 'low':
+        return {
+          color: 'text-green-600 dark:text-green-400',
+          bg: 'bg-green-100 dark:bg-green-900/20',
+          border: 'border-green-300 dark:border-green-700',
+          icon: CheckCircle,
+          label: 'Low',
+          textColor: 'text-green-800 dark:text-green-200',
+          badgeClass: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+          bgClass: 'bg-green-100 dark:bg-green-900/30',
+          textClass: 'text-green-600 dark:text-green-400',
+          borderClass: 'border-green-200 dark:border-green-700/50',
+          hoverBorderClass: 'hover:border-green-300 dark:hover:border-green-600',
+          gradientClass: 'bg-gradient-to-r from-green-500 to-green-600'
+        };
+      default:
+        return {
+          color: 'text-yellow-600 dark:text-yellow-400',
+          bg: 'bg-yellow-100 dark:bg-yellow-900/20',
+          border: 'border-yellow-300 dark:border-yellow-700',
+          icon: Info,
+          label: 'Normal',
+          textColor: 'text-yellow-800 dark:text-yellow-200',
+          badgeClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+          bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textClass: 'text-yellow-600 dark:text-yellow-400',
+          borderClass: 'border-yellow-200 dark:border-yellow-700/50',
+          hoverBorderClass: 'hover:border-yellow-300 dark:hover:border-yellow-600',
+          gradientClass: 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+        };
+    }
+  };
+
   const getTimeAgo = (date) => {
     const now = new Date();
     const notificationDate = new Date(date);
@@ -373,37 +487,101 @@ const Notifications = () => {
               </div>
 
               {/* Filter Tabs */}
-              <div className="mt-8 flex flex-wrap gap-2">
-                <button
-                  onClick={() => { setFilter('all'); setCurrentPage(1); }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                    filter === 'all'
-                      ? 'bg-blue-500 text-white shadow-lg'
-                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
-                  }`}
-                >
-                  All Notifications
-                </button>
-                <button
-                  onClick={() => { setFilter('unread'); setCurrentPage(1); }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                    filter === 'unread'
-                      ? 'bg-blue-500 text-white shadow-lg'
-                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
-                  }`}
-                >
-                  Unread ({unreadCount})
-                </button>
-                <button
-                  onClick={() => { setFilter('read'); setCurrentPage(1); }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                    filter === 'read'
-                      ? 'bg-blue-500 text-white shadow-lg'
-                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
-                  }`}
-                >
-                  Read
-                </button>
+              <div className="mt-8 space-y-4">
+                {/* Status Filters */}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => { setFilter('all'); setCurrentPage(1); }}
+                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                      filter === 'all'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    All Notifications
+                  </button>
+                  <button
+                    onClick={() => { setFilter('unread'); setCurrentPage(1); }}
+                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                      filter === 'unread'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    Unread ({unreadCount})
+                  </button>
+                  <button
+                    onClick={() => { setFilter('read'); setCurrentPage(1); }}
+                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                      filter === 'read'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    Read
+                  </button>
+                </div>
+
+                {/* Priority Filters */}
+                <div className="flex flex-wrap gap-2">
+                  <span className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300">
+                    Priority:
+                  </span>
+                  <button
+                    onClick={() => { setPriorityFilter('all'); setCurrentPage(1); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      priorityFilter === 'all'
+                        ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100'
+                        : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    All ({priorityStats.total})
+                  </button>
+                  <button
+                    onClick={() => { setPriorityFilter('urgent'); setCurrentPage(1); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      priorityFilter === 'urgent'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                        : 'bg-gray-50 hover:bg-red-50 dark:bg-gray-700/50 dark:hover:bg-red-900/20 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
+                    }`}
+                  >
+                    <AlertCircle className="h-3 w-3" />
+                    Urgent ({priorityStats.urgent})
+                  </button>
+                  <button
+                    onClick={() => { setPriorityFilter('high'); setCurrentPage(1); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      priorityFilter === 'high'
+                        ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                        : 'bg-gray-50 hover:bg-orange-50 dark:bg-gray-700/50 dark:hover:bg-orange-900/20 text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400'
+                    }`}
+                  >
+                    <AlertTriangle className="h-3 w-3" />
+                    High ({priorityStats.high})
+                  </button>
+                  <button
+                    onClick={() => { setPriorityFilter('medium'); setCurrentPage(1); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      priorityFilter === 'medium'
+                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                        : 'bg-gray-50 hover:bg-yellow-50 dark:bg-gray-700/50 dark:hover:bg-yellow-900/20 text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400'
+                    }`}
+                  >
+                    <Info className="h-3 w-3" />
+                    Normal ({priorityStats.medium})
+                  </button>
+                  <button
+                    onClick={() => { setPriorityFilter('low'); setCurrentPage(1); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      priorityFilter === 'low'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                        : 'bg-gray-50 hover:bg-green-50 dark:bg-gray-700/50 dark:hover:bg-green-900/20 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400'
+                    }`}
+                  >
+                    <CheckCircle className="h-3 w-3" />
+                    Low ({priorityStats.low})
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -506,16 +684,23 @@ const Notifications = () => {
               <div className="space-y-4">
                 {notifications.map((notification) => {
                   const iconData = getNotificationIcon(notification.type);
+                  const priorityData = getPriorityIndicator(notification.priority);
+                  const PriorityIcon = priorityData.icon;
                   return (
                     <div
                       key={notification._id}
                       className={`group relative backdrop-blur-lg rounded-2xl border transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
                         !notification.read 
-                          ? 'border-blue-200 dark:border-blue-700/50 shadow-lg shadow-blue-500/10' 
-                          : 'border-gray-200/50 dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600'
+                          ? `border-blue-200 dark:border-blue-700/50 shadow-lg shadow-blue-500/10 ${priorityData.borderClass}` 
+                          : `border-gray-200/50 dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600 ${priorityData.hoverBorderClass}`
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
+                      {/* Priority indicator bar */}
+                      {notification.priority && notification.priority !== 'low' && (
+                        <div className={`absolute top-0 left-0 w-full h-1 rounded-t-2xl ${priorityData.gradientClass}`}></div>
+                      )}
+
                       {/* Unread indicator */}
                       {!notification.read && (
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full ring-4 ring-white dark:ring-gray-800"></div>
@@ -523,13 +708,32 @@ const Notifications = () => {
 
                       <div className="p-6">
                         <div className="flex items-start gap-4">
-                          {/* Icon */}
-                          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${iconData.bgColor} ${iconData.color} shadow-lg`}>
+                          {/* Icon with priority styling */}
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                            notification.priority && notification.priority !== 'low' 
+                              ? priorityData.bgClass + ' ' + priorityData.textClass
+                              : iconData.bgColor + ' ' + iconData.color
+                          }`}>
                             <iconData.icon className="h-6 w-6" />
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
+                            {/* Priority badge and title */}
+                            <div className="flex items-center gap-2 mb-2">
+                              {notification.priority && (
+                                <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityData.badgeClass}`}>
+                                  <PriorityIcon className="h-3 w-3" />
+                                  {notification.priority.charAt(0).toUpperCase() + notification.priority.slice(1)} Priority
+                                </div>
+                              )}
+                              {!notification.read && (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                  New
+                                </span>
+                              )}
+                            </div>
+
                             <div className="text-gray-900 dark:text-gray-100 leading-relaxed">
                               {formatNotificationText(notification)}
                             </div>
@@ -565,11 +769,6 @@ const Notifications = () => {
                                   <Clock className="h-4 w-4" />
                                   {getTimeAgo(notification.createdAt)}
                                 </div>
-                                {!notification.read && (
-                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                    New
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </div>

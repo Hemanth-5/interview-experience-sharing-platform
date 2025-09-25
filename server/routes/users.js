@@ -352,9 +352,20 @@ router.delete('/account', isAuthenticated, async (req, res) => {
 // @access  Admin
 router.get('/admin/all', isAdmin, async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, role } = req.query;
+    const { 
+      page = 1, 
+      limit = 20, 
+      search, 
+      role,
+      branch,
+      department,
+      graduationYear,
+      yearOfStudy
+    } = req.query;
 
     const filter = {};
+    
+    // Search in name, email, and university
     if (search) {
       filter.$or = [
         { name: new RegExp(search, 'i') },
@@ -362,8 +373,44 @@ router.get('/admin/all', isAdmin, async (req, res) => {
         { university: new RegExp(search, 'i') }
       ];
     }
+    
+    // Role filter
     if (role) {
       filter.role = role;
+    }
+    
+    // Graduation year filter
+    if (graduationYear) {
+      if (Array.isArray(graduationYear)) {
+        filter.graduationYear = { $in: graduationYear.map(year => parseInt(year)) };
+      } else {
+        filter.graduationYear = parseInt(graduationYear);
+      }
+    }
+    
+    // Background data filters
+    if (branch) {
+      if (Array.isArray(branch)) {
+        filter['backgroundData.branch'] = { $in: branch };
+      } else {
+        filter['backgroundData.branch'] = branch;
+      }
+    }
+    
+    if (department) {
+      if (Array.isArray(department)) {
+        filter['backgroundData.department'] = { $in: department };
+      } else {
+        filter['backgroundData.department'] = department;
+      }
+    }
+    
+    if (yearOfStudy) {
+      if (Array.isArray(yearOfStudy)) {
+        filter['backgroundData.yearOfStudy'] = { $in: yearOfStudy };
+      } else {
+        filter['backgroundData.yearOfStudy'] = yearOfStudy;
+      }
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -395,6 +442,81 @@ router.get('/admin/all', isAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching users',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/users/admin/filter-options
+// @desc    Get filter options for admin panel (Admin only)
+// @access  Admin
+router.get('/admin/filter-options', isAdmin, async (req, res) => {
+  try {
+    // Get enum values from User schema
+    const branchOptions = [
+      "B. E.",
+      "B. Tech.",
+      "B. Sc.",
+      "Other"
+    ];
+    
+    const departmentOptions = [
+      "Automobile Engineering",
+      "Biomedical Engineering",
+      "Civil Engineering",
+      "Computer Science and Engineering",
+      "Computer Science and Engineering (AI and ML)",
+      "Electrical and Electronics Engineering",
+      "Electronics and Communication Engineering",
+      "Instrumentation and Control Engineering",
+      "Mechanical Engineering",
+      "Metallurgical Engineering",
+      "Production Engineering",
+      "Robotics and Automation",
+      "Bio Technology",
+      "Fashion Technology",
+      "Information Technology",
+      "Textile Technology",
+      "Electrical and Electronics Engineering (Sandwich)",
+      "Mechanical Engineering (Sandwich)",
+      "Production Engineering (Sandwich)",
+      "Applied Science",
+      "Computer Systems and Design"
+    ];
+    
+    const yearOfStudyOptions = [
+      '1st Year',
+      '2nd Year', 
+      '3rd Year',
+      '4th Year',
+      'Graduate',
+      'Postgraduate'
+    ];
+    
+    // Get available graduation years (dynamic from database)
+    const graduationYears = await User.distinct('graduationYear');
+    const validGradYears = graduationYears
+      .filter(year => year && year >= 2020 && year <= 2030)
+      .sort((a, b) => b - a); // Sort descending (newest first)
+    
+    // Get roles
+    const roleOptions = ['Student', 'Admin', 'Moderator'];
+
+    res.json({
+      success: true,
+      data: {
+        branches: branchOptions,
+        departments: departmentOptions,
+        yearsOfStudy: yearOfStudyOptions,
+        graduationYears: validGradYears,
+        roles: roleOptions
+      }
+    });
+  } catch (error) {
+    // console.error('Error fetching filter options:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching filter options',
       error: error.message
     });
   }
