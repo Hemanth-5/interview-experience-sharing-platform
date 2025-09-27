@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
+import SearchableDropdown from '../components/SearchableDropdown';
 import MarkdownEditor from '../components/MarkdownEditor';
 // import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
 import { useIsDesktopRequired } from '../utils/deviceDetection';
@@ -888,33 +889,24 @@ const CreateExperience = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Internship Type</label>
-          <select
-            className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <SearchableDropdown
             value={formData.companyInfo.internshipType}
-            onChange={(e) => handleInputChange('companyInfo', 'internshipType', e.target.value)}
-          >
-            <option value="Summer">Summer Internship</option>
-            <option value="Winter">Winter Internship</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
-            <option value="PPO">PPO</option>
-            <option value="Contract">Contract</option>
-          </select>
+            onChange={(value) => handleInputChange('companyInfo', 'internshipType', value)}
+            options={['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract']}
+            placeholder="Select internship type"
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Work Location</label>
-          <select
-            className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <SearchableDropdown
             value={formData.companyInfo.location}
-            onChange={(e) => handleInputChange('companyInfo', 'location', e.target.value)}
-          >
-            <option value="Remote">Remote</option>
-            <option value="On-site">On-site</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
+            onChange={(value) => handleInputChange('companyInfo', 'location', value)}
+            options={['Remote', 'On-site', 'Hybrid']}
+            placeholder="Select work location"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">City</label>

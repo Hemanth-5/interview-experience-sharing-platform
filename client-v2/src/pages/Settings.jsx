@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { createApiUrl } from '../config/api';
 import Avatar from '../components/Avatar.jsx';
+import SearchableDropdown from '../components/SearchableDropdown.jsx';
 import { extractUserName } from '../utils/avatar';
 import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
 import { useIsDesktopRequired } from '../utils/deviceDetection';
@@ -60,91 +61,6 @@ const DEPARTMENT_OPTIONS = [
   "Applied Science",
   "Computer Systems and Design"
 ];
-
-// Searchable Dropdown Component
-const SearchableDropdown = ({ 
-  value, 
-  onChange, 
-  options, 
-  placeholder, 
-  className = "",
-  icon: Icon,
-  required = false
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const filteredOptions = options.filter(option =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleSelect = (option) => {
-    onChange(option);
-    setIsOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleInputClick = () => {
-    setIsOpen(!isOpen);
-    setSearchTerm('');
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setIsOpen(true);
-  };
-
-  return (
-    <div className={`relative ${className}`}>
-      <div className="relative">
-        {Icon && (
-          <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
-        )}
-        <input
-          type="text"
-          className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-10 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background text-foreground cursor-pointer`}
-          value={isOpen ? searchTerm : value}
-          onClick={handleInputClick}
-          onChange={handleSearchChange}
-          placeholder={placeholder}
-          required={required}
-          autoComplete="off"
-        />
-        <ChevronDown 
-          className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </div>
-      
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {filteredOptions.length > 0 ? (
-            filteredOptions.map((option, index) => (
-              <div
-                key={index}
-                className="px-4 py-2 hover:bg-secondary cursor-pointer text-foreground"
-                onClick={() => handleSelect(option)}
-              >
-                {option}
-              </div>
-            ))
-          ) : (
-            <div className="px-4 py-2 text-muted-foreground">
-              No options found
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Overlay to close dropdown when clicking outside */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </div>
-  );
-};
 
 const Settings = () => {
   const { user, updateUser } = useAuth();
@@ -457,20 +373,13 @@ const Settings = () => {
 
           <div>
             <label htmlFor="graduationYear" className="block text-sm font-medium text-foreground mb-2">Graduation Year</label>
-            <div className="relative">
-              <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <select
-                id="graduationYear"
-                className="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background text-foreground appearance-none"
-                value={profileData.graduationYear}
-                onChange={(e) => handleProfileChange('graduationYear', e.target.value)}
-              >
-                <option value="">Select year</option>
-                {Array.from({ length: 11 }, (_, i) => 2020 + i).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
+            <SearchableDropdown
+              value={profileData.graduationYear}
+              onChange={(value) => handleProfileChange('graduationYear', value)}
+              options={['', ...Array.from({ length: 11 }, (_, i) => (2020 + i).toString())]}
+              placeholder="Select year"
+              icon={GraduationCap}
+            />
           </div>
         </div>
 
@@ -590,23 +499,14 @@ const Settings = () => {
             <label htmlFor="yearOfStudy" className="block text-sm font-medium text-foreground mb-2">
               Year of Study <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <select
-                id="yearOfStudy"
-                className="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background text-foreground"
-                value={backgroundData.yearOfStudy}
-                onChange={(e) => handleBackgroundChange('yearOfStudy', e.target.value)}
-                required
-              >
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
-                <option value="Graduate">Graduate</option>
-                <option value="Postgraduate">Postgraduate</option>
-              </select>
-            </div>
+            <SearchableDropdown
+              value={backgroundData.yearOfStudy}
+              onChange={(value) => handleBackgroundChange('yearOfStudy', value)}
+              options={['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate', 'Postgraduate']}
+              placeholder="Select year of study"
+              icon={GraduationCap}
+              required
+            />
           </div>
 
           <div>

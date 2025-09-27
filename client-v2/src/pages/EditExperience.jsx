@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { experienceAPI } from '../utils/api';
 import { createApiUrl } from '../config/api';
 import CompanySearch from '../components/CompanySearch';
+import SearchableDropdown from '../components/SearchableDropdown';
 import MarkdownEditor from '../components/MarkdownEditor';
 // import DesktopOnlyPrompt from '../components/DesktopOnlyPrompt';
 import { useIsDesktopRequired } from '../utils/deviceDetection';
@@ -956,33 +957,24 @@ const EditExperience = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Internship Type</label>
-                  <select
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={formData.companyInfo.internshipType}
-                    onChange={(e) => handleInputChange('companyInfo', 'internshipType', e.target.value)}
-                  >
-                    <option value="Summer">Summer Internship</option>
-                    <option value="Winter">Winter Internship</option>
-                    <option value="Full-time">Full-time</option>
-                    <option value="Part-time">Part-time</option>
-                    <option value="PPO">PPO</option>
-                    <option value="Contract">Contract</option>
-                  </select>
+                    onChange={(value) => handleInputChange('companyInfo', 'internshipType', value)}
+                    options={['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract']}
+                    placeholder="Select internship type"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Work Location</label>
-                  <select
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={formData.companyInfo.location}
-                    onChange={(e) => handleInputChange('companyInfo', 'location', e.target.value)}
-                  >
-                    <option value="Remote">Remote</option>
-                    <option value="On-site">On-site</option>
-                    <option value="Hybrid">Hybrid</option>
-                  </select>
+                    onChange={(value) => handleInputChange('companyInfo', 'location', value)}
+                    options={['Remote', 'On-site', 'Hybrid']}
+                    placeholder="Select work location"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">City</label>
@@ -1011,14 +1003,15 @@ const EditExperience = () => {
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Monthly Stipend</label>
                   <div className="flex">
-                    <select
-                      value={formData.companyInfo.currency}
-                      onChange={(e) => handleInputChange('companyInfo', 'currency', e.target.value)}
-                      className="w-20 px-2 py-2 border border-border rounded-l-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="INR">INR</option>
-                      <option value="USD">USD</option>
-                    </select>
+                    <div className="w-20">
+                      <SearchableDropdown
+                        value={formData.companyInfo.currency}
+                        onChange={(value) => handleInputChange('companyInfo', 'currency', value)}
+                        options={['INR', 'USD']}
+                        placeholder="Currency"
+                        className="rounded-r-none border-r-0"
+                      />
+                    </div>
                     <input
                       type="number"
                       className="flex-1 px-4 py-2 border border-border rounded-r-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent border-l-0"
@@ -1091,19 +1084,12 @@ const EditExperience = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Round Type</label>
-                      <select
-                        className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      <SearchableDropdown
                         value={round?.roundType || 'Technical'}
-                        onChange={(e) => handleInputChange('rounds', 'roundType', e.target.value, roundIndex)}
-                      >
-                        <option value="Online Assessment">Online Assessment</option>
-                        <option value="Technical">Technical Round</option>
-                        <option value="HR">HR Round</option>
-                        <option value="Group Discussion">Group Discussion</option>
-                        <option value="Case Study">Case Study</option>
-                        <option value="System Design">System Design</option>
-                        <option value="Coding Round">Coding Round</option>
-                      </select>
+                        onChange={(value) => handleInputChange('rounds', 'roundType', value, roundIndex)}
+                        options={['Online Assessment', 'Technical', 'HR', 'Group Discussion', 'Case Study', 'System Design', 'Coding Round']}
+                        placeholder="Select round type"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Duration</label>
@@ -1246,15 +1232,12 @@ def count_triangles(arr):
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-1">Difficulty</label>
-                            <select
-                              className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            <SearchableDropdown
                               value={question?.difficulty || 'Medium'}
-                              onChange={(e) => handleQuestionChange(roundIndex, qIndex, 'technical', 'difficulty', e.target.value)}
-                            >
-                              <option value="Easy">Easy</option>
-                              <option value="Medium">Medium</option>
-                              <option value="Hard">Hard</option>
-                            </select>
+                              onChange={(value) => handleQuestionChange(roundIndex, qIndex, 'technical', 'difficulty', value)}
+                              options={['Easy', 'Medium', 'Hard']}
+                              placeholder="Select difficulty"
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-1">Topics (comma-separated)</label>
@@ -1344,16 +1327,12 @@ Tell me about a time when you had to **work under pressure** to meet a tight dea
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-1">Category</label>
-                            <select
-                              className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            <SearchableDropdown
                               value={question?.category || 'Personal'}
-                              onChange={(e) => handleQuestionChange(roundIndex, qIndex, 'behavioral', 'category', e.target.value)}
-                            >
-                              <option value="Personal">Personal</option>
-                              <option value="Behavioral">Behavioral</option>
-                              <option value="Situational">Situational</option>
-                              <option value="Company-specific">Company-specific</option>
-                            </select>
+                              onChange={(value) => handleQuestionChange(roundIndex, qIndex, 'behavioral', 'category', value)}
+                              options={['Personal', 'Behavioral', 'Situational', 'Company-specific']}
+                              placeholder="Select category"
+                            />
                           </div>
                         {/* </div> */}
                         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
@@ -1474,15 +1453,12 @@ We delivered the project *2 days early* with **zero critical bugs**. The client 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-sm font-medium text-foreground mb-1">Difficulty Level</label>
-                                <select
-                                  className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                <SearchableDropdown
                                   value={round?.mcqSection?.difficulty || 'Medium'}
-                                  onChange={(e) => handleInputChange('rounds', 'mcqSection', { ...round.mcqSection, difficulty: e.target.value }, roundIndex)}
-                                >
-                                  <option value="Easy">Easy</option>
-                                  <option value="Medium">Medium</option>
-                                  <option value="Hard">Hard</option>
-                                </select>
+                                  onChange={(value) => handleInputChange('rounds', 'mcqSection', { ...round.mcqSection, difficulty: value }, roundIndex)}
+                                  options={['Easy', 'Medium', 'Hard']}
+                                  placeholder="Select difficulty"
+                                />
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-foreground mb-1">Cutoff Percentage</label>
@@ -1751,41 +1727,30 @@ def find_duplicates(numbers):
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Overall Rating</label>
-                  <select
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={formData.overallRating}
-                    onChange={(e) => handleInputChange(null, 'overallRating', parseInt(e.target.value))}
-                  >
-                    <option value={5}>5 - Excellent</option>
-                    <option value={4}>4 - Good</option>
-                    <option value={3}>3 - Average</option>
-                    <option value={2}>2 - Below Average</option>
-                    <option value={1}>1 - Poor</option>
-                  </select>
+                    onChange={(value) => handleInputChange(null, 'overallRating', parseInt(value))}
+                    options={['5', '4', '3', '2', '1']}
+                    placeholder="Select rating"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Final Result</label>
-                  <select
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={formData.finalResult}
-                    onChange={(e) => handleInputChange(null, 'finalResult', e.target.value)}
-                  >
-                    <option value="Selected">Selected</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Withdrawn">Withdrawn</option>
-                    <option value="Pending">Pending</option>
-                  </select>
+                    onChange={(value) => handleInputChange(null, 'finalResult', value)}
+                    options={['Selected', 'Rejected', 'Withdrawn', 'Pending']}
+                    placeholder="Select result"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Would Recommend?</label>
-                  <select
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.wouldRecommend}
-                    onChange={(e) => handleInputChange(null, 'wouldRecommend', e.target.value === 'true')}
-                  >
-                    <option value={true}>Yes</option>
-                    <option value={false}>No</option>
-                  </select>
+                  <SearchableDropdown
+                    value={formData.wouldRecommend ? 'true' : 'false'}
+                    onChange={(value) => handleInputChange(null, 'wouldRecommend', value === 'true')}
+                    options={['true', 'false']}
+                    placeholder="Select recommendation"
+                  />
                 </div>
               </div>
 

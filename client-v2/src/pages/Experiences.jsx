@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { createApiUrl } from '../config/api';
 import axios from 'axios';
 import CompanyLogo from '../components/CompanyLogo.jsx';
+import SearchableDropdown from '../components/SearchableDropdown.jsx';
 import {
   Search,
   Filter,
@@ -550,43 +551,32 @@ const Experiences = () => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Internship Type</label>
-                  <select
-                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={filters.internshipType}
-                    onChange={(e) => handleFilterChange('internshipType', e.target.value)}
-                  >
-                    <option value="">All Types</option>
-                    {internshipTypeOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleFilterChange('internshipType', value)}
+                    options={['', ...internshipTypeOptions]}
+                    placeholder="All Types"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Location</label>
-                  <select
-                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={filters.location}
-                    onChange={(e) => handleFilterChange('location', e.target.value)}
-                  >
-                    <option value="">All Locations</option>
-                    {locationOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleFilterChange('location', value)}
+                    options={['', ...locationOptions]}
+                    placeholder="All Locations"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Sort By</label>
-                  <select
-                    className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <SearchableDropdown
                     value={filters.sortBy}
-                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                  >
-                    {sortOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleFilterChange('sortBy', value)}
+                    options={sortOptions.map(option => option.value)}
+                    placeholder="Sort by"
+                  />
                 </div>
               </div>
 
@@ -599,44 +589,32 @@ const Experiences = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Branch</label>
-                    <select
-                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    <SearchableDropdown
                       value={filters.branch}
-                      onChange={(e) => handleFilterChange('branch', e.target.value)}
-                    >
-                      <option value="">All Branches</option>
-                      {branchOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => handleFilterChange('branch', value)}
+                      options={['', ...branchOptions]}
+                      placeholder="All Branches"
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Department</label>
-                    <select
-                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    <SearchableDropdown
                       value={filters.department}
-                      onChange={(e) => handleFilterChange('department', e.target.value)}
-                    >
-                      <option value="">All Departments</option>
-                      {departmentOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => handleFilterChange('department', value)}
+                      options={['', ...departmentOptions]}
+                      placeholder="All Departments"
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Graduation Year</label>
-                    <select
-                      className="w-full px-4 py-2 mt-1 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    <SearchableDropdown
                       value={filters.graduationYear}
-                      onChange={(e) => handleFilterChange('graduationYear', e.target.value)}
-                    >
-                      <option value="">All Years</option>
-                      {graduationYearOptions.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => handleFilterChange('graduationYear', value)}
+                      options={['', ...graduationYearOptions.map(year => year.toString())]}
+                      placeholder="All Years"
+                    />
                   </div>
                 </div>
               </div>

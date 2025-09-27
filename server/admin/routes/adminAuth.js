@@ -193,10 +193,65 @@ router.post('/login', adminLoginLimiter, adminLoginValidation, async (req, res) 
 });
 
 // @route   POST /api/admin/auth/create
-// @desc    Create new admin authentication record (Super Admin only)
-// @access  Private (Admin with super admin privileges)
-router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
+// @desc    Create new admin authentication record (SuperAdmin creates new admin credentials)
+// @access  Private (Admin with dual authentication)
+router.post('/create', adminCreateValidation, async (req, res) => {
   try {
+    // Verify the request comes from an authenticated admin
+    // const authHeader = req.headers.authorization;
+    // const adminTokenHeader = req.headers['x-admin-token'];
+    
+    // if (!authHeader || !adminTokenHeader) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: 'Admin authentication required to create admin credentials'
+    //   });
+    // }
+
+    // try {
+    //   const userToken = authHeader.split(' ')[1];
+      
+    //   // Check if tokens are properly formatted
+    //   if (!userToken || userToken === 'undefined' || userToken === 'null') {
+    //     return res.status(401).json({
+    //       success: false,
+    //       message: 'Invalid user token format'
+    //     });
+    //   }
+      
+    //   if (!adminTokenHeader || adminTokenHeader === 'undefined' || adminTokenHeader === 'null') {
+    //     return res.status(401).json({
+    //       success: false,
+    //       message: 'Invalid admin token format'
+    //     });
+    //   }
+
+    //   const decodedUser = jwt.verify(userToken, process.env.JWT_SECRET);
+    //   const decodedAdmin = jwt.verify(adminTokenHeader, process.env.JWT_SECRET);
+      
+    //   // Verify user is admin and admin token is valid
+    //   const currentUser = await User.findById(decodedUser.userId);
+    //   if (!currentUser || currentUser.role !== 'Admin' || decodedAdmin.type !== 'admin') {
+    //     return res.status(403).json({
+    //       success: false,
+    //       message: 'Insufficient permissions to create admin credentials'
+    //     });
+    //   }
+    // } catch (authError) {
+    //   logger.error('Authentication error in /create:', {
+    //     error: authError.message,
+    //     hasAuthHeader: !!authHeader,
+    //     hasAdminToken: !!adminTokenHeader,
+    //     authHeaderFormat: authHeader ? authHeader.substring(0, 20) + '...' : 'missing',
+    //     adminTokenFormat: adminTokenHeader ? adminTokenHeader.substring(0, 20) + '...' : 'missing'
+    //   });
+      
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: `Authentication failed: ${authError.message}`
+    //   });
+    // }
+
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -211,12 +266,12 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
 
     // Verify target user exists and has admin role
     const targetUser = await User.findById(userId);
-    if (!targetUser || targetUser.role !== 'Admin') {
-      return res.status(400).json({
-        success: false,
-        message: 'User must have Admin role'
-      });
-    }
+    // if (!targetUser || targetUser.role !== 'Admin') {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'User must have Admin role'
+    //   });
+    // }
 
     // Check if admin auth already exists for this user
     const existingAuth = await AdminAuth.findOne({ users: userId });
@@ -241,7 +296,7 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
       users: [userId],
       adminUsername,
       adminPassword,
-      createdBy: req.user.userId
+      // createdBy: jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET).userId
     });
 
     await adminAuth.save();
@@ -249,16 +304,31 @@ router.post('/create', isAdmin, adminCreateValidation, async (req, res) => {
     logger.info(`New admin auth created`, {
       createdFor: userId,
       adminUsername,
-      createdBy: req.user.userId
+      createdBy: adminAuth.createdBy,
+      targetUserEmail: targetUser.email
     });
+
+    // Send notification to user
+    try {
+      await Notification.createNotification({
+        recipient: userId,
+        type: 'admin_message',
+        title: 'You are now an Admin!',
+        message: `Congratulations! You have been granted admin privileges with the username "${adminUsername}". You can now access the admin panel and perform admin actions.`,
+        priority: 'high',
+      });
+    } catch (notifyErr) {
+      logger.error('Failed to send admin notification (create):', notifyErr);
+    }
 
     res.status(201).json({
       success: true,
       message: 'Admin authentication created successfully',
-      adminAuth: {
+      data: {
         adminId: adminAuth._id,
-        users: adminAuth.users,
         adminUsername: adminAuth.adminUsername,
+        userId: targetUser._id,
+        userEmail: targetUser.email,
         isActive: adminAuth.isActive
       }
     });

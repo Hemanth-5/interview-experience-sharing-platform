@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createApiUrl } from '../../config/api';
 import PSGNotification from '../../components/PSGNotification';
+import SearchableDropdown from '../../components/SearchableDropdown';
 import Avatar from '../../components/Avatar';
 import { 
   Users, 
@@ -218,10 +219,11 @@ const AdminUsers = () => {
       let result;
       if (adminCredsMode === 'new') {
         // Create new admin creds using /bootstrap
-        const res = await fetch(createApiUrl('/api/admin/auth/bootstrap'), {
+        const res = await fetch(createApiUrl('/api/admin/auth/create'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
           body: JSON.stringify({
             userId: adminCredsUser._id,
@@ -237,8 +239,7 @@ const AdminUsers = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'x-admin-token': localStorage.getItem('adminToken')
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
           body: JSON.stringify({ userId: adminCredsUser._id, adminCredId: selectedCredId })
         });
@@ -590,19 +591,13 @@ const AdminUsers = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Role
               </label>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <select
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={filters.role}
-                  onChange={(e) => handleFilterChange('role', e.target.value)}
-                >
-                  <option value="">All Roles</option>
-                  <option value="Student">Student</option>
-                  <option value="Moderator">Moderator</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
+              <SearchableDropdown
+                value={filters.role}
+                onChange={(value) => handleFilterChange('role', value)}
+                options={['', 'Student', 'Moderator', 'Admin']}
+                placeholder="All Roles"
+                icon={Filter}
+              />
             </div>
           </div>
 

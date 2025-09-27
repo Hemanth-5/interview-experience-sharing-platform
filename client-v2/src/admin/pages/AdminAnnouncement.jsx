@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAdminAuth } from '../utils/adminAuth';
 import PSGNotification from '../../components/PSGNotification';
+import SearchableDropdown from '../../components/SearchableDropdown';
 import { 
   Megaphone, 
   Send, 
@@ -326,16 +327,13 @@ const AdminAnnouncement = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Priority Level</h3>
             </div>
             
-            <select
+            <SearchableDropdown
               value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-              <option value="urgent">Urgent</option>
-            </select>
+              onChange={(value) => setPriority(value)}
+              options={['low', 'medium', 'high', 'urgent']}
+              placeholder="Select priority level"
+              className="w-full"
+            />
           </div>
         )}
 
