@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { NotificationProvider, useNotification } from './contexts/NotificationContext.jsx';
+import { BrowserCompatibilityProvider } from './contexts/BrowserCompatibilityContext.jsx';
 import Header from './components/Layout/Header.jsx';
 import Footer from './components/Layout/Footer.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
@@ -136,16 +137,18 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <Router>
-            <ScrollToTop />
-            <AppContent />
-          </Router>
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <BrowserCompatibilityProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Router>
+              <ScrollToTop />
+              <AppContent />
+            </Router>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserCompatibilityProvider>
   );
 }
 
