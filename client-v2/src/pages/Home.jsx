@@ -111,7 +111,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-blue-50/30 to-cyan-50/50 dark:from-background dark:via-blue-950/20 dark:to-cyan-950/30">
+      <section className="relative bg-gradient-to-br from-background via-blue-50/30 to-cyan-50/50 dark:from-background dark:via-blue-950/20 dark:to-cyan-950/30">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"></div>
@@ -139,7 +139,7 @@ const Home = () => {
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto px-2 sm:px-0">
+            <div className="max-w-2xl mx-auto px-2 sm:px-0 relative z-10">
               <SmartSearch
                 onSearch={(query) => {
                   if (query.trim()) {

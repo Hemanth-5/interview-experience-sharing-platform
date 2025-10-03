@@ -233,7 +233,7 @@ const SmartSearch = ({ onSearch, className = '', initialValue = '', placeholder 
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-sm border border-border rounded-xl shadow-2xl z-[9999] max-h-96 overflow-y-auto">
           {/* Suggestions from search */}
           {suggestions.length > 0 && (
             <div>
