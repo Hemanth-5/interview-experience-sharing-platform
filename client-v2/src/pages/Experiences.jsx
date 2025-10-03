@@ -5,6 +5,9 @@ import { createApiUrl } from '../config/api';
 import axios from 'axios';
 import CompanyLogo from '../components/CompanyLogo.jsx';
 import SearchableDropdown from '../components/SearchableDropdown.jsx';
+import SmartSearch from '../components/SmartSearch.jsx';
+import EnhancedExperienceCard from '../components/EnhancedExperienceCard.jsx';
+import ExperiencePreviewModal from '../components/ExperiencePreviewModal.jsx';
 import {
   Search,
   Filter,
@@ -58,6 +61,10 @@ const Experiences = () => {
     total: 0,
     totalPages: 0
   });
+
+  // Preview modal state
+  const [previewExperience, setPreviewExperience] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const internshipTypeOptions = ['Summer', 'Winter', 'Full-time', 'Part-time', 'PPO', 'Contract'];
   const locationOptions = ['Remote', 'On-site', 'Hybrid'];
@@ -190,6 +197,17 @@ const Experiences = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
+  // Preview handlers
+  const handlePreview = (experience) => {
+    setPreviewExperience(experience);
+    setIsPreviewOpen(true);
+  };
+
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+    setPreviewExperience(null);
+  };
+
   const { user } = useAuth();
   const [flaggedPopup, setFlaggedPopup] = useState(null);
   
@@ -279,12 +297,11 @@ const Experiences = () => {
                 </div>
                 
                 <h3 className="font-bold text-base sm:text-lg mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
-                  {experience.companyInfo?.role || 'Unknown Role'}
+                  <span className="font-semibold text-foreground">{experience.companyInfo?.companyName || 'Unknown Company'}</span> - <span className="font-semibold text-foreground">{experience.companyInfo?.role || 'Unknown Role'}</span>
                 </h3>
                 
                 <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
-                  <span className="font-semibold text-foreground">{experience.companyInfo?.companyName || 'Unknown Company'}</span>
-                  <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                  {/* <span className="w-1 h-1 bg-muted-foreground rounded-full"></span> */}
                   <span>{experience.companyInfo?.internshipType || 'N/A'}</span>
                   {experience.companyInfo?.stipend && (
                     <>
@@ -513,18 +530,12 @@ const Experiences = () => {
             {/* Core Filters - Toggleable */}
             <div className={`transition-all duration-300 ${showFilters ? 'opacity-100 mt-4 sm:mt-6' : 'opacity-0 max-h-0 overflow-hidden'}`}>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-4">
-                <div className="space-y-2">
+                <div className="space-y-2 sm:col-span-2 lg:col-span-3">
                   <label className="text-sm font-medium text-foreground">Search</label>
-                  <div className="relative mt-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <input
-                      type="text"
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Search companies, roles..."
-                      value={filters.search}
-                      onChange={(e) => handleFilterChange('search', e.target.value)}
-                    />
-                  </div>
+                  <SmartSearch
+                    onSearch={(query) => handleFilterChange('search', query)}
+                    className="mt-1"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -653,7 +664,14 @@ const Experiences = () => {
           ) : experiences.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {experiences.map(renderExperienceCard)}
+                {experiences.map((experience) => (
+                  <EnhancedExperienceCard
+                    key={experience._id}
+                    experience={experience}
+                    onPreview={() => handlePreview(experience)}
+                    isOwner={user && experience.userId && (experience.userId._id === user.id)}
+                  />
+                ))}
               </div>
               {renderPagination()}
             </>
@@ -677,6 +695,15 @@ const Experiences = () => {
           )}
         </div>
       </div>
+
+      {/* Experience Preview Modal */}
+      {isPreviewOpen && (
+        <ExperiencePreviewModal
+          experience={previewExperience}
+          isOpen={isPreviewOpen}
+          onClose={closePreview}
+        />
+      )}
     </div>
   );
 };

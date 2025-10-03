@@ -15,6 +15,7 @@ import CreateExperience from './pages/CreateExperience.jsx';
 import EditExperience from './pages/EditExperience.jsx';
 import Profile from './pages/Profile.jsx';
 import UserPublicProfile from './pages/UserPublicProfile.jsx';
+// import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
 import Notifications from './pages/Notifications.jsx';
 // import Leaderboard from './pages/Leaderboard';
@@ -80,6 +81,14 @@ function AppContent() {
               </PrivateRoute>
             } 
           />
+          {/* <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          /> */}
           <Route 
             path="/settings" 
             element={

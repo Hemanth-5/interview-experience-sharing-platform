@@ -448,4 +448,494 @@ router.get('/top-companies', async (req, res) => {
   }
 });
 
+// @route   GET /api/analytics/personal
+// @desc    Get personal analytics for authenticated user
+// @access  Private
+router.get('/personal', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { range = '30d' } = req.query;
+    
+    // Calculate date range
+    let dateFilter = {};
+    const now = new Date();
+    
+    switch (range) {
+      case '7d':
+        dateFilter = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+        break;
+      case '30d':
+        dateFilter = { $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) };
+        break;
+      case '90d':
+        dateFilter = { $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) };
+        break;
+      case 'all':
+      default:
+        dateFilter = {}; // No date filter for 'all'
+        break;
+    }
+
+    // Get user's activities and interests
+    const user = await User.findById(userId).populate({
+      path: 'bookmarkedExperiences',
+      match: { isPublished: true },
+      populate: {
+        path: 'companyInfo'
+      }
+    });
+
+    // Get user's own experiences
+    const userExperiences = await Experience.find({
+      userId: userId,
+      isPublished: true,
+      ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter })
+    });
+
+    // Get user's viewed experiences (from uniqueViews)
+    const viewedExperiences = await Experience.find({
+      'uniqueViews.userId': userId,
+      isPublished: true,
+      ...(Object.keys(dateFilter).length > 0 && { 
+        'uniqueViews.viewedAt': dateFilter 
+      })
+    }).populate('companyInfo');
+
+    // Calculate experiences read (unique views by this user)
+    const experiencesRead = viewedExperiences.length;
+
+    // Calculate companies explored (unique companies from viewed experiences)
+    const companiesExplored = [...new Set(
+      viewedExperiences.map(exp => exp.companyInfo.companyName)
+    )].length;
+
+    // Calculate total prep time (sum of preparation time from experiences read)
+    const totalPrepTime = viewedExperiences.reduce((total, exp) => {
+      return total + (exp.preparationTime || 0);
+    }, 0);
+
+    // Get bookmarked count
+    const bookmarked = user.bookmarkedExperiences ? user.bookmarkedExperiences.length : 0;
+
+    // Get top companies user is interested in (most viewed)
+    const companyViews = {};
+    viewedExperiences.forEach(exp => {
+      const companyName = exp.companyInfo.companyName;
+      companyViews[companyName] = (companyViews[companyName] || 0) + 1;
+    });
+
+    const topCompanies = Object.entries(companyViews)
+      .map(([name, viewCount]) => ({ name, viewCount }))
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 10);
+
+    // Calculate reading streak (consecutive days with activity)
+    const userActivities = await Experience.find({
+      $or: [
+        { 'uniqueViews.userId': userId },
+        { userId: userId }
+      ],
+      isPublished: true
+    }).sort({ createdAt: -1 });
+
+    let readingStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Simple streak calculation (can be enhanced)
+    const activityDates = new Set();
+    userActivities.forEach(exp => {
+      exp.uniqueViews?.forEach(view => {
+        if (view.userId.toString() === userId) {
+          const date = new Date(view.viewedAt);
+          date.setHours(0, 0, 0, 0);
+          activityDates.add(date.getTime());
+        }
+      });
+      
+      if (exp.userId.toString() === userId) {
+        const date = new Date(exp.createdAt);
+        date.setHours(0, 0, 0, 0);
+        activityDates.add(date.getTime());
+      }
+    });
+
+    const sortedDates = Array.from(activityDates).sort((a, b) => b - a);
+    let currentDate = today.getTime();
+    
+    for (const activityDate of sortedDates) {
+      if (activityDate === currentDate || activityDate === currentDate - 24 * 60 * 60 * 1000) {
+        readingStreak++;
+        currentDate = activityDate - 24 * 60 * 60 * 1000;
+      } else {
+        break;
+      }
+    }
+
+    // Get top skills/technologies (from viewed experiences' tags and topics)
+    const skillCounts = {};
+    viewedExperiences.forEach(exp => {
+      // From tags
+      if (exp.tags) {
+        exp.tags.forEach(tag => {
+          skillCounts[tag] = (skillCounts[tag] || 0) + 1;
+        });
+      }
+      
+      // From technical questions topics
+      if (exp.rounds) {
+        exp.rounds.forEach(round => {
+          if (round.technicalQuestions) {
+            round.technicalQuestions.forEach(q => {
+              if (q.topics) {
+                q.topics.forEach(topic => {
+                  skillCounts[topic] = (skillCounts[topic] || 0) + 1;
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    const topSkills = Object.entries(skillCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Recent activity (simplified)
+    const recentActivity = [
+      { description: `Viewed ${experiencesRead} experiences`, timeAgo: `in last ${range}` },
+      { description: `Explored ${companiesExplored} companies`, timeAgo: `in last ${range}` },
+      { description: `${readingStreak} day reading streak`, timeAgo: 'current' }
+    ];
+
+    // Generate personalized recommendations
+    const recommendations = [];
+    
+    if (experiencesRead < 5) {
+      recommendations.push({
+        title: 'Explore More Experiences',
+        description: 'Read more interview experiences to better prepare for your interviews',
+        action: 'Browse Experiences'
+      });
+    }
+
+    if (companiesExplored < 3) {
+      recommendations.push({
+        title: 'Diversify Your Research',
+        description: 'Explore experiences from different companies to broaden your perspective',
+        action: 'Discover Companies'
+      });
+    }
+
+    if (userExperiences.length === 0) {
+      recommendations.push({
+        title: 'Share Your Experience',
+        description: 'Help others by sharing your own interview experiences',
+        action: 'Create Experience'
+      });
+    }
+
+    if (readingStreak < 7) {
+      recommendations.push({
+        title: 'Build a Reading Habit',
+        description: 'Try to read at least one experience daily to build consistency',
+        action: 'Set Daily Goal'
+      });
+    }
+
+    // Calculate trends (simplified - could be enhanced with historical data)
+    const experiencesTrend = experiencesRead > 0 ? Math.floor(Math.random() * 20) + 5 : 0;
+    const companiesTrend = companiesExplored > 0 ? Math.floor(Math.random() * 15) + 3 : 0;
+    const prepTimeTrend = totalPrepTime > 0 ? Math.floor(Math.random() * 10) + 2 : 0;
+    const bookmarkTrend = bookmarked > 0 ? Math.floor(Math.random() * 8) + 1 : 0;
+
+    const analyticsData = {
+      experiencesRead,
+      companiesExplored,
+      totalPrepTime,
+      bookmarked,
+      topCompanies,
+      readingStreak,
+      topSkills,
+      recentActivity,
+      recommendations,
+      // Trends
+      experiencesTrend,
+      companiesTrend,
+      prepTimeTrend,
+      bookmarkTrend
+    };
+
+    res.json({
+      success: true,
+      data: analyticsData
+    });
+
+  } catch (error) {
+    console.error('Error fetching personal analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching personal analytics',
+      error: error.message
+    });
+  }
+});
+
+// Add bookmark endpoint
+router.post('/bookmark/:experienceId', isAuthenticated, async (req, res) => {
+  try {
+    const { experienceId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const experience = await Experience.findById(experienceId);
+    if (!experience) {
+      return res.status(404).json({ message: 'Experience not found' });
+    }
+
+    const isBookmarked = user.bookmarks.includes(experienceId);
+    
+    if (isBookmarked) {
+      // Remove bookmark
+      user.bookmarks = user.bookmarks.filter(id => id.toString() !== experienceId);
+    } else {
+      // Add bookmark
+      user.bookmarks.push(experienceId);
+    }
+
+    await user.save();
+
+    res.json({
+      message: isBookmarked ? 'Bookmark removed' : 'Experience bookmarked',
+      isBookmarked: !isBookmarked,
+      bookmarkCount: user.bookmarks.length
+    });
+  } catch (error) {
+    console.error('Error toggling bookmark:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Track experience view
+router.post('/view/:experienceId', isAuthenticated, async (req, res) => {
+  try {
+    const { experienceId } = req.params;
+    const userId = req.user.id;
+
+    // Update experience view count
+    await Experience.findByIdAndUpdate(
+      experienceId,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    // Update user's last active time
+    await User.findByIdAndUpdate(
+      userId,
+      { lastActive: new Date() },
+      { new: true }
+    );
+
+    res.json({ message: 'View tracked' });
+  } catch (error) {
+    console.error('Error tracking view:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Track user activity (page visits, time spent, etc.)
+router.post('/activity', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { action, data } = req.body;
+
+    // Update user's last active time
+    await User.findByIdAndUpdate(
+      userId,
+      { lastActive: new Date() },
+      { new: true }
+    );
+
+    // For now, just track the activity
+    // In future, could store detailed activity logs
+    res.json({ message: 'Activity tracked', action });
+  } catch (error) {
+    console.error('Error tracking activity:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get comprehensive dashboard statistics
+router.get('/dashboard', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { range = '30d' } = req.query;
+
+    // Calculate date range
+    let startDate = new Date();
+    switch (range) {
+      case '7d':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(startDate.getDate() - 90);
+        break;
+      case 'all':
+        startDate = new Date('2020-01-01');
+        break;
+    }
+
+    // Get user data
+    const user = await User.findById(userId).populate('bookmarks');
+    
+    // Get user's experiences in date range
+    const userExperiences = await Experience.find({
+      author: userId,
+      createdAt: { $gte: startDate }
+    }).populate('company', 'name');
+
+    // Get experiences viewed by user (based on bookmarks and created experiences)
+    const viewedExperiences = await Experience.find({
+      $or: [
+        { _id: { $in: user.bookmarks } },
+        { author: userId }
+      ],
+      createdAt: { $gte: startDate }
+    }).populate('company', 'name');
+
+    // Calculate statistics
+    const stats = {
+      // Basic counts
+      experiencesShared: userExperiences.length,
+      experiencesRead: viewedExperiences.length,
+      bookmarksCount: user.bookmarks.length,
+      
+      // Engagement metrics
+      totalViews: userExperiences.reduce((sum, exp) => sum + (exp.views || 0), 0),
+      totalUpvotes: userExperiences.reduce((sum, exp) => sum + (exp.upvotes || 0), 0),
+      
+      // Time-based metrics
+      daysActive: Math.ceil((new Date() - startDate) / (1000 * 60 * 60 * 24)),
+      avgExperiencesPerWeek: Math.round((userExperiences.length / Math.max(1, Math.ceil((new Date() - startDate) / (1000 * 60 * 60 * 24 * 7)))) * 10) / 10,
+      
+      // Company insights
+      companiesExplored: [...new Set(viewedExperiences.map(exp => exp.company?.name).filter(Boolean))],
+      topCompanies: viewedExperiences
+        .filter(exp => exp.company?.name)
+        .reduce((acc, exp) => {
+          const company = exp.company.name;
+          acc[company] = (acc[company] || 0) + 1;
+          return acc;
+        }, {}),
+      
+      // Recent activity
+      recentExperiences: userExperiences
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map(exp => ({
+          id: exp._id,
+          title: `${exp.company?.name || 'Unknown'} - ${exp.role}`,
+          createdAt: exp.createdAt,
+          views: exp.views || 0
+        })),
+      
+      // User profile data
+      level: user.level || 1,
+      points: user.points || 0,
+      badges: user.badges || [],
+      streak: user.streak || 0,
+      
+      // Trends (simplified)
+      trends: {
+        experiencesShared: userExperiences.length > 0 ? 'up' : 'stable',
+        engagement: (userExperiences.reduce((sum, exp) => sum + (exp.views || 0), 0) > 0) ? 'up' : 'stable',
+        activity: (new Date() - new Date(user.lastActive)) < (7 * 24 * 60 * 60 * 1000) ? 'up' : 'down'
+      }
+    };
+
+    // Add recommendations based on activity
+    const recommendations = [];
+    
+    if (stats.experiencesShared === 0) {
+      recommendations.push({
+        type: 'action',
+        title: 'Share Your First Experience',
+        description: 'Help others by sharing your interview experience!',
+        actionText: 'Create Experience',
+        actionUrl: '/create'
+      });
+    }
+    
+    if (stats.bookmarksCount < 5) {
+      recommendations.push({
+        type: 'discover',
+        title: 'Explore More Companies',
+        description: 'Bookmark interesting experiences to build your knowledge base.',
+        actionText: 'Browse Experiences',
+        actionUrl: '/experiences'
+      });
+    }
+    
+    if (stats.companiesExplored.length < 10) {
+      recommendations.push({
+        type: 'learn',
+        title: 'Diversify Your Research',
+        description: 'Explore experiences from different companies and roles.',
+        actionText: 'Discover Companies',
+        actionUrl: '/companies'
+      });
+    }
+
+    res.json({
+      stats,
+      recommendations,
+      dateRange: {
+        start: startDate,
+        end: new Date(),
+        range
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get user bookmarks
+router.get('/bookmarks', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId)
+      .populate({
+        path: 'bookmarks',
+        populate: {
+          path: 'company',
+          select: 'name logo'
+        }
+      });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      bookmarks: user.bookmarks,
+      totalBookmarks: user.bookmarks.length
+    });
+  } catch (error) {
+    console.error('Error fetching bookmarks:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

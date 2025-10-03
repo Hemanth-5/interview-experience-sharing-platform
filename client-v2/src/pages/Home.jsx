@@ -3,6 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiUrl } from '../config/api';
 import CompanyLogo from '../components/CompanyLogo.jsx';
+import SmartSearch from '../components/SmartSearch.jsx';
+import EnhancedExperienceCard from '../components/EnhancedExperienceCard.jsx';
+import ExperiencePreviewModal from '../components/ExperiencePreviewModal.jsx';
+// import AnalyticsDashboard from '../components/AnalyticsDashboard.jsx';
 import { Search, Filter, Star, MapPin, Calendar, Users, TrendingUp, ChevronRight, Briefcase, Building2, GraduationCap, AlertCircle, X, Edit } from 'lucide-react';
 
 const Home = () => {
@@ -12,10 +16,13 @@ const Home = () => {
   const [topCompanies, setTopCompanies] = useState([]);
   const [featuredExperience, setFeaturedExperience] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   
   // Background data reminder state
   const [showBackgroundReminder, setShowBackgroundReminder] = useState(false);
+
+  // Preview modal state
+  const [previewExperience, setPreviewExperience] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -49,6 +56,17 @@ const Home = () => {
     }
   };
 
+  // Preview handlers
+  const handlePreview = (experience) => {
+    setPreviewExperience(experience);
+    setIsPreviewOpen(true);
+  };
+
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+    setPreviewExperience(null);
+  };
+
   const fetchHomeData = async () => {
     try {
       const [statsResponse, experiencesResponse, companiesResponse, featuredResponse] = await Promise.all([
@@ -76,13 +94,6 @@ const Home = () => {
       console.error('Error fetching home data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/experiences?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -129,24 +140,14 @@ const Home = () => {
             
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto px-2 sm:px-0">
-              <form onSubmit={handleSearch} className="relative">
-                <div className="relative">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search companies, roles, or keywords..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 sm:pl-12 pr-20 sm:pr-16 py-3 sm:py-4 bg-card border border-border rounded-2xl text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-6 py-2 rounded-xl transition-colors text-sm sm:text-base"
-                  >
-                    Search
-                  </button>
-                </div>
-              </form>
+              <SmartSearch
+                onSearch={(query) => {
+                  if (query.trim()) {
+                    navigate(`/experiences?search=${encodeURIComponent(query.trim())}`);
+                  }
+                }}
+                className="w-full"
+              />
             </div>
             
             {/* Action Buttons */}
@@ -333,6 +334,45 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Personal Analytics Dashboard for Logged-in Users */}
+      {/* {user && (
+        <section className="py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-3 sm:px-4">
+            <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
+              <div>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
+                  Your Analytics Dashboard
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Track your interview preparation journey
+                </p>
+              </div>
+              <Link 
+                to="/dashboard" 
+                className="hidden sm:inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                View Full Dashboard
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Link>
+            </div>
+            
+            <div className="bg-card border border-border rounded-2xl shadow-lg p-6 lg:p-8">
+              <AnalyticsDashboard userId={user.id} />
+            </div>
+            
+            <div className="text-center mt-8 sm:mt-12 sm:hidden">
+              <Link 
+                to="/dashboard" 
+                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                View Full Dashboard
+              </Link>
+            </div>
+          </div>
+        </section>
+      )} */}
+
       {/* Recent Experiences */}
       {recentExperiences.length > 0 && (
         <section className="py-12 sm:py-16 lg:py-20 bg-gray-50/50 dark:bg-gray-900/20">
@@ -357,66 +397,12 @@ const Home = () => {
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {recentExperiences.slice(0, 6).map((experience) => (
-                <Link 
-                  key={experience._id} 
-                  to={`/experiences/${experience._id}`}
-                  className="group"
-                >
-                  <div className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] group-hover:border-blue-200 dark:group-hover:border-blue-800">
-                    <div className="p-4 sm:p-6">
-                      <div className="flex items-start justify-between mb-3 sm:mb-4">
-                        <div className="flex items-center space-x-2 sm:space-x-3">
-                          <CompanyLogo 
-                            companyName={experience.companyInfo?.companyName}
-                            companyLogo={experience.companyInfo?.companyLogo}
-                            size={32}
-                            className="rounded-lg sm:w-10 sm:h-10"
-                          />
-                          <div>
-                            <h3 className="font-semibold text-foreground group-hover:text-blue-600 transition-colors text-sm sm:text-base">
-                              {experience.companyInfo?.companyName}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
-                              {experience.companyInfo?.role}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${
-                          experience.finalResult?.toLowerCase() === 'selected' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : experience.finalResult?.toLowerCase() === 'rejected'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
-                          {experience.finalResult}
-                        </span>
-                      </div>
-                      
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 line-clamp-2">
-                        {experience.overallExperience?.substring(0, 100)}...
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <div className="flex items-center space-x-2 sm:space-x-3">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-3 h-3" />
-                            <span className="hidden sm:inline">{experience.companyInfo?.location}</span>
-                            <span className="sm:hidden">{experience.companyInfo?.location?.split(',')[0]}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-3 h-3" />
-                            <span className="hidden sm:inline">{new Date(experience.createdAt).toLocaleDateString()}</span>
-                            <span className="sm:hidden">{new Date(experience.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                          <span>{experience.overallRating}/5</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <EnhancedExperienceCard
+                  key={experience._id}
+                  experience={experience}
+                  onPreview={() => handlePreview(experience)}
+                  isOwner={user && experience.userId && (experience.userId._id === user.id)}
+                />
               ))}
             </div>
             
@@ -488,6 +474,15 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Experience Preview Modal */}
+      {isPreviewOpen && (
+        <ExperiencePreviewModal
+          experience={previewExperience}
+          isOpen={isPreviewOpen}
+          onClose={closePreview}
+        />
+      )}
     </div>
   );
 };

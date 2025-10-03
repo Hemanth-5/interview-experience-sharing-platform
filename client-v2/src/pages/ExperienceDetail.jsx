@@ -39,7 +39,14 @@ import {
   Timer,
   FileText,
   Tag,
-  Download
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Grid3X3,
+  Award,
+  HelpCircle,
+  DollarSign
 } from 'lucide-react';
 
 const ExperienceDetail = () => {
@@ -64,10 +71,53 @@ const ExperienceDetail = () => {
   const [reportSuccess, setReportSuccess] = useState('');
   const [reportError, setReportError] = useState('');
 
+  // Round modal state
+  const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
+  const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
+  const [roundModalView, setRoundModalView] = useState('overview'); // 'overview' or 'grid'
+
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, []);
+
+  // Keyboard navigation for round modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isRoundModalOpen) return;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          prevRound();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          nextRound();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          closeRoundModal();
+          break;
+        case 'g':
+          if (e.shiftKey) { // Shift + G for grid view
+            e.preventDefault();
+            setRoundModalView(roundModalView === 'grid' ? 'overview' : 'grid');
+          }
+          break;
+      }
+    };
+
+    if (isRoundModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isRoundModalOpen, roundModalView, currentRoundIndex, experience?.rounds?.length]);
 
   const fetchExperience = useCallback(async () => {
     try {
@@ -294,6 +344,36 @@ const ExperienceDetail = () => {
     setReportSuccess('');
     setReportError('');
   }
+
+  // Round modal handler functions
+  const openRoundModal = (roundIndex = 0) => {
+    setCurrentRoundIndex(roundIndex);
+    setIsRoundModalOpen(true);
+    setRoundModalView('overview');
+  };
+
+  const closeRoundModal = () => {
+    setIsRoundModalOpen(false);
+    setCurrentRoundIndex(0);
+    setRoundModalView('overview');
+  };
+
+  const nextRound = () => {
+    if (experience?.rounds && currentRoundIndex < experience.rounds.length - 1) {
+      setCurrentRoundIndex(currentRoundIndex + 1);
+    }
+  };
+
+  const prevRound = () => {
+    if (currentRoundIndex > 0) {
+      setCurrentRoundIndex(currentRoundIndex - 1);
+    }
+  };
+
+  const goToRound = (index) => {
+    setCurrentRoundIndex(index);
+    setRoundModalView('overview');
+  };
 
   // Show popup if owner is viewing and experience is flagged
   const showFlaggedOwnerPopup = experience.flagged && user && experience.userId && (experience.userId._id === user.id);
@@ -625,8 +705,17 @@ const ExperienceDetail = () => {
 
             {/* Interview Rounds */}
             <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg sm:text-xl font-bold">Interview Rounds</h2>
+                {experience.rounds?.length > 0 && (
+                  <button
+                    onClick={() => openRoundModal(0)}
+                    className="flex items-center space-x-2 px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg transition-colors"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                    <span>View All</span>
+                  </button>
+                )}
               </div>
               
               {experience.rounds?.map((round, index) => {
@@ -634,199 +723,62 @@ const ExperienceDetail = () => {
                 const roundConfig = getOutcomeConfig(round.roundResult);
                 
                 return (
-                  <div key={index} className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
+                  <div 
+                    key={index} 
+                    onClick={() => openRoundModal(index)}
+                    className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group"
+                  >
                     <div className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-secondary/50">
-                            <RoundIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-secondary/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
+                            <RoundIcon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="font-semibold text-base sm:text-lg truncate">Round {round.roundNumber}: {round.roundType}</h3>
-                            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
-                              <div className="flex items-center space-x-1">
-                                <Clock className="w-3 h-3" />
-                                <span>{round.duration} minutes</span>
-                              </div>
+                          <div>
+                            <h3 className="font-bold text-base sm:text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              Round {index + 1}: {round.roundType}
+                            </h3>
+                            <div className="flex items-center space-x-3 mt-1">
+                              {round.duration && (
+                                <div className="flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground">
+                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span>{round.duration}</span>
+                                </div>
+                              )}
                               {round.platform && (
-                                <div className="flex items-center space-x-1">
-                                  <Building className="w-3 h-3" />
-                                  <span className="truncate">{round.platform}</span>
+                                <div className="flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground">
+                                  <Building className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span>{round.platform}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                         </div>
                         
-                        <div className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-lg text-xs font-medium border ${roundConfig.class} flex-shrink-0 mt-2 sm:mt-0`}>
-                          <roundConfig.icon className="w-3 h-3 mr-1" />
-                          <span className="truncate">{roundConfig.text}</span>
+                        <div className="flex items-center space-x-3">
+                          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${roundConfig.bgColor} ${roundConfig.textColor} border ${roundConfig.borderColor}`}>
+                            {(() => {
+                              const IconComponent = roundConfig.icon;
+                              return <IconComponent className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />;
+                            })()}
+                            {round.roundResult}
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                         </div>
                       </div>
-
-                      {/* Technical Questions */}
-                      {round.technicalQuestions && round.technicalQuestions.length > 0 && (
-                        <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
-                          <h4 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4 flex items-center space-x-2">
-                            <Code className="w-4 h-4 text-blue-600" />
-                            <span>Technical Questions</span>
-                          </h4>
-                          <div className="space-y-3 sm:space-y-4">
-                            {round.technicalQuestions.map((q, qIndex) => {
-                              const difficultyConfig = getDifficultyConfig(q.difficulty);
-                              return (
-                                <div key={qIndex} className="bg-gray-50 dark:bg-gray-900/30 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-800 space-y-3">
-                                  <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0">
-                                    <p className="font-medium text-foreground text-sm sm:text-base flex-1 sm:pr-4">{q.question}</p>
-                                    <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${difficultyConfig.class} flex-shrink-0 self-start`}>
-                                      <span className="mr-1">{difficultyConfig.icon}</span>
-                                      {q.difficulty}
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Additional question details */}
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                                    {q.timeGiven && (
-                                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
-                                        <Timer className="w-4 h-4" />
-                                        <span>Time Given: {q.timeGiven} minutes</span>
-                                      </div>
-                                    )}
-                                    {q.leetcodeLink && (
-                                      <div className="flex items-center space-x-2">
-                                        <a 
-                                          href={q.leetcodeLink} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center space-x-1 text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 truncate"
-                                        >
-                                          <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                                          <span>LeetCode Link</span>
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  {q.topics && q.topics.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                      {q.topics.map((topic, tIndex) => (
-                                        <span key={tIndex} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                          {topic}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                  {q.solution && (
-                                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                      <p className="font-semibold text-green-800 dark:text-green-300 text-sm mb-2">Solution Approach:</p>
-                                      <MarkdownViewer content={q.solution} className="text-green-700 dark:text-green-400 text-sm" />
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Behavioral Questions */}
-                      {round.behavioralQuestions && round.behavioralQuestions.length > 0 && (
-                        <div className="mt-6 space-y-4">
-                          <h4 className="font-semibold text-base mb-4 flex items-center space-x-2">
-                            <Brain className="w-4 h-4 text-green-600" />
-                            <span>Behavioral Questions</span>
-                          </h4>
-                          <div className="space-y-4">
-                            {round.behavioralQuestions.map((q, qIndex) => (
-                              <div key={qIndex} className="bg-gray-50 dark:bg-gray-900/30 rounded-lg p-4 border border-gray-200 dark:border-gray-800 space-y-3">
-                                <div className="flex items-start justify-between">
-                                  <p className="font-medium text-foreground flex-1 pr-4">{q.question}</p>
-                                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 flex-shrink-0">
-                                    {q.category}
-                                  </span>
-                                </div>
-                                {q.yourAnswer && (
-                                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                                    <p className="font-semibold text-blue-800 dark:text-blue-300 text-sm mb-2">Sample Answer:</p>
-                                    <MarkdownViewer content={q.yourAnswer} className="text-blue-700 dark:text-blue-400 text-sm" />
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* MCQ Section */}
-                      {round.mcqSection && (round.mcqSection.totalQuestions || round.mcqSection.timeLimit || round.mcqSection.topics?.length > 0) && (
-                        <div className="mt-6 space-y-4">
-                          <h4 className="font-semibold text-base mb-4 flex items-center space-x-2">
-                            <FileText className="w-4 h-4 text-purple-600" />
-                            <span>MCQ/Assessment Section</span>
-                          </h4>
-                          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                              {round.mcqSection.totalQuestions && (
-                                <div className="text-center">
-                                  <div className="font-bold text-lg text-purple-800 dark:text-purple-300">{round.mcqSection.totalQuestions}</div>
-                                  <div className="text-xs text-purple-600 dark:text-purple-400">Total Questions</div>
-                                </div>
-                              )}
-                              {round.mcqSection.timeLimit && (
-                                <div className="text-center">
-                                  <div className="font-bold text-lg text-purple-800 dark:text-purple-300">{round.mcqSection.timeLimit} min</div>
-                                  <div className="text-xs text-purple-600 dark:text-purple-400">Time Limit</div>
-                                </div>
-                              )}
-                              {round.mcqSection.difficulty && (
-                                <div className="text-center">
-                                  <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getDifficultyConfig(round.mcqSection.difficulty).class}`}>
-                                    {round.mcqSection.difficulty}
-                                  </div>
-                                  <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">Difficulty</div>
-                                </div>
-                              )}
-                              {round.mcqSection.cutoff && (
-                                <div className="text-center">
-                                  <div className="font-bold text-lg text-purple-800 dark:text-purple-300">{round.mcqSection.cutoff}%</div>
-                                  <div className="text-xs text-purple-600 dark:text-purple-400">Cutoff</div>
-                                </div>
-                              )}
-                            </div>
-                            {round.mcqSection.topics && round.mcqSection.topics.length > 0 && (
-                              <div>
-                                <p className="font-semibold text-purple-800 dark:text-purple-300 text-sm mb-2">Topics Covered:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {round.mcqSection.topics.map((topic, tIndex) => (
-                                    <span key={tIndex} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                                      {topic}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Tips & Experience */}
-                      {round.tips && (
-                        <div className="mt-4 sm:mt-6 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 dark:from-blue-950/20 dark:to-cyan-950/10 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
-                          <h4 className="font-semibold text-sm sm:text-base mb-2 sm:mb-3 flex items-center space-x-2">
-                            <Lightbulb className="w-4 h-4 text-orange-600" />
-                            <span>Tips & Experience</span>
-                          </h4>
-                          <MarkdownViewer content={round.tips} className="text-xs sm:text-sm text-muted-foreground leading-relaxed" />
-                        </div>
-                      )}
-
-                      {/* Feedback */}
-                      {round.feedback && (
-                        <div className="mt-4 sm:mt-6 border-l-4 border-blue-400 bg-blue-50 dark:bg-blue-950/30 pl-3 sm:pl-4 py-2 sm:py-3 rounded-r-lg">
-                          <h4 className="font-semibold text-xs sm:text-sm mb-2">Feedback Received:</h4>
-                          <MarkdownViewer content={round.feedback} className="text-xs sm:text-sm text-muted-foreground" />
-                        </div>
-                      )}
+                      
+                      {/* Preview of round content */}
+                      <div className="text-sm text-muted-foreground">
+                        {round.description ? (
+                          <p className="line-clamp-2">{round.description.substring(0, 150)}...</p>
+                        ) : round.technicalQuestions?.length > 0 ? (
+                          <p>Technical questions, solutions and more...</p>
+                        ) : round.behavioralQuestions?.length > 0 ? (
+                          <p>Behavioral questions and insights...</p>
+                        ) : (
+                          <p>Click to view round details</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -1048,6 +1000,390 @@ const ExperienceDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Round Modal */}
+      {isRoundModalOpen && experience.rounds && experience.rounds.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border bg-secondary/20">
+              <div className="flex items-center space-x-4">
+                <h2 className="text-xl font-bold">
+                  Round {currentRoundIndex + 1}: {experience.rounds[currentRoundIndex]?.roundType}
+                </h2>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <span>{currentRoundIndex + 1} of {experience.rounds.length}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                {/* Grid View Toggle */}
+                <button
+                  onClick={() => setRoundModalView(roundModalView === 'grid' ? 'overview' : 'grid')}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                  title={roundModalView === 'grid' ? 'Detail View' : 'Grid View'}
+                >
+                  <Grid3X3 className="w-5 h-5" />
+                </button>
+                
+                {/* Navigation */}
+                <button
+                  onClick={prevRound}
+                  disabled={currentRoundIndex === 0}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <button
+                  onClick={nextRound}
+                  disabled={currentRoundIndex === experience.rounds.length - 1}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                
+                <button
+                  onClick={closeRoundModal}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+              {roundModalView === 'grid' ? (
+                /* Grid View - All Rounds */
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {experience.rounds.map((round, index) => {
+                      const RoundIcon = getRoundTypeIcon(round.roundType);
+                      const roundConfig = getOutcomeConfig(round.roundResult);
+                      
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => goToRound(index)}
+                          className={`p-4 border rounded-xl cursor-pointer transition-all hover:shadow-lg ${
+                            index === currentRoundIndex 
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                              : 'border-border hover:border-blue-300 dark:hover:border-blue-600'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center">
+                              <RoundIcon className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-sm">Round {index + 1}</h3>
+                              <p className="text-xs text-muted-foreground">{round.roundType}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-muted-foreground">
+                              {round.duration && `${round.duration} min`}
+                            </div>
+                            <div className={`px-2 py-1 rounded text-xs font-medium ${roundConfig.bgColor} ${roundConfig.textColor}`}>
+                              {round.roundResult}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* Detail View - Current Round */
+                <div className="p-6">
+                  {(() => {
+                    const round = experience.rounds[currentRoundIndex];
+                    const RoundIcon = getRoundTypeIcon(round.roundType);
+                    const roundConfig = getOutcomeConfig(round.roundResult);
+                    
+                    return (
+                      <div className="space-y-6">
+                        {/* Round Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 rounded-xl bg-secondary/50 flex items-center justify-center">
+                              <RoundIcon className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold">{round.roundType}</h3>
+                              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                                {round.duration && (
+                                  <div className="flex items-center space-x-1">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{round.duration} minutes</span>
+                                  </div>
+                                )}
+                                {round.platform && (
+                                  <div className="flex items-center space-x-1">
+                                    <Building className="w-4 h-4" />
+                                    <span>{round.platform}</span>
+                                  </div>
+                                )}
+                                {round.overallExperience && (
+                                  <div className="flex items-center space-x-1">
+                                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                    <span>{round.overallExperience}/5</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={`px-4 py-2 rounded-lg font-medium ${roundConfig.bgColor} ${roundConfig.textColor} border ${roundConfig.borderColor}`}>
+                            {(() => {
+                              const IconComponent = roundConfig.icon;
+                              return <IconComponent className="w-4 h-4 mr-2 inline" />;
+                            })()}
+                            {round.roundResult}
+                          </div>
+                        </div>
+
+                        {/* Round Content */}
+                        <div className="space-y-6">
+                          {/* Description */}
+                          {round.description && (
+                            <div>
+                              <h4 className="font-semibold mb-3">Description</h4>
+                              <MarkdownViewer content={round.description} className="text-sm text-muted-foreground" />
+                            </div>
+                          )}
+
+                          {/* Technical Questions */}
+                          {round.technicalQuestions && round.technicalQuestions.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center space-x-2">
+                                <Code className="w-4 h-4 text-blue-600" />
+                                <span>Technical Questions ({round.technicalQuestions.length})</span>
+                              </h4>
+                              <div className="space-y-4">
+                                {round.technicalQuestions.map((q, qIndex) => {
+                                  const difficultyConfig = getDifficultyConfig(q.difficulty);
+                                  return (
+                                    <div key={qIndex} className="bg-secondary/30 rounded-lg p-4 space-y-4">
+                                      {/* Question Header */}
+                                      <div className="flex items-start justify-between">
+                                        <p className="font-medium flex-1 pr-4">{q.question}</p>
+                                        <div className="flex items-center space-x-2">
+                                          {q.timeGiven && (
+                                            <div className="flex items-center space-x-1 text-xs text-muted-foreground bg-background/50 px-2 py-1 rounded">
+                                              <Timer className="w-3 h-3" />
+                                              <span>{q.timeGiven} min</span>
+                                            </div>
+                                          )}
+                                          <div className={`px-2 py-1 rounded text-xs font-medium ${difficultyConfig.class}`}>
+                                            {difficultyConfig.icon} {q.difficulty}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Topics */}
+                                      {q.topics && q.topics.length > 0 && (
+                                        <div>
+                                          <span className="text-sm text-muted-foreground">Topics:</span>
+                                          <div className="flex flex-wrap gap-1 mt-1">
+                                            {q.topics.map((topic, tIndex) => (
+                                              <span key={tIndex} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs">
+                                                {topic}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Solution/Approach */}
+                                      {q.solution && (
+                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                                          <h5 className="font-semibold text-green-800 dark:text-green-300 text-sm mb-2 flex items-center space-x-2">
+                                            <Lightbulb className="w-4 h-4" />
+                                            <span>Solution Approach:</span>
+                                          </h5>
+                                          <MarkdownViewer content={q.solution} className="text-green-700 dark:text-green-400 text-sm" />
+                                        </div>
+                                      )}
+                                      
+                                      {/* LeetCode Link */}
+                                      {q.leetcodeLink && (
+                                        <div>
+                                          <a 
+                                            href={q.leetcodeLink} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                          >
+                                            <ExternalLink className="w-4 h-4" />
+                                            <span>View on LeetCode</span>
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Behavioral Questions */}
+                          {round.behavioralQuestions && round.behavioralQuestions.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center space-x-2">
+                                <Brain className="w-4 h-4 text-purple-600" />
+                                <span>Behavioral Questions ({round.behavioralQuestions.length})</span>
+                              </h4>
+                              <div className="space-y-4">
+                                {round.behavioralQuestions.map((q, qIndex) => (
+                                  <div key={qIndex} className="bg-secondary/30 rounded-lg p-4 space-y-3">
+                                    <div className="flex items-start justify-between">
+                                      <p className="font-medium flex-1 pr-4">{q.question}</p>
+                                      <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full text-xs font-medium">
+                                        {q.category}
+                                      </span>
+                                    </div>
+                                    
+                                    {q.yourAnswer && (
+                                      <div className="bg-background/50 border border-border rounded-lg p-3">
+                                        <h5 className="font-semibold text-sm mb-2 flex items-center space-x-2">
+                                          <MessageCircle className="w-4 h-4 text-purple-600" />
+                                          <span>Your Answer:</span>
+                                        </h5>
+                                        <div className="text-sm text-muted-foreground">
+                                          <MarkdownViewer content={q.yourAnswer} />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* MCQ Section */}
+                          {round.mcqSection && (round.mcqSection.totalQuestions || round.mcqSection.topics?.length > 0) && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center space-x-2">
+                                <HelpCircle className="w-4 h-4 text-orange-600" />
+                                <span>MCQ/Aptitude Section</span>
+                              </h4>
+                              <div className="bg-secondary/30 rounded-lg p-4 space-y-4">
+                                {/* MCQ Stats Grid */}
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                  {round.mcqSection.totalQuestions && (
+                                    <div className="text-center p-3 bg-background/50 rounded-lg">
+                                      <div className="font-bold text-lg text-orange-600">{round.mcqSection.totalQuestions}</div>
+                                      <div className="text-xs text-muted-foreground">Total Questions</div>
+                                    </div>
+                                  )}
+                                  {round.mcqSection.timeLimit && (
+                                    <div className="text-center p-3 bg-background/50 rounded-lg">
+                                      <div className="font-bold text-lg text-blue-600 flex items-center justify-center space-x-1">
+                                        <Timer className="w-4 h-4" />
+                                        <span>{round.mcqSection.timeLimit}</span>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">Minutes</div>
+                                    </div>
+                                  )}
+                                  {round.mcqSection.difficulty && (
+                                    <div className="text-center p-3 bg-background/50 rounded-lg">
+                                      <div className={`font-bold text-lg ${round.mcqSection.difficulty === 'Easy' ? 'text-green-600' : round.mcqSection.difficulty === 'Medium' ? 'text-yellow-600' : 'text-red-600'}`}>
+                                        {round.mcqSection.difficulty}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">Difficulty</div>
+                                    </div>
+                                  )}
+                                  {round.mcqSection.cutoff && (
+                                    <div className="text-center p-3 bg-background/50 rounded-lg">
+                                      <div className="font-bold text-lg text-purple-600 flex items-center justify-center space-x-1">
+                                        <Target className="w-4 h-4" />
+                                        <span>{round.mcqSection.cutoff}</span>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">Cutoff Score</div>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Topics */}
+                                {round.mcqSection.topics && round.mcqSection.topics.length > 0 && (
+                                  <div>
+                                    <h5 className="font-medium text-sm mb-2 flex items-center space-x-2">
+                                      <Tag className="w-4 h-4" />
+                                      <span>Topics Covered:</span>
+                                    </h5>
+                                    <div className="flex flex-wrap gap-2">
+                                      {round.mcqSection.topics.map((topic, index) => (
+                                        <span key={index} className="px-3 py-1 bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 rounded-full text-sm">
+                                          {topic}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Tips */}
+                          {round.tips && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center space-x-2">
+                                <Lightbulb className="w-4 h-4 text-yellow-600" />
+                                <span>Tips</span>
+                              </h4>
+                              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                <MarkdownViewer content={round.tips} className="text-yellow-800 dark:text-yellow-300 text-sm" />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Feedback */}
+                          {round.feedback && (
+                            <div>
+                              <h4 className="font-semibold mb-3">Feedback Received</h4>
+                              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                <MarkdownViewer content={round.feedback} className="text-blue-800 dark:text-blue-300 text-sm" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-border p-4 bg-secondary/10">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Use arrow keys or buttons to navigate between rounds
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-muted-foreground">
+                    {currentRoundIndex + 1} of {experience.rounds.length}
+                  </span>
+                  <div className="flex space-x-1">
+                    {experience.rounds.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => goToRound(index)}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          index === currentRoundIndex ? 'bg-blue-600' : 'bg-secondary'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

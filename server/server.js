@@ -17,6 +17,7 @@ const uploadRoutes = require('./routes/upload');
 const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
 const companyRoutes = require('./routes/companies');
+const searchRoutes = require('./routes/search');
 const adminRoutes = require('./admin/routes/adminRoutes');
 
 // Import middleware
@@ -113,6 +114,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/companies', companyRoutes);
+app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check endpoint

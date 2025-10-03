@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { extractUserName } from '../../utils/avatar';
 import Avatar from '../Avatar.jsx';
 import NotificationBell from '../NotificationBell.jsx';
-import { BookOpen, Sun, Moon, Plus, Bell, User, Menu, Home, FileText, Users, Info, Settings, Shield, LogOut, UserCircle, LogIn, LogInIcon, LogOutIcon, Loader } from "lucide-react";
+import { BookOpen, Sun, Moon, Plus, Bell, User, Menu, Home, FileText, Users, Info, Settings, Shield, LogOut, UserCircle, LogIn, LogInIcon, LogOutIcon, Loader, TrendingUp } from "lucide-react";
 // import './Header.css';
 
 const Header = () => {
@@ -166,6 +166,15 @@ const Header = () => {
                           <User className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                           <span>Profile</span>
                         </Link>
+                        
+                        {/* <Link 
+                          to="/dashboard" 
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-secondary transition-colors group"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <TrendingUp className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          <span>Analytics</span>
+                        </Link> */}
                         
                         <Link 
                           to="/settings" 

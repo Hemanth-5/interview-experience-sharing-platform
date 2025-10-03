@@ -6,6 +6,8 @@ import { createApiUrl } from '../config/api';
 import Avatar from '../components/Avatar.jsx';
 import { extractUserName } from '../utils/avatar';
 import CompanyLogo from "../components/CompanyLogo.jsx"
+// import AnalyticsDashboard from '../components/AnalyticsDashboard.jsx';
+// import AnalyticsDashboard from '../components/AnalyticsDashboard.jsx';
 import { 
   User, 
   FileText, 
@@ -38,7 +40,7 @@ const Profile = () => {
   const [userExperiences, setUserExperiences] = useState([]);
   const [bookmarkedExperiences, setBookmarkedExperiences] = useState([]);
   const [stats, setStats] = useState({});
-  const [activeTab, setActiveTab] = useState('experiences');
+  const [activeTab, setActiveTab] = useState('experiences'); // experiences, bookmarks, background, analytics
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [announcement, setAnnouncement] = useState(null);
@@ -718,6 +720,19 @@ const Profile = () => {
                       <span>Background</span>
                     </div>
                   </button>
+                  {/* <button 
+                    className={`flex-1 min-w-0 px-3 sm:px-6 py-3 sm:py-4 text-center font-medium transition-colors text-sm sm:text-base ${
+                      activeTab === 'analytics' 
+                        ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                    onClick={() => setActiveTab('analytics')}
+                  >
+                    <div className="flex items-center justify-center space-x-1 sm:space-x-2">
+                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>Analytics</span>
+                    </div>
+                  </button> */}
                 </div>
               </div>
 
@@ -777,6 +792,12 @@ const Profile = () => {
                 )}
 
                 {activeTab === 'background' && renderBackgroundInfo()}
+                
+                {activeTab === 'analytics' && (
+                  <div className="space-y-6">
+                    <AnalyticsDashboard userId={user?.id} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
