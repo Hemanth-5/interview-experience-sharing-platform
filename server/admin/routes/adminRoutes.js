@@ -1123,6 +1123,299 @@ router.put('/company-requests/:requestId/change-status', isAdminWithDualAuth, as
   }
 });
 
+// @route   GET /api/admin/experiences/reported
+// @desc    Get all experiences with reports
+// @access  Admin
+router.get('/experiences/reported', isAdmin, async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 20, 
+      reportStatus, // pending, reviewed, resolved, dismissed
+      search
+    } = req.query;
+
+    // Build filter - only get experiences that have reports
+    const filter = {
+      reports: { $exists: true, $ne: [] }
+    };
+
+    // Filter by report status if provided
+    if (reportStatus && reportStatus !== 'all') {
+      filter['reports.status'] = reportStatus;
+    }
+
+    // Search filter
+    if (search && search !== '') {
+      filter.$or = [
+        { 'companyInfo.companyName': { $regex: search, $options: 'i' } },
+        { 'companyInfo.role': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [experiences, total] = await Promise.all([
+      Experience.find(filter)
+        .populate('reports.reportedBy', 'name email')
+        .populate('userId', 'name email')
+        .sort({ 'reports.reportedAt': -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Experience.countDocuments(filter)
+    ]);
+
+    res.json({
+      success: true,
+      experiences,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit)
+    });
+
+  } catch (error) {
+    console.error('Error fetching reported experiences:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch reported experiences',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/admin/experiences/report-stats
+// @desc    Get report statistics
+// @access  Admin
+router.get('/experiences/report-stats', isAdmin, async (req, res) => {
+  try {
+    // Aggregate report statistics
+    const statsResult = await Experience.aggregate([
+      {
+        $match: {
+          reports: { $exists: true, $ne: [] }
+        }
+      },
+      {
+        $unwind: '$reports'
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          pending: {
+            $sum: { $cond: [{ $eq: ['$reports.status', 'pending'] }, 1, 0] }
+          },
+          reviewed: {
+            $sum: { $cond: [{ $eq: ['$reports.status', 'reviewed'] }, 1, 0] }
+          },
+          resolved: {
+            $sum: { $cond: [{ $eq: ['$reports.status', 'resolved'] }, 1, 0] }
+          },
+          dismissed: {
+            $sum: { $cond: [{ $eq: ['$reports.status', 'dismissed'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    // Count flagged experiences
+    const flagged = await Experience.countDocuments({ flagged: true });
+
+    const stats = statsResult.length > 0 ? {
+      total: statsResult[0].total,
+      pending: statsResult[0].pending,
+      reviewed: statsResult[0].reviewed,
+      resolved: statsResult[0].resolved,
+      dismissed: statsResult[0].dismissed,
+      flagged
+    } : {
+      total: 0,
+      pending: 0,
+      reviewed: 0,
+      resolved: 0,
+      dismissed: 0,
+      flagged
+    };
+
+    res.json({
+      success: true,
+      stats
+    });
+
+  } catch (error) {
+    console.error('Error fetching report stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch report statistics',
+      error: error.message
+    });
+  }
+});
+
+// @route   PATCH /api/admin/experiences/:experienceId/reports/:reportId
+// @desc    Update a specific report status
+// @access  Admin
+router.patch('/experiences/:experienceId/reports/:reportId', isAdmin, async (req, res) => {
+  try {
+    const { experienceId, reportId } = req.params;
+    const { status, action } = req.body;
+
+    // Validate status
+    const validStatuses = ['pending', 'reviewed', 'resolved', 'dismissed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status provided'
+      });
+    }
+
+    // Find the experience
+    const experience = await Experience.findById(experienceId);
+    if (!experience) {
+      return res.status(404).json({
+        success: false,
+        message: 'Experience not found'
+      });
+    }
+
+    // Find the specific report
+    const report = experience.reports.id(reportId);
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Report not found'
+      });
+    }
+
+    // Update report status
+    report.status = status;
+    report.reviewedBy = req.user._id;
+    report.reviewedAt = new Date();
+
+    // If resolving all reports, unflag the experience
+    if (status === 'resolved' || status === 'dismissed') {
+      const allReportsResolved = experience.reports.every(r => 
+        r._id.equals(report._id) || 
+        r.status === 'resolved' || 
+        r.status === 'dismissed'
+      );
+
+      if (allReportsResolved) {
+        experience.flagged = false;
+        experience.flaggedBy = null;
+        experience.flagReason = null;
+      }
+    }
+
+    await experience.save();
+
+    // Send notification to the reporter using admin_message type
+    try {
+      await Notification.createNotification({
+        recipient: report.reportedBy,
+        type: 'admin_message',
+        title: 'Report Status Updated',
+        message: `Your report on "${experience.companyInfo?.companyName} - ${experience.companyInfo?.role}" has been ${status}.`,
+        relatedExperience: experience._id,
+        metadata: {
+          experienceId: experience._id,
+          reportId: report._id,
+          status,
+          companyName: experience.companyInfo?.companyName,
+          notificationType: 'report_status_update'
+        }
+      });
+    } catch (notifError) {
+      console.error('Error sending notification:', notifError);
+      // Continue even if notification fails
+    }
+
+    res.json({
+      success: true,
+      message: `Report ${status} successfully`,
+      data: {
+        experience,
+        report
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating report status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update report status',
+      error: error.message
+    });
+  }
+});
+
+// @route   PATCH /api/admin/experiences/:experienceId/unpublish
+// @desc    Unpublish an experience (remove from public view)
+// @access  Admin
+router.patch('/experiences/:experienceId/unpublish', isAdmin, async (req, res) => {
+  try {
+    const { experienceId } = req.params;
+    const { reason, flagReason } = req.body;
+
+    const experience = await Experience.findById(experienceId);
+    if (!experience) {
+      return res.status(404).json({
+        success: false,
+        message: 'Experience not found'
+      });
+    }
+
+    // Unpublish and flag the experience
+    experience.isPublished = false;
+    experience.flagged = true;
+    experience.flaggedBy = req.user._id;
+    experience.flagReason = flagReason || 'multiple_reports';
+    experience.flaggedAt = new Date();
+
+    await experience.save();
+
+    // Notify the experience owner using experience_flagged type
+    try {
+      await Notification.createNotification({
+        recipient: experience.userId,
+        type: 'experience_flagged',
+        title: 'Experience Unpublished',
+        message: `Your experience at "${experience.companyInfo?.companyName} - ${experience.companyInfo?.role}" has been unpublished. ${reason || 'It violated our community guidelines.'}`,
+        relatedExperience: experience._id,
+        flagReason: experience.flagReason,
+        flagReasonDetails: reason,
+        actionUrl: `/experiences/${experience._id}/edit`,
+        metadata: {
+          experienceId: experience._id,
+          companyName: experience.companyInfo?.companyName,
+          reason,
+          flagReason: experience.flagReason,
+          unpublishedBy: req.user._id,
+          notificationType: 'experience_unpublished'
+        }
+      });
+    } catch (notifError) {
+      console.error('Error sending notification:', notifError);
+      // Continue even if notification fails
+    }
+
+    res.json({
+      success: true,
+      message: 'Experience unpublished successfully',
+      data: experience
+    });
+
+  } catch (error) {
+    console.error('Error unpublishing experience:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to unpublish experience',
+      error: error.message
+    });
+  }
+});
+
 // Announcement/news route
 const adminAnnounceRoutes = require('./admin_announce');
 router.use(adminAnnounceRoutes);

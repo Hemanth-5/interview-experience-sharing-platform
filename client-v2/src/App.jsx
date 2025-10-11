@@ -33,6 +33,7 @@ import AdminCompanies from './admin/pages/AdminCompanies.jsx';
 import AdminCompanyRequests from './admin/pages/AdminCompanyRequests.jsx';
 import AdminParsePdfPage from './admin/pages/AdminParsePdfPage.jsx';
 import AdminDownloadExperiences from './admin/pages/AdminDownloadExperiences.jsx';
+import AdminReports from './admin/pages/AdminReports.jsx';
 
 function AppContent() {
   const location = useLocation();
@@ -121,7 +122,7 @@ function AppContent() {
             <Route path="experiences" element={<AdminExperiences />} />
             <Route path="download-experiences" element={<AdminDownloadExperiences />} />
             <Route path="analytics" element={<AdminDashboard />} />
-            <Route path="reports" element={<AdminDashboard />} />
+            <Route path="reports" element={<AdminReports />} />
             <Route path="companies" element={<AdminCompanies />} />
             <Route path="company-requests" element={<AdminCompanyRequests />} />
             <Route path="announcement" element={<AdminAnnouncement />} />

@@ -362,6 +362,13 @@ const experienceSchema = new mongoose.Schema({
       type: String,
       enum: ['pending', 'reviewed', 'dismissed', 'resolved'],
       default: 'pending'
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    reviewedAt: {
+      type: Date
     }
   }],
   autoFlagThreshold: {
