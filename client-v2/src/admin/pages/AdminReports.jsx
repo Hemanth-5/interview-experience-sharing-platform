@@ -275,68 +275,80 @@ const AdminReports = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
-            <Flag className="w-5 h-5 text-blue-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <Flag className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.total}</h3>
-          <p className="text-xs text-muted-foreground">Total Reports</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mb-3">
-            <Clock className="w-5 h-5 text-yellow-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pending}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.pending}</h3>
-          <p className="text-xs text-muted-foreground">Pending</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
-            <Eye className="w-5 h-5 text-blue-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <Eye className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Reviewed</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.reviewed}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.reviewed}</h3>
-          <p className="text-xs text-muted-foreground">Reviewed</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Resolved</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.resolved}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.resolved}</h3>
-          <p className="text-xs text-muted-foreground">Resolved</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-gray-100 dark:bg-gray-900/30 rounded-lg flex items-center justify-center mb-3">
-            <XCircle className="w-5 h-5 text-gray-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <XCircle className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dismissed</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.dismissed}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.dismissed}</h3>
-          <p className="text-xs text-muted-foreground">Dismissed</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-shadow">
-          <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-3">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Flagged</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.flagged}</p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-1">{stats.flagged}</h3>
-          <p className="text-xs text-muted-foreground">Flagged</p>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by company, role, or reporter..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -346,7 +358,7 @@ const AdminReports = () => {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -359,42 +371,42 @@ const AdminReports = () => {
       </div>
 
       {/* Reports Table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {error ? (
           <div className="p-8 text-center">
-            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <p className="text-red-600">{error}</p>
+            <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400 mx-auto mb-4" />
+            <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
         ) : experiences.length === 0 ? (
           <div className="p-8 text-center">
-            <Flag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No reported experiences found</p>
+            <Flag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">No reported experiences found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-secondary/50 border-b border-border">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Experience
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Reports
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Flagged
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {experiences.map((experience) => (
-                  <tr key={experience._id} className="hover:bg-secondary/20 transition-colors">
+                  <tr key={experience._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <CompanyLogo 
@@ -404,20 +416,20 @@ const AdminReports = () => {
                           className="flex-shrink-0"
                         />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {experience.companyInfo?.companyName || 'Unknown Company'}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {experience.companyInfo?.role || 'Unknown Role'}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {experience.companyInfo?.internshipType}
                             </span>
                             {experience.companyInfo?.location && (
                               <>
-                                <span className="text-xs text-muted-foreground">•</span>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-gray-500 dark:text-gray-400">•</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
                                   {experience.companyInfo.location}
                                 </span>
                               </>
@@ -428,7 +440,7 @@ const AdminReports = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-foreground">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {experience.reports?.length || 0} Report{experience.reports?.length !== 1 ? 's' : ''}
                         </p>
                         {experience.reports && experience.reports.length > 0 && (
@@ -439,7 +451,7 @@ const AdminReports = () => {
                               </span>
                             ))}
                             {experience.reports.length > 2 && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 +{experience.reports.length - 2} more
                               </span>
                             )}
@@ -463,7 +475,7 @@ const AdminReports = () => {
                           <span>Yes</span>
                         </span>
                       ) : (
-                        <span className="text-sm text-muted-foreground">No</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">No</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -489,15 +501,15 @@ const AdminReports = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-border flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Page {currentPage} of {totalPages}
             </p>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="inline-flex items-center px-3 py-1 border border-border rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 Previous
@@ -505,7 +517,7 @@ const AdminReports = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="inline-flex items-center px-3 py-1 border border-border rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -518,13 +530,13 @@ const AdminReports = () => {
       {/* Report Detail Modal */}
       {isModalOpen && selectedExperience && selectedReport && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-border sticky top-0 bg-card z-10">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-foreground">Report Details</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Report Details</h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-600 dark:text-gray-400"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -533,8 +545,8 @@ const AdminReports = () => {
 
             <div className="p-6 space-y-6">
               {/* Experience Info */}
-              <div className="bg-secondary/20 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-foreground mb-3">Reported Experience</h3>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Reported Experience</h3>
                 <div className="flex items-start space-x-4">
                   <CompanyLogo 
                     companyName={selectedExperience.companyInfo?.companyName}
@@ -542,7 +554,7 @@ const AdminReports = () => {
                     size={60}
                   />
                   <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-foreground">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {selectedExperience.companyInfo?.companyName} - {selectedExperience.companyInfo?.role}
                     </h4>
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -563,22 +575,22 @@ const AdminReports = () => {
               {/* Report Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Report Reason</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Report Reason</p>
                   {getReasonBadge(selectedReport.reason)}
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Status</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</p>
                   {getStatusBadge(selectedReport.status)}
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Reported By</p>
-                  <p className="text-sm text-foreground">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Reported By</p>
+                  <p className="text-sm text-gray-900 dark:text-white">
                     {selectedReport.reportedBy?.name || 'Anonymous'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Reported On</p>
-                  <p className="text-sm text-foreground">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Reported On</p>
+                  <p className="text-sm text-gray-900 dark:text-white">
                     {new Date(selectedReport.reportedAt).toLocaleString()}
                   </p>
                 </div>
@@ -587,8 +599,8 @@ const AdminReports = () => {
               {/* Report Details */}
               {selectedReport.reasonDetails && (
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-2">Additional Details</h3>
-                  <p className="text-sm text-muted-foreground bg-secondary/20 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Additional Details</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                     {selectedReport.reasonDetails}
                   </p>
                 </div>
@@ -596,9 +608,9 @@ const AdminReports = () => {
 
               {/* Content Preview */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Content Preview</h3>
-                <div className="bg-secondary/20 rounded-lg p-4 border-l-4 border-blue-500">
-                  <p className="text-sm text-foreground line-clamp-6">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Content Preview</h3>
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-6">
                     {selectedExperience.keyTips || selectedExperience.overallExperience || 'No content available'}
                   </p>
                 </div>
@@ -606,7 +618,7 @@ const AdminReports = () => {
 
               {/* Actions */}
               {selectedReport.status === 'pending' && (
-                <div className="space-y-3 pt-4 border-t border-border">
+                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleUpdateReportStatus(selectedExperience._id, selectedReport._id, 'reviewed')}
