@@ -29,12 +29,13 @@ const CompanySearch = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [pendingCompanyName, setPendingCompanyName] = useState(null); // For companies to be created later
+  const [pendingCompanyName, setPendingCompanyName] = useState(null);
   const [showAppValidation, setShowAppValidation] = useState(false);
   const [appValidationMessage, setAppValidationMessage] = useState('');
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const searchTimeoutRef = useRef(null);
   const modalRef = useRef(null);
+  const isSubmittingRef = useRef(false); // ✅ Use useRef instead of a variable
 
   // Search for companies with debouncing (includes application database)
   const searchCompanies = async (query) => {
@@ -90,7 +91,7 @@ const CompanySearch = ({
 
   const handleCompanySelect = (company) => {
     setSelectedCompany(company);
-    setPendingCompanyName(null); // Clear any pending company name
+    setPendingCompanyName(null);
     onChange(company.displayName);
     setShowModal(false);
     setSearchQuery('');
@@ -101,66 +102,76 @@ const CompanySearch = ({
     }
   };
 
-  let isSubmitting = false;
-
-const handleSelectNewCompany = async () => {
-  if (isSubmitting) return; // ✅ Guard variable
-  if (!searchQuery || searchQuery.trim().length < 2) return;
-
-  const companyName = searchQuery.trim();
-
-  try {
-    isSubmitting = true; // ✅ Set guard active
-    setLoading(true);
-    setShowAppValidation(true);
-
-    // Send request to admin to create company
-    const requestResponse = await axios.post(createApiUrl('/api/users/request-company-creation'), {
-      companyName: companyName
-    }, {
-      withCredentials: true
-    });
-
-    if (requestResponse.data.success) {
-      // Close the modal
-      setShowModal(false);
-      setSearchQuery('');
-      setSuggestions([]);
-      setAppDatabaseSuggestions([]);
-      setShowAppValidation(false);
-      setAppValidationMessage('');
-
-      // Show success notification
-      setShowSuccessNotification(true);
-
-      // Redirect to home after a short delay
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-
+  const handleSelectNewCompany = async () => {
+    // ✅ Guard check using ref
+    if (isSubmittingRef.current) {
+      console.log('Already submitting, ignoring duplicate request');
       return;
-    } else {
-      setAppValidationMessage(
-        `Failed to send request: ${requestResponse.data.message}`
-      );
     }
+    
+    if (!searchQuery || searchQuery.trim().length < 2) return;
 
-  } catch (error) {
-    console.error('Company creation request error:', error);
-    if (error.response?.status === 400 && error.response?.data?.message?.includes('pending request')) {
-      setAppValidationMessage(
-        `You already have a pending request for "${companyName}". Please wait for admin approval or check your notifications.`
-      );
-    } else {
-      setAppValidationMessage(
-        'Failed to send company creation request. Please try again later.'
-      );
+    const companyName = searchQuery.trim();
+
+    try {
+      isSubmittingRef.current = true; // ✅ Set guard active
+      setLoading(true);
+      setShowAppValidation(true);
+
+      console.log('Sending company creation request for:', companyName);
+
+      // Send request to admin to create company
+      const requestResponse = await axios.post(createApiUrl('/api/users/request-company-creation'), {
+        companyName: companyName
+      }, {
+        withCredentials: true
+      });
+
+      if (requestResponse.data.success) {
+        console.log('Company creation request successful');
+        
+        // Close the modal
+        setShowModal(false);
+        setSearchQuery('');
+        setSuggestions([]);
+        setAppDatabaseSuggestions([]);
+        setShowAppValidation(false);
+        setAppValidationMessage('');
+
+        // Show success notification
+        setShowSuccessNotification(true);
+
+        // Redirect to home after a short delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+
+        return;
+      } else {
+        setAppValidationMessage(
+          `Failed to send request: ${requestResponse.data.message}`
+        );
+      }
+
+    } catch (error) {
+      console.error('Company creation request error:', error);
+      if (error.response?.status === 400 && error.response?.data?.message?.includes('pending request')) {
+        setAppValidationMessage(
+          `You already have a pending request for "${companyName}". Please wait for admin approval or check your notifications.`
+        );
+      } else {
+        setAppValidationMessage(
+          'Failed to send company creation request. Please try again later.'
+        );
+      }
+    } finally {
+      // ✅ Add delay before resetting guard to prevent rapid re-clicks
+      setTimeout(() => {
+        isSubmittingRef.current = false;
+      }, 1000);
+      setLoading(false);
     }
-  } finally {
-    isSubmitting = false; // ✅ Reset guard
-    setLoading(false);
-  }
-};
+  };
 
   const proceedWithCompanyCreation = (companyName) => {
     // Set as pending company (to be created later)
@@ -511,6 +522,7 @@ const handleSelectNewCompany = async () => {
                   </div>
                 )}
                 
+                {/* ✅ Add disabled state and loading indicator to the button */}
                 {!showAppValidation && searchQuery.trim().length >= 2 && 
                  !suggestions.find(c => c.displayName.toLowerCase() === searchQuery.trim().toLowerCase()) &&
                  !appDatabaseSuggestions.find(c => (c.displayName || c.name).toLowerCase() === searchQuery.trim().toLowerCase()) && (
@@ -520,15 +532,21 @@ const handleSelectNewCompany = async () => {
                       <span>Create New</span>
                     </h4>
                     <div 
-                      className="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:border-green-300 dark:hover:border-green-700 cursor-pointer transition-colors"
-                      onClick={handleSelectNewCompany}
+                      className={`flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg transition-colors ${
+                        loading ? 'opacity-50 cursor-not-allowed' : 'hover:border-green-300 dark:hover:border-green-700 cursor-pointer'
+                      }`}
+                      onClick={loading ? undefined : handleSelectNewCompany}
                     >
                       <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                        <Plus className="w-5 h-5 text-white" />
+                        {loading ? (
+                          <Loader2 className="w-5 h-5 text-white animate-spin" />
+                        ) : (
+                          <Plus className="w-5 h-5 text-white" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="font-medium text-green-800 dark:text-green-300 truncate block">
-                          Select "{searchQuery.trim()}"
+                          {loading ? 'Sending request...' : `Select "${searchQuery.trim()}"`}
                         </span>
                         <p className="text-sm text-green-600 dark:text-green-400">
                           Will send request to admin for creation
