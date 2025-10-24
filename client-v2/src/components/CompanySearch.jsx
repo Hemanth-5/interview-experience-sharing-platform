@@ -101,61 +101,66 @@ const CompanySearch = ({
     }
   };
 
-  const handleSelectNewCompany = async () => {
-    if (!searchQuery || searchQuery.trim().length < 2) return;
-    
-    const companyName = searchQuery.trim();
-    
-    try {
-      setLoading(true);
-      setShowAppValidation(true);
-      
-      // Send request to admin to create company
-      const requestResponse = await axios.post(createApiUrl('/api/users/request-company-creation'), {
-        companyName: companyName
-      }, {
-        withCredentials: true
-      });
-      
-      if (requestResponse.data.success) {
-        // Close the modal
-        setShowModal(false);
-        setSearchQuery('');
-        setSuggestions([]);
-        setAppDatabaseSuggestions([]);
-        setShowAppValidation(false);
-        setAppValidationMessage('');
-        
-        // Show success notification
-        setShowSuccessNotification(true);
-        
-        // Redirect to home after a short delay
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
-        
-        return;
-      } else {
-        setAppValidationMessage(
-          `Failed to send request: ${requestResponse.data.message}`
-        );
-      }
-      
-    } catch (error) {
-      console.error('Company creation request error:', error);
-      if (error.response?.status === 400 && error.response?.data?.message?.includes('pending request')) {
-        setAppValidationMessage(
-          `You already have a pending request for "${companyName}". Please wait for admin approval or check your notifications.`
-        );
-      } else {
-        setAppValidationMessage(
-          'Failed to send company creation request. Please try again later.'
-        );
-      }
-    } finally {
-      setLoading(false);
+  let isSubmitting = false;
+
+const handleSelectNewCompany = async () => {
+  if (isSubmitting) return; // ✅ Guard variable
+  if (!searchQuery || searchQuery.trim().length < 2) return;
+
+  const companyName = searchQuery.trim();
+
+  try {
+    isSubmitting = true; // ✅ Set guard active
+    setLoading(true);
+    setShowAppValidation(true);
+
+    // Send request to admin to create company
+    const requestResponse = await axios.post(createApiUrl('/api/users/request-company-creation'), {
+      companyName: companyName
+    }, {
+      withCredentials: true
+    });
+
+    if (requestResponse.data.success) {
+      // Close the modal
+      setShowModal(false);
+      setSearchQuery('');
+      setSuggestions([]);
+      setAppDatabaseSuggestions([]);
+      setShowAppValidation(false);
+      setAppValidationMessage('');
+
+      // Show success notification
+      setShowSuccessNotification(true);
+
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+
+      return;
+    } else {
+      setAppValidationMessage(
+        `Failed to send request: ${requestResponse.data.message}`
+      );
     }
-  };
+
+  } catch (error) {
+    console.error('Company creation request error:', error);
+    if (error.response?.status === 400 && error.response?.data?.message?.includes('pending request')) {
+      setAppValidationMessage(
+        `You already have a pending request for "${companyName}". Please wait for admin approval or check your notifications.`
+      );
+    } else {
+      setAppValidationMessage(
+        'Failed to send company creation request. Please try again later.'
+      );
+    }
+  } finally {
+    isSubmitting = false; // ✅ Reset guard
+    setLoading(false);
+  }
+};
 
   const proceedWithCompanyCreation = (companyName) => {
     // Set as pending company (to be created later)
