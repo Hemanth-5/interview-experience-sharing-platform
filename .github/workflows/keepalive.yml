@@ -1,0 +1,20 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # every 10 minutes
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render health endpoint
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://psg-interview-experience-portal.onrender.com/health)
+          echo "HTTP status: $RESPONSE"
+
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "Health check failed!"
+            exit 1
+          fi
