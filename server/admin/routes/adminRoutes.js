@@ -786,32 +786,43 @@ router.get('/company-requests', isAdminWithDualAuth, async (req, res) => {
         { 'metadata.status': 'pending' }            // Explicitly set as pending
       ];
     } else if (status === 'approved') {
-      filter.read = true;
       filter['metadata.status'] = 'approved';
     } else if (status === 'rejected') {
-      filter.read = true;
       filter['metadata.status'] = 'rejected';
     }
     // For 'all', we don't add additional filters
 
     const requests = await Notification.find(filter)
-      .populate('recipient', 'name email')
       .sort({ createdAt: -1 })
       .limit(100); // Limit to prevent too many results
 
-    const formattedRequests = requests.map(request => ({
+    // Group by requestIdentifier to avoid duplicates (one per admin)
+    const uniqueRequestsMap = new Map();
+    requests.forEach(request => {
+      const identifier = request.metadata?.requestIdentifier;
+      if (identifier && !uniqueRequestsMap.has(identifier)) {
+        uniqueRequestsMap.set(identifier, request);
+      } else if (!identifier) {
+        // For old requests without requestIdentifier, use _id as fallback
+        uniqueRequestsMap.set(request._id.toString(), request);
+      }
+    });
+
+    const formattedRequests = Array.from(uniqueRequestsMap.values()).map(request => ({
       _id: request._id,
       companyName: request.metadata?.companyName,
       requestedBy: request.metadata?.requestedByName,
       requestedByEmail: request.metadata?.requestedByEmail,
+      requestedByRollNumber: request.metadata?.requestedByRollNumber,
       requestedById: request.metadata?.requestedBy,
       createdAt: request.createdAt,
       message: request.message,
       status: request.metadata?.status || 'pending',  // Default to pending if no status
-      processedAt: request.readAt,
+      processedAt: request.metadata?.processedAt,
       processedBy: request.metadata?.processedBy,
       rejectionReason: request.metadata?.rejectionReason,
-      companyId: request.metadata?.companyId
+      companyId: request.metadata?.companyId,
+      requestIdentifier: request.metadata?.requestIdentifier
     }));
 
     res.json({ 
@@ -867,16 +878,38 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
     });
 
     if (existingCompany) {
-      // Mark the request as read and store metadata
-      request.metadata = {
-        ...request.metadata,
-        status: 'approved',
-        processedBy: req.user._id,
-        processedAt: new Date()
-      };
-      request.read = true;
-      request.readAt = new Date();
-      await request.save();
+      // Update all related notifications (for all admins) using requestIdentifier
+      const requestIdentifier = request.metadata?.requestIdentifier;
+      if (requestIdentifier) {
+        await Notification.updateMany(
+          { 
+            type: 'company_creation_request',
+            'metadata.requestIdentifier': requestIdentifier
+          },
+          {
+            $set: {
+              'metadata.status': 'approved',
+              'metadata.processedBy': req.user._id,
+              'metadata.processedAt': new Date(),
+              'metadata.companyId': existingCompany._id,
+              read: true,
+              readAt: new Date()
+            }
+          }
+        );
+      } else {
+        // Fallback for old notifications without requestIdentifier
+        request.metadata = {
+          ...request.metadata,
+          status: 'approved',
+          processedBy: req.user._id,
+          processedAt: new Date(),
+          companyId: existingCompany._id
+        };
+        request.read = true;
+        request.readAt = new Date();
+        await request.save();
+      }
 
       // Notify the requesting user
       await Notification.createNotification({
@@ -890,11 +923,13 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
           approvedBy: req.user._id
         },
         actionUrl: `/companies/${existingCompany._id}`
-      });      return res.json({
-          success: true,
-          message: 'Company already exists',
-          data: existingCompany
-        });
+      });
+
+      return res.json({
+        success: true,
+        message: 'Company already exists',
+        data: existingCompany
+      });
     }
 
     // Create the new company
@@ -912,17 +947,38 @@ router.post('/company-requests/:requestId/approve', isAdminWithDualAuth, async (
 
     await newCompany.save();
 
-    // Mark the request as read and store metadata
-    request.metadata = {
-      ...request.metadata,
-      status: 'approved',
-      processedBy: req.user._id,
-      processedAt: new Date(),
-      companyId: newCompany._id
-    };
-    request.read = true;
-    request.readAt = new Date();
-    await request.save();
+    // Update all related notifications (for all admins) using requestIdentifier
+    const requestIdentifier = request.metadata?.requestIdentifier;
+    if (requestIdentifier) {
+      await Notification.updateMany(
+        { 
+          type: 'company_creation_request',
+          'metadata.requestIdentifier': requestIdentifier
+        },
+        {
+          $set: {
+            'metadata.status': 'approved',
+            'metadata.processedBy': req.user._id,
+            'metadata.processedAt': new Date(),
+            'metadata.companyId': newCompany._id,
+            read: true,
+            readAt: new Date()
+          }
+        }
+      );
+    } else {
+      // Fallback for old notifications without requestIdentifier
+      request.metadata = {
+        ...request.metadata,
+        status: 'approved',
+        processedBy: req.user._id,
+        processedAt: new Date(),
+        companyId: newCompany._id
+      };
+      request.read = true;
+      request.readAt = new Date();
+      await request.save();
+    }
 
     // Notify the requesting user
     await Notification.createNotification({
@@ -973,17 +1029,38 @@ router.post('/company-requests/:requestId/reject', isAdminWithDualAuth, async (r
     const companyName = request.metadata?.companyName;
     const requestedBy = request.metadata?.requestedBy;
 
-    // Mark the request as read and store metadata
-    request.metadata = {
-      ...request.metadata,
-      status: 'rejected',
-      processedBy: req.user._id,
-      processedAt: new Date(),
-      rejectionReason: reason || 'No reason provided'
-    };
-    request.read = true;
-    request.readAt = new Date();
-    await request.save();
+    // Update all related notifications (for all admins) using requestIdentifier
+    const requestIdentifier = request.metadata?.requestIdentifier;
+    if (requestIdentifier) {
+      await Notification.updateMany(
+        { 
+          type: 'company_creation_request',
+          'metadata.requestIdentifier': requestIdentifier
+        },
+        {
+          $set: {
+            'metadata.status': 'rejected',
+            'metadata.processedBy': req.user._id,
+            'metadata.processedAt': new Date(),
+            'metadata.rejectionReason': reason || 'No reason provided',
+            read: true,
+            readAt: new Date()
+          }
+        }
+      );
+    } else {
+      // Fallback for old notifications without requestIdentifier
+      request.metadata = {
+        ...request.metadata,
+        status: 'rejected',
+        processedBy: req.user._id,
+        processedAt: new Date(),
+        rejectionReason: reason || 'No reason provided'
+      };
+      request.read = true;
+      request.readAt = new Date();
+      await request.save();
+    }
 
     // Notify the requesting user
     await Notification.createNotification({

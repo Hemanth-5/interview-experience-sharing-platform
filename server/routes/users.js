@@ -742,7 +742,10 @@ router.post('/request-company-creation',
         type: 'company_creation_request',
         'metadata.companyName': companyName,
         'metadata.requestedBy': userId,
-        read: false
+        $or: [
+          { 'metadata.status': 'pending' },
+          { 'metadata.status': { $exists: false } }
+        ]
       });
 
       if (existingRequest) {
@@ -751,6 +754,9 @@ router.post('/request-company-creation',
           message: 'You already have a pending request for this company'
         });
       }
+
+      // Generate a unique identifier for this request
+      const requestIdentifier = `${userId}-${companyName}-${Date.now()}`;
 
       // Get all admin users
       const adminUsers = await User.find({ role: 'Admin' }).select('_id');
@@ -762,50 +768,50 @@ router.post('/request-company-creation',
         });
       }
 
-      // Create notifications for all admins
+      // Create notification for all admins with the same requestIdentifier
       const notifications = [];
-      let successfulNotifications = 0;
-      
       for (const admin of adminUsers) {
         try {
           const notification = await Notification.createNotification({
             recipient: admin._id,
             type: 'company_creation_request',
             title: 'New Company Creation Request',
-            message: `${req.user.name} has requested creation of company: ${companyName}`,
+            message: `${req.user.rollNumber || req.user.name} has requested creation of company: ${companyName}`,
             priority: 'medium',
             metadata: {
               companyName: companyName,
               requestedBy: userId,
               requestedByName: req.user.name,
-              requestedByEmail: req.user.email
+              requestedByEmail: req.user.email,
+              requestedByRollNumber: req.user.rollNumber,
+              requestIdentifier: requestIdentifier,
+              status: 'pending'
             },
             actionUrl: `/admin/company-requests`
           });
           
           if (notification) {
             notifications.push(notification);
-            successfulNotifications++;
           }
         } catch (error) {
           console.error(`Error creating notification for admin ${admin._id}:`, error);
         }
       }
 
-      if (successfulNotifications === 0) {
+      if (notifications.length === 0) {
         return res.status(500).json({
           success: false,
-          message: 'Failed to send notifications to any admin. Please contact support.'
+          message: 'Failed to create company request. Please try again.'
         });
       }
 
       res.json({
         success: true,
-        message: `Company creation request sent to ${successfulNotifications} admin(s) successfully`,
+        message: 'Company creation request sent to admins successfully',
         data: {
           companyName,
-          requestId: notifications[0]._id, // Use first successful notification as reference
-          notificationsSent: successfulNotifications
+          requestId: notifications[0]._id,
+          requestIdentifier
         }
       });
 
